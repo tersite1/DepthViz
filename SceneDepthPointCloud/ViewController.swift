@@ -235,17 +235,22 @@ extension ViewController {
     
     private func updateIsRecording(_isRecording: Bool) {
         isRecording = _isRecording
+        renderer.isRecording = isRecording
         if (isRecording){
             recordButton.setTitle("PAUSE", for: .normal)
             recordButton.backgroundColor = .systemRed
-            renderer.currentFolder = getTimeStr()
-            createDirectory(folder: renderer.currentFolder + "/data")
         } else {
             recordButton.setTitle("START", for: .normal)
             recordButton.backgroundColor = .systemBlue
             renderer.savePointCloud()
         }
-        renderer.isRecording = isRecording
+    }
+    
+    private func updateTextLabel() {
+        let text = "  1/\(self.renderer.pickFrames)  of new frames  \n  Files saved \(self.completedTaskNum)/\(self.taskNum)  "
+        DispatchQueue.main.async {
+            self.textLabel.text = text
+        }
     }
 }
 
@@ -261,10 +266,17 @@ extension ViewController: TaskDelegate {
         updateTextLabel()
     }
     
-    private func updateTextLabel() {
-        let text = "  1/\(self.renderer.pickFrames)  of new frames  \n  Files saved \(self.completedTaskNum)/\(self.taskNum)  "
+    func sharePLY(file: Any) {
+        let activityViewController = UIActivityViewController(activityItems: [file], applicationActivities: nil)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            activityViewController.popoverPresentationController?.sourceView = self.view
+            activityViewController.popoverPresentationController?.sourceRect = self.recordButton.frame
+        }
+        
         DispatchQueue.main.async {
-            self.textLabel.text = text
+            self.present(activityViewController, animated: true)
+            self.didFinishTask()
         }
     }
 }

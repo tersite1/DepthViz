@@ -208,27 +208,6 @@ final class Renderer {
         
         if shouldAccumulate(frame: currentFrame), updateDepthTextures(frame: currentFrame) {
             accumulatePoints(frame: currentFrame, commandBuffer: commandBuffer, renderEncoder: renderEncoder)
-            
-            // MARK: SAVE PLY
-            if (checkSamplingRate()) {
-                // save selected data to disk if not dropped
-                autoreleasepool {
-                    // selected data are deep copied into custom struct to release currentFrame
-                    // if not, the pools of memory reserved for ARFrame will be full and later frames will be dropped
-                    let data = ARFrameDataPack(
-                        timestamp: currentFrame.timestamp,
-                        cameraTransform: currentFrame.camera.transform,
-                        cameraEulerAngles: currentFrame.camera.eulerAngles,
-                        depthMap: duplicatePixelBuffer(input: currentFrame.sceneDepth!.depthMap),
-                        smoothedDepthMap: duplicatePixelBuffer(input: currentFrame.smoothedSceneDepth!.depthMap),
-                        confidenceMap: duplicatePixelBuffer(input: currentFrame.sceneDepth!.confidenceMap!),
-                        capturedImage: duplicatePixelBuffer(input: currentFrame.capturedImage),
-                        localToWorld: pointCloudUniforms.localToWorld,
-                        cameraIntrinsicsInversed: pointCloudUniforms.cameraIntrinsicsInversed
-                    )
-                    saveData(frame: data)
-                }
-            }
         }
         
         // check and render rgb camera image
@@ -481,32 +460,29 @@ extension Renderer {
     func savePointCloud() {
         delegate?.didStartTask()
         Task.init(priority: .utility) {
-            do {
-                var fileToWrite = ""
-                let headers = ["ply", "format ascii 1.0", "element vertex \(currentPointCount)", "property float x", "property float y", "property float z", "property uchar red", "property uchar green", "property uchar blue", "element face 0", "property list uchar int vertex_indices", "end_header"]
-                for header in headers {
-                    fileToWrite += header
-                    fileToWrite += "\r\n"
-                }
+            var fileToWrite = ""
+            let headers = ["ply", "format ascii 1.0", "element vertex \(currentPointCount)", "property float x", "property float y", "property float z", "property uchar red", "property uchar green", "property uchar blue", "element face 0", "property list uchar int vertex_indices", "end_header"]
+            for header in headers {
+                fileToWrite += header
+                fileToWrite += "\n"
+            }
+            
+            for i in 0..<currentPointCount {
+                let point = particlesBuffer[i]
+                let colors = point.color
                 
-                for i in 0..<currentPointCount {
-                    let point = particlesBuffer[i]
-                    let colors = point.color
-                    
-                    let red = colors.x * 255.0
-                    let green = colors.y * 255.0
-                    let blue = colors.z * 255.0
-                    
-                    let pvValue = "\(point.position.x) \(point.position.y) \(point.position.z) \(Int(red)) \(Int(green)) \(Int(blue))"
-                    fileToWrite += pvValue
-                    fileToWrite += "\r\n"
-                }
+                let red = colors.x * 255.0
+                let green = colors.y * 255.0
+                let blue = colors.z * 255.0
                 
-                try await saveFile(content: fileToWrite, filename: "\(getTimeStr()).ply", folder: currentFolder)
-                
-                delegate?.didFinishTask()
-            } catch {
-                print(error.localizedDescription)
+                let pvValue = "\(point.position.x) \(point.position.y) \(point.position.z) \(Int(red)) \(Int(green)) \(Int(blue))"
+                fileToWrite += pvValue
+                fileToWrite += "\n"
+            }
+            
+            // MARK: Share PLY file option
+            if let file = shareFile(content: fileToWrite, filename: "\(getTimeStr()).ply", folder: self.currentFolder) {
+                self.delegate?.sharePLY(file: file)
             }
         }
     }

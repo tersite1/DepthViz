@@ -14,7 +14,7 @@ import VideoToolbox
 /// Get current time in string.
 func getTimeStr() -> String {
     let df = DateFormatter()
-    df.dateFormat = "yyyy-MM-dd_hhmmss"
+    df.dateFormat = "yyyy-MM-dd_HHmmss"
     return df.string(from: Date())
 }
 
@@ -23,6 +23,18 @@ func saveFile(content: String, filename: String, folder: String) async throws ->
     print("Save file to \(folder)/\(filename)")
     let url = getDocumentsDirectory().appendingPathComponent(folder, isDirectory: true).appendingPathComponent(filename)
     try content.write(to: url, atomically: true, encoding: .utf8)
+}
+
+func shareFile(content: String, filename: String, folder: String) -> URL? {
+    print("SHARE file to \(folder)/\(filename)")
+    let url = getDocumentsDirectory().appendingPathComponent(folder, isDirectory: true).appendingPathComponent(filename)
+    do {
+        try content.write(to: url, atomically: true, encoding: .ascii)
+        return url
+    } catch {
+        print(error.localizedDescription)
+        return nil
+    }
 }
 
 /// Save jpeg to a directory.
@@ -112,6 +124,7 @@ extension simd_float3x3: Codable {
 protocol TaskDelegate: AnyObject {
     func didStartTask()
     func didFinishTask()
+    func sharePLY(file: Any)
 }
 
 /// Deep copy CVPixelBuffer for depth data

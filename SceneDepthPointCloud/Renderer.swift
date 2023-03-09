@@ -16,8 +16,8 @@ final class Renderer {
     private let numGridPoints = 500
     // Particle's size in pixels
     private let particleSize: Float = 10
-    // We only use landscape orientation in this app
-    private let orientation = UIInterfaceOrientation.landscapeRight
+    // We only use portrait orientation in this app
+    private let orientation = UIInterfaceOrientation.portrait
     // Camera's threshold values for detecting when the camera moves so that we can accumulate the points
     private let cameraRotationThreshold = cos(2 * .degreesToRadian)
     private let cameraTranslationThreshold: Float = pow(0.02, 2)   // (meter-squared)

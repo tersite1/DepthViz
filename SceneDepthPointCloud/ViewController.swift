@@ -44,7 +44,8 @@ final class ViewController: UIViewController, ARSessionDelegate {
         }
         
         // Confidence control
-        confidenceControl.backgroundColor = .white
+        confidenceControl.backgroundColor = .clear
+        confidenceControl.tintColor = .label
         confidenceControl.selectedSegmentIndex = renderer.confidenceThreshold
         confidenceControl.addTarget(self, action: #selector(viewValueChanged), for: .valueChanged)
         

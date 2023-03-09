@@ -8,6 +8,9 @@ The host app renderer.
 import Metal
 import MetalKit
 import ARKit
+// MARK: SAVE PLY
+import Foundation
+import UIKit
 
 final class Renderer {
     // Maximum number of points we store in the point cloud
@@ -65,6 +68,7 @@ final class Renderer {
     }()
     private var rgbUniformsBuffers = [MetalBuffer<RGBUniforms>]()
     // Point Cloud buffer
+    // This is not the point cloud data, but some parameters
     private lazy var pointCloudUniforms: PointCloudUniforms = {
         var uniforms = PointCloudUniforms()
         uniforms.maxPoints = Int32(maxPoints)
@@ -75,6 +79,7 @@ final class Renderer {
     }()
     private var pointCloudUniformsBuffers = [MetalBuffer<PointCloudUniforms>]()
     // Particles buffer
+    // Saves the point cloud data, filled by unprojectVertex func in Shaders.metal
     private var particlesBuffer: MetalBuffer<ParticleUniforms>
     private var currentPointIndex = 0
     private var currentPointCount = 0
@@ -99,6 +104,17 @@ final class Renderer {
             rgbUniforms.radius = rgbRadius
         }
     }
+    
+    // MARK: SAVE PLY
+    // Whether recording is on
+    public var isRecording = false;
+    // Current folder for saving data
+    public var currentFolder = ""
+    // Pick every n frames (~1/sampling frequency)
+    public var pickFrames = 5 // default to save 1/5 of the new frames
+    public var currentFrameIndex = 0;
+    // Task delegate for informing ViewController of tasks
+    public weak var delegate: TaskDelegate?
     
     init(session: ARSession, metalDevice device: MTLDevice, renderDestination: RenderDestinationProvider) {
         self.session = session
@@ -169,10 +185,10 @@ final class Renderer {
     
     func draw() {
         guard let currentFrame = session.currentFrame,
-            let renderDescriptor = renderDestination.currentRenderPassDescriptor,
-            let commandBuffer = commandQueue.makeCommandBuffer(),
-            let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderDescriptor) else {
-                return
+              let renderDescriptor = renderDestination.currentRenderPassDescriptor,
+              let commandBuffer = commandQueue.makeCommandBuffer(),
+              let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderDescriptor) else {
+            return
         }
         
         _ = inFlightSemaphore.wait(timeout: DispatchTime.distantFuture)
@@ -192,6 +208,27 @@ final class Renderer {
         
         if shouldAccumulate(frame: currentFrame), updateDepthTextures(frame: currentFrame) {
             accumulatePoints(frame: currentFrame, commandBuffer: commandBuffer, renderEncoder: renderEncoder)
+            
+            // MARK: SAVE PLY
+            if (checkSamplingRate()) {
+                // save selected data to disk if not dropped
+                autoreleasepool {
+                    // selected data are deep copied into custom struct to release currentFrame
+                    // if not, the pools of memory reserved for ARFrame will be full and later frames will be dropped
+                    let data = ARFrameDataPack(
+                        timestamp: currentFrame.timestamp,
+                        cameraTransform: currentFrame.camera.transform,
+                        cameraEulerAngles: currentFrame.camera.eulerAngles,
+                        depthMap: duplicatePixelBuffer(input: currentFrame.sceneDepth!.depthMap),
+                        smoothedDepthMap: duplicatePixelBuffer(input: currentFrame.smoothedSceneDepth!.depthMap),
+                        confidenceMap: duplicatePixelBuffer(input: currentFrame.sceneDepth!.confidenceMap!),
+                        capturedImage: duplicatePixelBuffer(input: currentFrame.capturedImage),
+                        localToWorld: pointCloudUniforms.localToWorld,
+                        cameraIntrinsicsInversed: pointCloudUniforms.cameraIntrinsicsInversed
+                    )
+                    saveData(frame: data)
+                }
+            }
         }
         
         // check and render rgb camera image
@@ -224,6 +261,10 @@ final class Renderer {
     }
     
     private func shouldAccumulate(frame: ARFrame) -> Bool {
+        // MARK: SAVE PLY
+        if (!isRecording) {
+            return false
+        }
         let cameraTransform = frame.camera.transform
         return currentPointCount == 0
             || dot(cameraTransform.columns.2, lastCameraTransform.columns.2) <= cameraRotationThreshold
@@ -371,5 +412,102 @@ private extension Renderer {
 
         let rotationAngle = Float(cameraToDisplayRotation(orientation: orientation)) * .degreesToRadian
         return flipYZ * matrix_float4x4(simd_quaternion(rotationAngle, Float3(0, 0, 1)))
+    }
+}
+
+// MARK: SAVE PLY
+extension Renderer {
+    /// Check if the current frame should be saved or dropped based on sampling rate configuration
+    private func checkSamplingRate() -> Bool {
+        currentFrameIndex += 1
+        return currentFrameIndex % pickFrames == 0
+    }
+    
+    // custom struct for pulling necessary data from arframes
+    struct ARFrameDataPack {
+        var timestamp: Double
+        var cameraTransform: simd_float4x4
+        var cameraEulerAngles: simd_float3
+        var depthMap: CVPixelBuffer
+        var smoothedDepthMap: CVPixelBuffer
+        var confidenceMap: CVPixelBuffer
+        var capturedImage: CVPixelBuffer
+        var localToWorld: simd_float4x4
+        var cameraIntrinsicsInversed: simd_float3x3
+    }
+    
+    /// Save data to disk in json and jpeg formats.
+    private func saveData(frame: ARFrameDataPack) {
+        struct DataPack: Codable {
+            var timestamp: Double
+            var cameraTransform: simd_float4x4 // The position and orientation of the camera in world coordinate space.
+            var cameraEulerAngles: simd_float3 // The orientation of the camera, expressed as roll, pitch, and yaw values.
+            var depthMap: [[Float32]]
+            var smoothedDepthMap: [[Float32]]
+            var confidenceMap: [[UInt8]]
+            var localToWorld: simd_float4x4
+            var cameraIntrinsicsInversed: simd_float3x3
+        }
+        
+        delegate?.didStartTask()
+        Task.init(priority: .utility) {
+            do {
+                let dataPack = await DataPack(
+                    timestamp: frame.timestamp,
+                    cameraTransform: frame.cameraTransform,
+                    cameraEulerAngles: frame.cameraEulerAngles,
+                    depthMap: cvPixelBuffer2Map(rawDepth: frame.depthMap),
+                    smoothedDepthMap: cvPixelBuffer2Map(rawDepth: frame.smoothedDepthMap),
+                    confidenceMap: cvPixelBuffer2Map(rawDepth: frame.confidenceMap),
+                    localToWorld: frame.localToWorld,
+                    cameraIntrinsicsInversed: frame.cameraIntrinsicsInversed
+                )
+                
+                let jsonEncoder = JSONEncoder()
+                jsonEncoder.outputFormatting = .prettyPrinted
+                
+                let encoded = try jsonEncoder.encode(dataPack)
+                let encodedStr = String(data: encoded, encoding: .utf8)!
+                try await saveFile(content: encodedStr, filename: "\(frame.timestamp)_\(pickFrames).json", folder: currentFolder + "/data")
+                try await savePic(pic: cvPixelBuffer2UIImage(pixelBuffer: frame.capturedImage), filename: "\(frame.timestamp)_\(pickFrames).jpeg", folder: currentFolder + "/data")
+                delegate?.didFinishTask()
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    /// Save all particles to a point cloud file in ply format.
+    func savePointCloud() {
+        delegate?.didStartTask()
+        Task.init(priority: .utility) {
+            do {
+                var fileToWrite = ""
+                let headers = ["ply", "format ascii 1.0", "element vertex \(currentPointCount)", "property float x", "property float y", "property float z", "property uchar red", "property uchar green", "property uchar blue", "element face 0", "property list uchar int vertex_indices", "end_header"]
+                for header in headers {
+                    fileToWrite += header
+                    fileToWrite += "\r\n"
+                }
+                
+                for i in 0..<currentPointCount {
+                    let point = particlesBuffer[i]
+                    let colors = point.color
+                    
+                    let red = colors.x * 255.0
+                    let green = colors.y * 255.0
+                    let blue = colors.z * 255.0
+                    
+                    let pvValue = "\(point.position.x) \(point.position.y) \(point.position.z) \(Int(red)) \(Int(green)) \(Int(blue))"
+                    fileToWrite += pvValue
+                    fileToWrite += "\r\n"
+                }
+                
+                try await saveFile(content: fileToWrite, filename: "\(getTimeStr()).ply", folder: currentFolder)
+                
+                delegate?.didFinishTask()
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
     }
 }

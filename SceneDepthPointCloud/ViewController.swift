@@ -18,6 +18,16 @@ final class ViewController: UIViewController, ARSessionDelegate {
     private let session = ARSession()
     private var renderer: Renderer!
     
+    // MARK: SAVE PLY
+    private let pickFramesSlider = UISlider()
+    private let recordButton = UIButton()
+    private let textLabel = UILabel()
+    
+    private var isRecording = false
+    
+    private var taskNum = 0;
+    private var completedTaskNum = 0;
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -41,6 +51,8 @@ final class ViewController: UIViewController, ARSessionDelegate {
             // Configure the renderer to draw to the view
             renderer = Renderer(session: session, metalDevice: device, renderDestination: view)
             renderer.drawRectResized(size: view.bounds.size)
+            // MARK: SAVE PLY
+            renderer.delegate = self
         }
         
         // Confidence control
@@ -56,15 +68,44 @@ final class ViewController: UIViewController, ARSessionDelegate {
         rgbRadiusSlider.value = renderer.rgbRadius
         rgbRadiusSlider.addTarget(self, action: #selector(viewValueChanged), for: .valueChanged)
         
-        let stackView = UIStackView(arrangedSubviews: [confidenceControl, rgbRadiusSlider])
+        // MARK: SAVE PLY
+        // Pick every x Frames control
+        pickFramesSlider.minimumValue = 1
+        pickFramesSlider.maximumValue = 50
+        pickFramesSlider.isContinuous = true
+        pickFramesSlider.value = Float(renderer.pickFrames)
+        pickFramesSlider.addTarget(self, action: #selector(viewValueChanged), for: .valueChanged)
+
+        // UIButton
+        recordButton.setTitle("START", for: .normal)
+        recordButton.backgroundColor = .systemBlue
+        recordButton.layer.cornerRadius = 5
+        recordButton.addTarget(self, action: #selector(onButtonClick), for: .touchUpInside)
+        
+        // UILabel
+        textLabel.text = "  1/5 of new frames  \n  Files saved 0/0  "
+        textLabel.textColor = .white
+        textLabel.backgroundColor = UIColor.darkGray.withAlphaComponent(0.5)
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
+        textLabel.layer.masksToBounds = true
+        textLabel.layer.cornerRadius = 8
+        textLabel.sizeToFit()
+        textLabel.numberOfLines = 2
+        
+        let stackView = UIStackView(arrangedSubviews: [
+            confidenceControl, rgbRadiusSlider, pickFramesSlider, recordButton])
         stackView.isHidden = !isUIEnabled
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
-        stackView.spacing = 20
+        stackView.spacing = 10
         view.addSubview(stackView)
+        view.addSubview(textLabel)
         NSLayoutConstraint.activate([
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50)
+            stackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            textLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            textLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
+            textLabel.heightAnchor.constraint(equalToConstant: 50),
         ])
     }
     
@@ -74,7 +115,8 @@ final class ViewController: UIViewController, ARSessionDelegate {
         // Create a world-tracking configuration, and
         // enable the scene depth frame-semantic.
         let configuration = ARWorldTrackingConfiguration()
-        configuration.frameSemantics = .sceneDepth
+        // MARK: SAVE PLY
+        configuration.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
 
         // Run the view's session
         session.run(configuration)
@@ -92,6 +134,10 @@ final class ViewController: UIViewController, ARSessionDelegate {
             
         case rgbRadiusSlider:
             renderer.rgbRadius = rgbRadiusSlider.value
+        // MARK: SAVE PLY
+        case pickFramesSlider:
+            renderer.pickFrames = Int(pickFramesSlider.value)
+            updateTextLabel()
             
         default:
             break
@@ -159,4 +205,66 @@ protocol RenderDestinationProvider {
 
 extension MTKView: RenderDestinationProvider {
     
+}
+
+// MARK: SAVE PLY
+extension ViewController {
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        
+        print("memory warning!!!")
+        memoryAlert()
+        updateIsRecording(_isRecording: false)
+    }
+    
+    private func memoryAlert() {
+        let alert = UIAlertController(title: "Low Memory Warning", message: "The recording has been paused. Do not quit the app until all files have been saved.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
+            NSLog("The \"OK\" alert occured.")
+        }))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    @objc
+    private func onButtonClick(_ sender: UIButton) {
+        if (sender != recordButton) {
+            return
+        }
+        updateIsRecording(_isRecording: !isRecording)
+    }
+    
+    private func updateIsRecording(_isRecording: Bool) {
+        isRecording = _isRecording
+        if (isRecording){
+            recordButton.setTitle("PAUSE", for: .normal)
+            recordButton.backgroundColor = .systemRed
+            renderer.currentFolder = getTimeStr()
+            createDirectory(folder: renderer.currentFolder + "/data")
+        } else {
+            recordButton.setTitle("START", for: .normal)
+            recordButton.backgroundColor = .systemBlue
+            renderer.savePointCloud()
+        }
+        renderer.isRecording = isRecording
+    }
+}
+
+// update textlabel on tasks start/finish
+extension ViewController: TaskDelegate {
+    func didStartTask() {
+        self.taskNum += 1
+        updateTextLabel()
+    }
+    
+    func didFinishTask() {
+        self.completedTaskNum += 1
+        updateTextLabel()
+    }
+    
+    private func updateTextLabel() {
+        let text = "  1/\(self.renderer.pickFrames)  of new frames  \n  Files saved \(self.completedTaskNum)/\(self.taskNum)  "
+        DispatchQueue.main.async {
+            self.textLabel.text = text
+        }
+    }
 }

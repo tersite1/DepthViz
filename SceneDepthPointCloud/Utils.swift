@@ -14,7 +14,7 @@ import VideoToolbox
 /// Get current time in string.
 func getTimeStr() -> String {
     let df = DateFormatter()
-    df.dateFormat = "yyyy-MM-dd_HHmmss"
+    df.dateFormat = "yyyy-MM-dd-HHmm"
     return df.string(from: Date())
 }
 
@@ -82,6 +82,29 @@ func getDocumentsDirectory() -> URL {
     
     // just send back the first one, which ought to be the only one
     return paths[0]
+}
+
+// MARK: 임시 로직
+func getDocuments() {
+    let fm = FileManager.default
+    let documentPath = fm.urls(for: .documentDirectory, in: .userDomainMask)[0].path
+    do {
+        let documentContents = try FileManager.default.contentsOfDirectory(atPath: documentPath)
+        for content in documentContents {
+            print("Content: \(content)")
+        }
+    } catch {
+        print(error.localizedDescription)
+    }
+//
+//    // List all contents of directory and return as [String] OR nil if failed
+//    do {
+//        for path in try fileMngr.contentsOfDirectory(atPath:docs) {
+//            print("file: \(path)")
+//        }
+//    } catch {
+//        print(error.localizedDescription)
+//    }
 }
 
 func createDirectory(folder: String) {

@@ -481,8 +481,17 @@ extension Renderer {
             }
             
             // MARK: Share PLY file option
-            if let file = shareFile(content: fileToWrite, filename: "\(getTimeStr()).ply", folder: self.currentFolder) {
-                self.delegate?.sharePLY(file: file)
+//            if let file = shareFile(content: fileToWrite, filename: "\(getTimeStr()).ply", folder: self.currentFolder) {
+//                self.delegate?.sharePLY(file: file)
+//            }
+            
+            // MARK: Upload PLY file
+            if let data = fileToWrite.data(using: .ascii) {
+                // TODO: 해당로직은 구조변경이 필요
+                let apiService = MainApiService()
+                apiService.uploadPlyData(data: data) { [weak self] result in
+                    self?.delegate?.showUploadResult(result: result)
+                }
             }
         }
     }

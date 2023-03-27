@@ -144,10 +144,12 @@ extension simd_float3x3: Codable {
 }
 
 /// Send task start/finish messages.
+// TODO: 구조수정 필요 부분
 protocol TaskDelegate: AnyObject {
     func didStartTask()
     func didFinishTask()
     func sharePLY(file: Any)
+    func showUploadResult(result: NetworkResult)
 }
 
 /// Deep copy CVPixelBuffer for depth data

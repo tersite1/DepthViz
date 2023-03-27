@@ -256,6 +256,10 @@ extension ViewController {
 
 // update textlabel on tasks start/finish
 extension ViewController: TaskDelegate {
+    func showUploadResult(result: NetworkResult) {
+        print(result.status.rawValue)
+    }
+    
     func didStartTask() {
         self.taskNum += 1
         updateTextLabel()

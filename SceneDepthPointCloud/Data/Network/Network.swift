@@ -12,7 +12,7 @@ import Alamofire
 struct Network {
     /// Network 실제 통신 -> configurationNetworkResult 함수를 통해 NetworkResult 반환
     static func request(url: String, method: HTTPMethod, completion: @escaping (NetworkResult) -> Void) {
-        Session.default.request(url, method: method)
+        AF.request(url, method: method)
             .validate()
             .response { response in
                 completion(Network.configurationNetworkResult(response))

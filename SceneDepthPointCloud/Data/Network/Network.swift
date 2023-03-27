@@ -20,6 +20,20 @@ struct Network {
             .resume()
     }
     
+    static func uploadData(url: String, fileName: String, fileData: Data, completion: @escaping (NetworkResult) -> Void) {
+        // multipart/form-data 인코딩
+        let multipartFormData = MultipartFormData()
+        multipartFormData.append(fileData, withName: fileName, mimeType: "application/octet-stream")
+        
+        // 파일 업로드
+        AF.upload(multipartFormData: multipartFormData, to: url)
+        .validate()
+        .response { response in
+            completion(Network.configurationNetworkResult(response))
+        }
+        .resume()
+    }
+    
     /// statusCode 값과 Data 값으로 NetworkResult 반환
     static func configurationNetworkResult(_ response: AFDataResponse<Data?>) -> NetworkResult {
         guard let statusCode = response.response?.statusCode else {

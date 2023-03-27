@@ -21,8 +21,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		8711C71129D12CF100F6D5CC /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
 		8793524E29B9D8F200D6A079 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		87ABC85929D173BC00881FFB /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E73DD12D24636FEF00D77039 /* Point Cloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Point Cloud.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E73DD13024636FEF00D77039 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -84,7 +84,6 @@
 		8711C71829D1329C00F6D5CC /* Metal */ = {
 			isa = PBXGroup;
 			children = (
-				E73DD14224636FF100D77039 /* SceneDepthPointCloud-Bridging-Header.h */,
 				E73DD13424636FEF00D77039 /* ShaderTypes.h */,
 				E73DD13224636FEF00D77039 /* Shaders.metal */,
 				E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */,
@@ -113,20 +112,14 @@
 			path = PersistantStorages;
 			sourceTree = "<group>";
 		};
-		A6415A999BE1C768F18B2649 /* Configuration */ = {
+		87ABC85829D173AC00881FFB /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
-				8711C71129D12CF100F6D5CC /* env.xcconfig */,
-			);
-			name = Configuration;
-			sourceTree = "<group>";
-		};
-		BF2DD93DB9836723DA6BED14 /* LICENSE */ = {
-			isa = PBXGroup;
-			children = (
+				E73DD14224636FF100D77039 /* SceneDepthPointCloud-Bridging-Header.h */,
+				87ABC85929D173BC00881FFB /* env.xcconfig */,
 				E7E2ED6F1473F1FD1E9543FA /* LICENSE.txt */,
 			);
-			path = LICENSE;
+			path = Configuration;
 			sourceTree = "<group>";
 		};
 		E73DD12424636FEF00D77039 = {
@@ -135,8 +128,6 @@
 				B57D60B9736905755DECF7CE /* README.md */,
 				E73DD12F24636FEF00D77039 /* SceneDepthPointCloud */,
 				E73DD12E24636FEF00D77039 /* Products */,
-				A6415A999BE1C768F18B2649 /* Configuration */,
-				BF2DD93DB9836723DA6BED14 /* LICENSE */,
 			);
 			sourceTree = "<group>";
 		};
@@ -151,13 +142,14 @@
 		E73DD12F24636FEF00D77039 /* SceneDepthPointCloud */ = {
 			isa = PBXGroup;
 			children = (
+				87ABC85829D173AC00881FFB /* Configuration */,
 				8711C71529D1322A00F6D5CC /* Presentation */,
 				8711C71629D1323800F6D5CC /* Domain */,
 				8711C71729D1324000F6D5CC /* Data */,
-				E73DD13024636FEF00D77039 /* AppDelegate.swift */,
 				E73DD13924636FEF00D77039 /* Main.storyboard */,
-				E73DD13C24636FF100D77039 /* Assets.xcassets */,
 				E73DD13E24636FF100D77039 /* LaunchScreen.storyboard */,
+				E73DD13024636FEF00D77039 /* AppDelegate.swift */,
+				E73DD13C24636FF100D77039 /* Assets.xcassets */,
 				E73DD14124636FF100D77039 /* Info.plist */,
 			);
 			path = SceneDepthPointCloud;
@@ -392,7 +384,7 @@
 		};
 		E73DD14624636FF100D77039 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8711C71129D12CF100F6D5CC /* env.xcconfig */;
+			baseConfigurationReference = 87ABC85929D173BC00881FFB /* env.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "";
@@ -411,7 +403,7 @@
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
-				SWIFT_OBJC_BRIDGING_HEADER = "SceneDepthPointCloud/SceneDepthPointCloud-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "SceneDepthPointCloud/Configuration/SceneDepthPointCloud-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -419,7 +411,7 @@
 		};
 		E73DD14724636FF100D77039 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8711C71129D12CF100F6D5CC /* env.xcconfig */;
+			baseConfigurationReference = 87ABC85929D173BC00881FFB /* env.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "";
@@ -438,7 +430,7 @@
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
-				SWIFT_OBJC_BRIDGING_HEADER = "SceneDepthPointCloud/SceneDepthPointCloud-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "SceneDepthPointCloud/Configuration/SceneDepthPointCloud-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -13,6 +13,8 @@
 		87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85C29D176C700881FFB /* NetworkResult.swift */; };
 		87ABC85F29D176F700881FFB /* NetworkStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85E29D176F700881FFB /* NetworkStatus.swift */; };
 		87ABC86229D178BD00881FFB /* MainApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86129D178BD00881FFB /* MainApiService.swift */; };
+		87ABC86429D1924900881FFB /* NetworkURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86329D1924900881FFB /* NetworkURL.swift */; };
+		87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86629D1946400881FFB /* UIViewController+Extension.swift */; };
 		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
 		E73DD13324636FEF00D77039 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13224636FEF00D77039 /* Shaders.metal */; };
 		E73DD13624636FEF00D77039 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13524636FEF00D77039 /* Renderer.swift */; };
@@ -31,6 +33,8 @@
 		87ABC85C29D176C700881FFB /* NetworkResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkResult.swift; sourceTree = "<group>"; };
 		87ABC85E29D176F700881FFB /* NetworkStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkStatus.swift; sourceTree = "<group>"; };
 		87ABC86129D178BD00881FFB /* MainApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainApiService.swift; sourceTree = "<group>"; };
+		87ABC86329D1924900881FFB /* NetworkURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkURL.swift; sourceTree = "<group>"; };
+		87ABC86629D1946400881FFB /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E73DD12D24636FEF00D77039 /* Point Cloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Point Cloud.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E73DD13024636FEF00D77039 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -63,6 +67,7 @@
 		8711C71529D1322A00F6D5CC /* Presentation */ = {
 			isa = PBXGroup;
 			children = (
+				87ABC86529D1945200881FFB /* Extension */,
 				E73DD13724636FEF00D77039 /* ViewController.swift */,
 			);
 			path = Presentation;
@@ -113,6 +118,7 @@
 				87ABC85A29D175A700881FFB /* Network.swift */,
 				87ABC85C29D176C700881FFB /* NetworkResult.swift */,
 				87ABC85E29D176F700881FFB /* NetworkStatus.swift */,
+				87ABC86329D1924900881FFB /* NetworkURL.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -140,6 +146,14 @@
 				87ABC86129D178BD00881FFB /* MainApiService.swift */,
 			);
 			path = ApiService;
+			sourceTree = "<group>";
+		};
+		87ABC86529D1945200881FFB /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				87ABC86629D1946400881FFB /* UIViewController+Extension.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 		E73DD12424636FEF00D77039 = {
@@ -252,10 +266,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				87ABC86429D1924900881FFB /* NetworkURL.swift in Sources */,
 				E73DD13324636FEF00D77039 /* Shaders.metal in Sources */,
 				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,
 				87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */,
+				87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */,
 				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,
 				87ABC86229D178BD00881FFB /* MainApiService.swift in Sources */,
 				8793524F29B9D8F200D6A079 /* Utils.swift in Sources */,

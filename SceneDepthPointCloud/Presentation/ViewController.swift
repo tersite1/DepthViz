@@ -257,7 +257,12 @@ extension ViewController {
 // update textlabel on tasks start/finish
 extension ViewController: TaskDelegate {
     func showUploadResult(result: NetworkResult) {
-        print(result.status.rawValue)
+        switch result.status {
+        case .SUCCESS:
+            self.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
+        case .ERROR:
+            self.showAlert(title: "Upload Fail", text: "\(result.status.rawValue)")
+        }
     }
     
     func didStartTask() {

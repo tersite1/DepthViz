@@ -10,7 +10,9 @@ import Foundation
 
 final class MainApiService {
     /// ply 데이터를 서버로 전송
-    func uploadPlyData(data: Data, completion: @escaping (NetworkResult) -> Void) {
-        completion(NetworkResult(data: nil, status: .SUCCESS))
+    func uploadPlyData(fileName: String, fileData: Data, completion: @escaping (NetworkResult) -> Void) {
+        Network.uploadData(url: NetworkURL.uploadPly, fileName: fileName, fileData: fileData) { result in
+            completion(result)
+        }
     }
 }

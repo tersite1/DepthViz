@@ -36,8 +36,10 @@ struct Network {
     
     /// statusCode 값과 Data 값으로 NetworkResult 반환
     static func configurationNetworkResult(_ response: AFDataResponse<Data?>) -> NetworkResult {
+        print("Network Request: \(String(describing: response.request?.url))")
+        
         guard let statusCode = response.response?.statusCode else {
-            print("Network Fail: No Status Code: \(response.error?.localizedDescription ?? "nil")")
+            print("Network Fail: No Status Code: \(String(describing: response.error?.localizedDescription))")
             return NetworkResult(data: nil, status: .ERROR)
         }
         

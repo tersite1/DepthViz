@@ -52,6 +52,67 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8711C71529D1322A00F6D5CC /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				E73DD13724636FEF00D77039 /* ViewController.swift */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		8711C71629D1323800F6D5CC /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				8711C71829D1329C00F6D5CC /* Metal */,
+				E73DD13524636FEF00D77039 /* Renderer.swift */,
+				8793524E29B9D8F200D6A079 /* Utils.swift */,
+				E7B7223C24809D1E002E43E8 /* Helpers.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		8711C71729D1324000F6D5CC /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				8711C71929D132F400F6D5CC /* Repositories */,
+				8711C71A29D132FF00F6D5CC /* Network */,
+				8711C71B29D1330700F6D5CC /* PersistantStorages */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		8711C71829D1329C00F6D5CC /* Metal */ = {
+			isa = PBXGroup;
+			children = (
+				E73DD14224636FF100D77039 /* SceneDepthPointCloud-Bridging-Header.h */,
+				E73DD13424636FEF00D77039 /* ShaderTypes.h */,
+				E73DD13224636FEF00D77039 /* Shaders.metal */,
+				E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */,
+			);
+			path = Metal;
+			sourceTree = "<group>";
+		};
+		8711C71929D132F400F6D5CC /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		8711C71A29D132FF00F6D5CC /* Network */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Network;
+			sourceTree = "<group>";
+		};
+		8711C71B29D1330700F6D5CC /* PersistantStorages */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = PersistantStorages;
+			sourceTree = "<group>";
+		};
 		A6415A999BE1C768F18B2649 /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
@@ -90,19 +151,14 @@
 		E73DD12F24636FEF00D77039 /* SceneDepthPointCloud */ = {
 			isa = PBXGroup;
 			children = (
+				8711C71529D1322A00F6D5CC /* Presentation */,
+				8711C71629D1323800F6D5CC /* Domain */,
+				8711C71729D1324000F6D5CC /* Data */,
 				E73DD13024636FEF00D77039 /* AppDelegate.swift */,
-				E73DD13724636FEF00D77039 /* ViewController.swift */,
-				E73DD13224636FEF00D77039 /* Shaders.metal */,
-				E73DD13424636FEF00D77039 /* ShaderTypes.h */,
-				E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */,
-				E73DD13524636FEF00D77039 /* Renderer.swift */,
-				E7B7223C24809D1E002E43E8 /* Helpers.swift */,
 				E73DD13924636FEF00D77039 /* Main.storyboard */,
 				E73DD13C24636FF100D77039 /* Assets.xcassets */,
 				E73DD13E24636FF100D77039 /* LaunchScreen.storyboard */,
 				E73DD14124636FF100D77039 /* Info.plist */,
-				E73DD14224636FF100D77039 /* SceneDepthPointCloud-Bridging-Header.h */,
-				8793524E29B9D8F200D6A079 /* Utils.swift */,
 			);
 			path = SceneDepthPointCloud;
 			sourceTree = "<group>";

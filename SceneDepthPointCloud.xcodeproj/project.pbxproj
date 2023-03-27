@@ -20,8 +20,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8711C71129D12CF100F6D5CC /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
 		8793524E29B9D8F200D6A079 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
-		948146554F46E56B015690CC /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E73DD12D24636FEF00D77039 /* Point Cloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Point Cloud.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E73DD13024636FEF00D77039 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -53,7 +53,7 @@
 		A6415A999BE1C768F18B2649 /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
-				948146554F46E56B015690CC /* SampleCode.xcconfig */,
+				8711C71129D12CF100F6D5CC /* env.xcconfig */,
 			);
 			name = Configuration;
 			sourceTree = "<group>";
@@ -210,7 +210,6 @@
 /* Begin XCBuildConfiguration section */
 		E73DD14324636FF100D77039 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 948146554F46E56B015690CC /* SampleCode.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -273,7 +272,6 @@
 		};
 		E73DD14424636FF100D77039 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 948146554F46E56B015690CC /* SampleCode.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -330,7 +328,7 @@
 		};
 		E73DD14624636FF100D77039 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 948146554F46E56B015690CC /* SampleCode.xcconfig */;
+			baseConfigurationReference = 8711C71129D12CF100F6D5CC /* env.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "";
@@ -357,7 +355,7 @@
 		};
 		E73DD14724636FF100D77039 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 948146554F46E56B015690CC /* SampleCode.xcconfig */;
+			baseConfigurationReference = 8711C71129D12CF100F6D5CC /* env.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "";

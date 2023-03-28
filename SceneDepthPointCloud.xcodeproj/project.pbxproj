@@ -17,6 +17,7 @@
 		87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86629D1946400881FFB /* UIViewController+Extension.swift */; };
 		87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86B29D290E900881FFB /* RecordingButton.swift */; };
 		87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */; };
+		87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC87029D30EE000881FFB /* MeasuredData.swift */; };
 		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
 		E73DD13324636FEF00D77039 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13224636FEF00D77039 /* Shaders.metal */; };
 		E73DD13624636FEF00D77039 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13524636FEF00D77039 /* Renderer.swift */; };
@@ -39,6 +40,7 @@
 		87ABC86629D1946400881FFB /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
 		87ABC86B29D290E900881FFB /* RecordingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingButton.swift; sourceTree = "<group>"; };
 		87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorLabel.swift; sourceTree = "<group>"; };
+		87ABC87029D30EE000881FFB /* MeasuredData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasuredData.swift; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E73DD12D24636FEF00D77039 /* Point Cloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Point Cloud.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E73DD13024636FEF00D77039 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -91,6 +93,7 @@
 		8711C71729D1324000F6D5CC /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				87ABC86F29D30D7600881FFB /* Codable */,
 				87ABC86029D178AB00881FFB /* ApiService */,
 				8711C71929D132F400F6D5CC /* Repositories */,
 				8711C71A29D132FF00F6D5CC /* Network */,
@@ -168,6 +171,14 @@
 				87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */,
 			);
 			path = Main;
+			sourceTree = "<group>";
+		};
+		87ABC86F29D30D7600881FFB /* Codable */ = {
+			isa = PBXGroup;
+			children = (
+				87ABC87029D30EE000881FFB /* MeasuredData.swift */,
+			);
+			path = Codable;
 			sourceTree = "<group>";
 		};
 		E73DD12424636FEF00D77039 = {
@@ -293,6 +304,7 @@
 				87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */,
 				E73DD13624636FEF00D77039 /* Renderer.swift in Sources */,
 				E73DD13824636FEF00D77039 /* MainVC.swift in Sources */,
+				87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */,
 				87ABC85F29D176F700881FFB /* NetworkStatus.swift in Sources */,
 				E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */,
 			);
@@ -446,7 +458,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";
@@ -473,7 +485,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";

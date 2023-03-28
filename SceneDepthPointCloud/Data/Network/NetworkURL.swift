@@ -10,5 +10,6 @@ import Foundation
 
 struct NetworkURL {
     static let baseURL: String = Bundle.main.infoDictionary!["BASE_URL"] as! String
-    static let uploadPly: String = baseURL + "/upload"
+    static let domain = baseURL + "/LidarDemo"
+    static let uploadPly: String = domain + "/v1/collect/building"
 }

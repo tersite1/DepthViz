@@ -20,10 +20,11 @@ struct Network {
             .resume()
     }
     
-    static func uploadData(url: String, fileName: String, fileData: Data, completion: @escaping (NetworkResult) -> Void) {
+    static func uploadData(url: String, measuredData: MeasuredData, completion: @escaping (NetworkResult) -> Void) {
         // multipart/form-data 인코딩
         let multipartFormData = MultipartFormData()
-        multipartFormData.append(fileData, withName: fileName, mimeType: "application/octet-stream")
+        multipartFormData.append("\(measuredData.collectID)".data(using: .utf8)!, withName: "collectID", mimeType: "application/octet-stream")
+        multipartFormData.append(measuredData.lidar, withName: "lidar", mimeType: "application/octet-stream")
         
         // 파일 업로드
         AF.upload(multipartFormData: multipartFormData, to: url)

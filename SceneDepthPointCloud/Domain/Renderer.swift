@@ -424,41 +424,46 @@ extension Renderer {
     /// Save all particles to a point cloud file in ply format.
     func savePointCloud() {
         delegate?.startMakingPlyFile()
-        Task.init(priority: .utility) {
-            var fileToWrite = ""
-            let headers = ["ply", "format ascii 1.0", "element vertex \(currentPointCount)", "property float x", "property float y", "property float z", "property uchar red", "property uchar green", "property uchar blue", "element face 0", "property list uchar int vertex_indices", "end_header"]
-            for header in headers {
-                fileToWrite += header
-                fileToWrite += "\n"
-            }
+        DispatchQueue.global().async { [weak self] in
+            guard let self = self else { return }
             
-            for i in 0..<currentPointCount {
-                let point = particlesBuffer[i]
-                let colors = point.color
+            Task.init(priority: .utility) {
+                var fileToWrite = ""
+                let headers = ["ply", "format ascii 1.0", "element vertex \(self.currentPointCount)", "property float x", "property float y", "property float z", "property uchar red", "property uchar green", "property uchar blue", "element face 0", "property list uchar int vertex_indices", "end_header"]
+                for header in headers {
+                    fileToWrite += header
+                    fileToWrite += "\n"
+                }
                 
-                let red = colors.x * 255.0
-                let green = colors.y * 255.0
-                let blue = colors.z * 255.0
+                for i in 0..<self.currentPointCount {
+                    let point = self.particlesBuffer[i]
+                    let colors = point.color
+                    
+                    let red = colors.x * 255.0
+                    let green = colors.y * 255.0
+                    let blue = colors.z * 255.0
+                    
+                    let pvValue = "\(point.position.x) \(point.position.y) \(point.position.z) \(Int(red)) \(Int(green)) \(Int(blue))"
+                    fileToWrite += pvValue
+                    fileToWrite += "\n"
+                }
                 
-                let pvValue = "\(point.position.x) \(point.position.y) \(point.position.z) \(Int(red)) \(Int(green)) \(Int(blue))"
-                fileToWrite += pvValue
-                fileToWrite += "\n"
-            }
-            
-            self.delegate?.finishMakingPlyFile()
-            
-            // MARK: Share PLY file option
-//            if let file = shareFile(content: fileToWrite, filename: "\(getTimeStr()).ply", folder: self.currentFolder) {
-//                self.delegate?.sharePLY(file: file)
-//            }
-            
-            // MARK: Upload PLY file
-            self.delegate?.startUploadingData()
-            if let fileData = fileToWrite.data(using: .utf8) {
-                // TODO: 해당로직은 구조변경이 필요
-                let apiService = MainApiService()
-                apiService.uploadPlyData(fileName: "\(getTimeStr()).ply", fileData: fileData) { [weak self] result in
-                    self?.delegate?.showUploadResult(result: result)
+                self.delegate?.finishMakingPlyFile()
+                
+                // MARK: Share PLY file option
+    //            if let file = shareFile(content: fileToWrite, filename: "\(getTimeStr()).ply", folder: self.currentFolder) {
+    //                self.delegate?.sharePLY(file: file)
+    //            }
+                
+                // MARK: Upload PLY file
+                self.delegate?.startUploadingData()
+                if let fileData = fileToWrite.data(using: .utf8) {
+                    // TODO: 해당로직은 구조변경이 필요
+                    let apiService = MainApiService()
+                    apiService.uploadPlyData(fileName: "\(getTimeStr()).ply", fileData: fileData) { [weak self] result in
+                        guard let self = self else { return }
+                        self.delegate?.showUploadResult(result: result)
+                    }
                 }
             }
         }

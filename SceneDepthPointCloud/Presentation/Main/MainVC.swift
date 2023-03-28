@@ -16,6 +16,7 @@ final class MainVC: UIViewController, ARSessionDelegate {
     private let rgbRadiusSlider = UISlider()
     private let session = ARSession()
     private var renderer: Renderer!
+    private let statusLabel = StatusIndicatorLabel()
     private let recordingButton = RecordingButton()
     
     /// MainVC 최초 접근시 configure
@@ -74,6 +75,13 @@ extension MainVC {
             self.recordingButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             self.recordingButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
         ])
+        
+        // statusLabel
+        self.view.addSubview(self.statusLabel)
+        NSLayoutConstraint.activate([
+            self.statusLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            self.statusLabel.topAnchor.constraint(equalTo: self.recordingButton.topAnchor, constant: -60)
+        ])
     }
     
     /// session 설정 및 화면꺼짐방지
@@ -103,6 +111,10 @@ extension MainVC {
     private func updateRecording() {
         let recording: Bool = self.recordingButton.isSelected
         self.renderer.isRecording = recording
+        
+        if recording {
+            self.statusLabel.changeText(to: .recording)
+        }
     }
 }
 
@@ -168,11 +180,15 @@ extension MainVC {
 // update textlabel on tasks start/finish
 extension MainVC: TaskDelegate {
     func showUploadResult(result: NetworkResult) {
-        switch result.status {
-        case .SUCCESS:
-            self.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
-        case .ERROR:
-            self.showAlert(title: "Upload Fail", text: "\(result.status.rawValue)")
+        DispatchQueue.main.async { [weak self] in
+            self?.statusLabel.changeText(to: .removed)
+            switch result.status {
+            case .SUCCESS:
+                self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
+            case .ERROR:
+                self?.showAlert(title: "Upload Fail", text: "\(result.status.rawValue)")
+            }
+            
         }
     }
     
@@ -190,7 +206,9 @@ extension MainVC: TaskDelegate {
     }
     
     func startMakingPlyFile() {
-        print("start making ply file")
+        DispatchQueue.main.async { [weak self] in
+            self?.statusLabel.changeText(to: .loading)
+        }
     }
     
     func finishMakingPlyFile() {
@@ -198,6 +216,8 @@ extension MainVC: TaskDelegate {
     }
     
     func startUploadingData() {
-        print("start uploading ply file")
+        DispatchQueue.main.async { [weak self] in
+            self?.statusLabel.changeText(to: .uploading)
+        }
     }
 }

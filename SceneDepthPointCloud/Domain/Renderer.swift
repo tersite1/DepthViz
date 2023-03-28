@@ -415,50 +415,9 @@ extension Renderer {
         var cameraIntrinsicsInversed: simd_float3x3
     }
     
-    /// Save data to disk in json and jpeg formats.
-    private func saveData(frame: ARFrameDataPack) {
-        struct DataPack: Codable {
-            var timestamp: Double
-            var cameraTransform: simd_float4x4 // The position and orientation of the camera in world coordinate space.
-            var cameraEulerAngles: simd_float3 // The orientation of the camera, expressed as roll, pitch, and yaw values.
-            var depthMap: [[Float32]]
-            var smoothedDepthMap: [[Float32]]
-            var confidenceMap: [[UInt8]]
-            var localToWorld: simd_float4x4
-            var cameraIntrinsicsInversed: simd_float3x3
-        }
-        
-        delegate?.didStartTask()
-        Task.init(priority: .utility) {
-            do {
-                let dataPack = await DataPack(
-                    timestamp: frame.timestamp,
-                    cameraTransform: frame.cameraTransform,
-                    cameraEulerAngles: frame.cameraEulerAngles,
-                    depthMap: cvPixelBuffer2Map(rawDepth: frame.depthMap),
-                    smoothedDepthMap: cvPixelBuffer2Map(rawDepth: frame.smoothedDepthMap),
-                    confidenceMap: cvPixelBuffer2Map(rawDepth: frame.confidenceMap),
-                    localToWorld: frame.localToWorld,
-                    cameraIntrinsicsInversed: frame.cameraIntrinsicsInversed
-                )
-                
-                let jsonEncoder = JSONEncoder()
-                jsonEncoder.outputFormatting = .prettyPrinted
-                
-                let encoded = try jsonEncoder.encode(dataPack)
-                let encodedStr = String(data: encoded, encoding: .utf8)!
-                try await saveFile(content: encodedStr, filename: "\(frame.timestamp)_\(pickFrames).json", folder: currentFolder + "/data")
-                try await savePic(pic: cvPixelBuffer2UIImage(pixelBuffer: frame.capturedImage), filename: "\(frame.timestamp)_\(pickFrames).jpeg", folder: currentFolder + "/data")
-                delegate?.didFinishTask()
-            } catch {
-                print(error.localizedDescription)
-            }
-        }
-    }
-    
     /// Save all particles to a point cloud file in ply format.
     func savePointCloud() {
-        delegate?.didStartTask()
+        delegate?.startMakingPlyFile()
         Task.init(priority: .utility) {
             var fileToWrite = ""
             let headers = ["ply", "format ascii 1.0", "element vertex \(currentPointCount)", "property float x", "property float y", "property float z", "property uchar red", "property uchar green", "property uchar blue", "element face 0", "property list uchar int vertex_indices", "end_header"]
@@ -480,12 +439,15 @@ extension Renderer {
                 fileToWrite += "\n"
             }
             
+            self.delegate?.finishMakingPlyFile()
+            
             // MARK: Share PLY file option
 //            if let file = shareFile(content: fileToWrite, filename: "\(getTimeStr()).ply", folder: self.currentFolder) {
 //                self.delegate?.sharePLY(file: file)
 //            }
             
             // MARK: Upload PLY file
+            self.delegate?.startUploadingData()
             if let fileData = fileToWrite.data(using: .utf8) {
                 // TODO: 해당로직은 구조변경이 필요
                 let apiService = MainApiService()

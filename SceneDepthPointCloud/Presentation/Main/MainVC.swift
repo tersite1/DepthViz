@@ -10,23 +10,14 @@ import Metal
 import MetalKit
 import ARKit
 
-final class ViewController: UIViewController, ARSessionDelegate {
-    private let isUIEnabled = true
+final class MainVC: UIViewController, ARSessionDelegate {
     private let confidenceControl = UISegmentedControl(items: ["Low", "Medium", "High"])
     private let rgbRadiusSlider = UISlider()
-    
     private let session = ARSession()
     private var renderer: Renderer!
-    
-    // MARK: SAVE PLY
-    private let pickFramesSlider = UISlider()
     private let recordButton = UIButton()
-    private let textLabel = UILabel()
     
     private var isRecording = false
-    
-    private var taskNum = 0;
-    private var completedTaskNum = 0;
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,14 +58,6 @@ final class ViewController: UIViewController, ARSessionDelegate {
         rgbRadiusSlider.isContinuous = true
         rgbRadiusSlider.value = renderer.rgbRadius
         rgbRadiusSlider.addTarget(self, action: #selector(viewValueChanged), for: .valueChanged)
-        
-        // MARK: SAVE PLY
-        // Pick every x Frames control
-        pickFramesSlider.minimumValue = 1
-        pickFramesSlider.maximumValue = 50
-        pickFramesSlider.isContinuous = true
-        pickFramesSlider.value = Float(renderer.pickFrames)
-        pickFramesSlider.addTarget(self, action: #selector(viewValueChanged), for: .valueChanged)
 
         // UIButton
         recordButton.setTitle("START", for: .normal)
@@ -82,30 +65,16 @@ final class ViewController: UIViewController, ARSessionDelegate {
         recordButton.layer.cornerRadius = 5
         recordButton.addTarget(self, action: #selector(onButtonClick), for: .touchUpInside)
         
-        // UILabel
-        textLabel.text = "  1/5 of new frames  \n  Files saved 0/0  "
-        textLabel.textColor = .white
-        textLabel.backgroundColor = UIColor.darkGray.withAlphaComponent(0.5)
-        textLabel.translatesAutoresizingMaskIntoConstraints = false
-        textLabel.layer.masksToBounds = true
-        textLabel.layer.cornerRadius = 8
-        textLabel.sizeToFit()
-        textLabel.numberOfLines = 2
-        
         let stackView = UIStackView(arrangedSubviews: [
-            confidenceControl, rgbRadiusSlider, pickFramesSlider, recordButton])
-        stackView.isHidden = !isUIEnabled
+            confidenceControl, rgbRadiusSlider, recordButton])
+        stackView.isHidden = false
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
         stackView.spacing = 10
         view.addSubview(stackView)
-        view.addSubview(textLabel)
         NSLayoutConstraint.activate([
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-            textLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            textLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
-            textLabel.heightAnchor.constraint(equalToConstant: 50),
+            stackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
     }
     
@@ -134,10 +103,6 @@ final class ViewController: UIViewController, ARSessionDelegate {
             
         case rgbRadiusSlider:
             renderer.rgbRadius = rgbRadiusSlider.value
-        // MARK: SAVE PLY
-        case pickFramesSlider:
-            renderer.pickFrames = Int(pickFramesSlider.value)
-            updateTextLabel()
             
         default:
             break
@@ -181,7 +146,7 @@ final class ViewController: UIViewController, ARSessionDelegate {
 
 // MARK: - MTKViewDelegate
 
-extension ViewController: MTKViewDelegate {
+extension MainVC: MTKViewDelegate {
     // Called whenever view changes orientation or layout is changed
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         renderer.drawRectResized(size: size)
@@ -208,7 +173,7 @@ extension MTKView: RenderDestinationProvider {
 }
 
 // MARK: SAVE PLY
-extension ViewController {
+extension MainVC {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         
@@ -245,17 +210,10 @@ extension ViewController {
             renderer.savePointCloud()
         }
     }
-    
-    private func updateTextLabel() {
-        let text = "  1/\(self.renderer.pickFrames)  of new frames  \n  Files saved \(self.completedTaskNum)/\(self.taskNum)  "
-        DispatchQueue.main.async {
-            self.textLabel.text = text
-        }
-    }
 }
 
 // update textlabel on tasks start/finish
-extension ViewController: TaskDelegate {
+extension MainVC: TaskDelegate {
     func showUploadResult(result: NetworkResult) {
         switch result.status {
         case .SUCCESS:
@@ -263,16 +221,6 @@ extension ViewController: TaskDelegate {
         case .ERROR:
             self.showAlert(title: "Upload Fail", text: "\(result.status.rawValue)")
         }
-    }
-    
-    func didStartTask() {
-        self.taskNum += 1
-        updateTextLabel()
-    }
-    
-    func didFinishTask() {
-        self.completedTaskNum += 1
-        updateTextLabel()
     }
     
     func sharePLY(file: Any) {
@@ -285,7 +233,18 @@ extension ViewController: TaskDelegate {
         
         DispatchQueue.main.async {
             self.present(activityViewController, animated: true)
-            self.didFinishTask()
         }
+    }
+    
+    func startMakingPlyFile() {
+        print("start making ply file")
+    }
+    
+    func finishMakingPlyFile() {
+        print("finish making ply file")
+    }
+    
+    func startUploadingData() {
+        print("start uploading ply file")
     }
 }

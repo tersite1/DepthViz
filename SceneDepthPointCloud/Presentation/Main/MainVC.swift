@@ -16,9 +16,7 @@ final class MainVC: UIViewController, ARSessionDelegate {
     private let rgbRadiusSlider = UISlider()
     private let session = ARSession()
     private var renderer: Renderer!
-    private let recordButton = UIButton()
-    // MARK: Property
-    private var isRecording = false
+    private let recordingButton = RecordingButton()
     
     /// MainVC 최초 접근시 configure
     override func viewDidLoad() {
@@ -83,13 +81,10 @@ extension MainVC {
         rgbRadiusSlider.addTarget(self, action: #selector(viewValueChanged), for: .valueChanged)
 
         // UIButton
-        recordButton.setTitle("START", for: .normal)
-        recordButton.backgroundColor = .systemBlue
-        recordButton.layer.cornerRadius = 5
-        recordButton.addTarget(self, action: #selector(onButtonClick), for: .touchUpInside)
+        recordingButton.addTarget(self, action: #selector(onButtonClick), for: .touchUpInside)
         
         let stackView = UIStackView(arrangedSubviews: [
-            confidenceControl, rgbRadiusSlider, recordButton])
+            confidenceControl, rgbRadiusSlider, recordingButton])
         stackView.isHidden = false
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
@@ -181,7 +176,8 @@ extension MainVC {
         
         print("memory warning!!!")
         memoryAlert()
-        updateIsRecording(_isRecording: false)
+        self.recordingButton.isSelected = false
+        self.updateRecording()
     }
     
     private func memoryAlert() {
@@ -194,22 +190,15 @@ extension MainVC {
     
     @objc
     private func onButtonClick(_ sender: UIButton) {
-        if (sender != recordButton) {
-            return
-        }
-        updateIsRecording(_isRecording: !isRecording)
+        self.recordingButton.isSelected.toggle()
+        self.updateRecording()
     }
     
-    private func updateIsRecording(_isRecording: Bool) {
-        isRecording = _isRecording
-        renderer.isRecording = isRecording
-        if (isRecording){
-            recordButton.setTitle("PAUSE", for: .normal)
-            recordButton.backgroundColor = .systemRed
-        } else {
-            recordButton.setTitle("START", for: .normal)
-            recordButton.backgroundColor = .systemBlue
-            renderer.savePointCloud()
+    private func updateRecording() {
+        let recording: Bool = self.recordingButton.isSelected
+        self.renderer.isRecording = recording
+        if recording == false {
+            self.renderer.savePointCloud()
         }
     }
 }
@@ -230,7 +219,7 @@ extension MainVC: TaskDelegate {
         
         if UIDevice.current.userInterfaceIdiom == .pad {
             activityViewController.popoverPresentationController?.sourceView = self.view
-            activityViewController.popoverPresentationController?.sourceRect = self.recordButton.frame
+            activityViewController.popoverPresentationController?.sourceRect = self.recordingButton.frame
         }
         
         DispatchQueue.main.async {

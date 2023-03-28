@@ -11,23 +11,40 @@ import MetalKit
 import ARKit
 
 final class MainVC: UIViewController, ARSessionDelegate {
+    // MARK: View
     private let confidenceControl = UISegmentedControl(items: ["Low", "Medium", "High"])
     private let rgbRadiusSlider = UISlider()
     private let session = ARSession()
     private var renderer: Renderer!
     private let recordButton = UIButton()
-    
+    // MARK: Property
     private var isRecording = false
     
+    /// MainVC 최초 접근시 configure
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.configureMetalKitView()
+        self.configureRendererDelegegate()
+        self.configureUI()
+    }
+    
+    /// MainVC 화면 진입시 configure
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.configureARWorldTracking()
+    }
+}
+
+// MARK: Configure
+extension MainVC {
+    /// MetalKitView 설정 및 view 설정
+    private func configureMetalKitView() {
         guard let device = MTLCreateSystemDefaultDevice() else {
             print("Metal is not supported on this device")
             return
         }
         
-        session.delegate = self
+        self.session.delegate = self
         
         // Set the view to use the default device
         if let view = view as? MTKView {
@@ -40,12 +57,18 @@ final class MainVC: UIViewController, ARSessionDelegate {
             view.delegate = self
             
             // Configure the renderer to draw to the view
-            renderer = Renderer(session: session, metalDevice: device, renderDestination: view)
-            renderer.drawRectResized(size: view.bounds.size)
-            // MARK: SAVE PLY
-            renderer.delegate = self
+            self.renderer = Renderer(session: self.session, metalDevice: device, renderDestination: view)
+            self.renderer.drawRectResized(size: view.bounds.size)
         }
-        
+    }
+    
+    /// Renderer -> MainVC 연결
+    private func configureRendererDelegegate() {
+        self.renderer.delegate = self
+    }
+    
+    /// MainVC 표시할 UI 설정
+    private func configureUI() {
         // Confidence control
         confidenceControl.backgroundColor = .clear
         confidenceControl.tintColor = .label
@@ -78,9 +101,8 @@ final class MainVC: UIViewController, ARSessionDelegate {
         ])
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
+    /// session 설정 및 화면꺼짐방지
+    private func configureARWorldTracking() {
         // Create a world-tracking configuration, and
         // enable the scene depth frame-semantic.
         let configuration = ARWorldTrackingConfiguration()
@@ -88,27 +110,33 @@ final class MainVC: UIViewController, ARSessionDelegate {
         configuration.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
 
         // Run the view's session
-        session.run(configuration)
+        self.session.run(configuration)
         
         // The screen shouldn't dim during AR experiences.
         UIApplication.shared.isIdleTimerDisabled = true
     }
-    
-    @objc
-    private func viewValueChanged(view: UIView) {
+}
+
+// MARK: Action
+extension MainVC {
+    /// UI
+    @objc private func viewValueChanged(view: UIView) {
         switch view {
             
         case confidenceControl:
-            renderer.confidenceThreshold = confidenceControl.selectedSegmentIndex
+            self.renderer.confidenceThreshold = self.confidenceControl.selectedSegmentIndex
             
         case rgbRadiusSlider:
-            renderer.rgbRadius = rgbRadiusSlider.value
+            self.renderer.rgbRadius = self.rgbRadiusSlider.value
             
         default:
-            break
+            return
         }
     }
-    
+}
+
+// MARK: HomeBar & StatusBar Hidden
+extension MainVC {
     // Auto-hide the home indicator to maximize immersion in AR experiences.
     override var prefersHomeIndicatorAutoHidden: Bool {
         return true
@@ -118,34 +146,9 @@ final class MainVC: UIViewController, ARSessionDelegate {
     override var prefersStatusBarHidden: Bool {
         return true
     }
-    
-    func session(_ session: ARSession, didFailWithError error: Error) {
-        // Present an error message to the user.
-        guard error is ARError else { return }
-        let errorWithInfo = error as NSError
-        let messages = [
-            errorWithInfo.localizedDescription,
-            errorWithInfo.localizedFailureReason,
-            errorWithInfo.localizedRecoverySuggestion
-        ]
-        let errorMessage = messages.compactMap({ $0 }).joined(separator: "\n")
-        DispatchQueue.main.async {
-            // Present an alert informing about the error that has occurred.
-            let alertController = UIAlertController(title: "The AR session failed.", message: errorMessage, preferredStyle: .alert)
-            let restartAction = UIAlertAction(title: "Restart Session", style: .default) { _ in
-                alertController.dismiss(animated: true, completion: nil)
-                if let configuration = self.session.configuration {
-                    self.session.run(configuration, options: .resetSceneReconstruction)
-                }
-            }
-            alertController.addAction(restartAction)
-            self.present(alertController, animated: true, completion: nil)
-        }
-    }
 }
 
-// MARK: - MTKViewDelegate
-
+// MARK: MTKViewDelegate
 extension MainVC: MTKViewDelegate {
     // Called whenever view changes orientation or layout is changed
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -158,8 +161,7 @@ extension MainVC: MTKViewDelegate {
     }
 }
 
-// MARK: - RenderDestinationProvider
-
+// MARK: RenderDestinationProvider
 protocol RenderDestinationProvider {
     var currentRenderPassDescriptor: MTLRenderPassDescriptor? { get }
     var currentDrawable: CAMetalDrawable? { get }

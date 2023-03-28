@@ -91,7 +91,7 @@ final class Renderer {
     private lazy var lastCameraTransform = sampleFrame.camera.transform
     
     // interfaces
-    var confidenceThreshold = 1 {
+    var confidenceThreshold = 0 {
         didSet {
             // apply the change for the shader
             pointCloudUniforms.confidenceThreshold = Int32(confidenceThreshold)

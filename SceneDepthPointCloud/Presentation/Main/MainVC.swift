@@ -67,32 +67,12 @@ extension MainVC {
     
     /// MainVC 표시할 UI 설정
     private func configureUI() {
-        // Confidence control
-        confidenceControl.backgroundColor = .clear
-        confidenceControl.tintColor = .label
-        confidenceControl.selectedSegmentIndex = renderer.confidenceThreshold
-        confidenceControl.addTarget(self, action: #selector(viewValueChanged), for: .valueChanged)
-        
-        // RGB Radius control
-        rgbRadiusSlider.minimumValue = 0
-        rgbRadiusSlider.maximumValue = 1.5
-        rgbRadiusSlider.isContinuous = true
-        rgbRadiusSlider.value = renderer.rgbRadius
-        rgbRadiusSlider.addTarget(self, action: #selector(viewValueChanged), for: .valueChanged)
-
-        // UIButton
-        recordingButton.addTarget(self, action: #selector(onButtonClick), for: .touchUpInside)
-        
-        let stackView = UIStackView(arrangedSubviews: [
-            confidenceControl, rgbRadiusSlider, recordingButton])
-        stackView.isHidden = false
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .vertical
-        stackView.spacing = 10
-        view.addSubview(stackView)
+        // recordingButton
+        self.recordingButton.addTarget(self, action: #selector(tapRecordingButton), for: .touchUpInside)
+        self.view.addSubview(self.recordingButton)
         NSLayoutConstraint.activate([
-            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+            self.recordingButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            self.recordingButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -12)
         ])
     }
     
@@ -114,19 +94,15 @@ extension MainVC {
 
 // MARK: Action
 extension MainVC {
-    /// UI
-    @objc private func viewValueChanged(view: UIView) {
-        switch view {
-            
-        case confidenceControl:
-            self.renderer.confidenceThreshold = self.confidenceControl.selectedSegmentIndex
-            
-        case rgbRadiusSlider:
-            self.renderer.rgbRadius = self.rgbRadiusSlider.value
-            
-        default:
-            return
-        }
+    /// RecordingButton Tab 액션
+    @objc private func tapRecordingButton(_ sender: UIButton) {
+        self.recordingButton.isSelected.toggle()
+        self.updateRecording()
+    }
+    
+    private func updateRecording() {
+        let recording: Bool = self.recordingButton.isSelected
+        self.renderer.isRecording = recording
     }
 }
 
@@ -186,20 +162,6 @@ extension MainVC {
             NSLog("The \"OK\" alert occured.")
         }))
         self.present(alert, animated: true, completion: nil)
-    }
-    
-    @objc
-    private func onButtonClick(_ sender: UIButton) {
-        self.recordingButton.isSelected.toggle()
-        self.updateRecording()
-    }
-    
-    private func updateRecording() {
-        let recording: Bool = self.recordingButton.isSelected
-        self.renderer.isRecording = recording
-        if recording == false {
-            self.renderer.savePointCloud()
-        }
     }
 }
 

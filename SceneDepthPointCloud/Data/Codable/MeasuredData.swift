@@ -11,9 +11,11 @@ import Foundation
 struct MeasuredData: Codable {
     let collectID: UUID
     let lidar: Data
+    let lidarFileName: String
     
-    init(lidar: Data) {
+    init(lidar: Data, fileName: String) {
         self.collectID = UUID.init()
         self.lidar = lidar
+        self.lidarFileName = fileName
     }
 }

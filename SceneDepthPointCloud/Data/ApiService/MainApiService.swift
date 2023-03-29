@@ -11,7 +11,7 @@ import Foundation
 final class MainApiService {
     /// ply 데이터를 서버로 전송
     func uploadPlyData(fileName: String, fileData: Data, completion: @escaping (NetworkResult) -> Void) {
-        let measuredData = MeasuredData(lidar: fileData)
+        let measuredData = MeasuredData(lidar: fileData, fileName: fileName)
         Network.uploadData(url: NetworkURL.uploadPly, measuredData: measuredData) { result in
             completion(result)
         }

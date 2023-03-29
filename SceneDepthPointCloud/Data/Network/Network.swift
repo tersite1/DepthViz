@@ -23,8 +23,8 @@ struct Network {
     static func uploadData(url: String, measuredData: MeasuredData, completion: @escaping (NetworkResult) -> Void) {
         // multipart/form-data 인코딩
         let multipartFormData = MultipartFormData()
-        multipartFormData.append("\(measuredData.collectID)".data(using: .utf8)!, withName: "collectID", mimeType: "application/octet-stream")
-        multipartFormData.append(measuredData.lidar, withName: "lidar", mimeType: "application/octet-stream")
+        multipartFormData.append("\(measuredData.collectID)".data(using: .utf8)!, withName: "collectID", mimeType: "text/plain")
+        multipartFormData.append(measuredData.lidar, withName: "lidar", fileName: measuredData.lidarFileName, mimeType: "text/plain")
         
         // 파일 업로드
         AF.upload(multipartFormData: multipartFormData, to: url)
@@ -50,6 +50,10 @@ struct Network {
             print("Network Warning: No Data")
             return NetworkResult(data: nil, status: status)
         }
+        
+        // check 용 출력
+        print("statusCode: \(statusCode)")
+        print("Data: \(String(data: data, encoding: .utf8)!)")
         
         return NetworkResult(data: data, status: status)
     }

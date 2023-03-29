@@ -104,12 +104,16 @@ extension MainVC {
 extension MainVC {
     /// RecordingButton Tab 액션
     @objc private func tapRecordingButton(_ sender: UIButton) {
-        self.recordingButton.isSelected.toggle()
+        if self.recordingButton.status == .ready {
+            self.recordingButton.changeStatus(to: .recording)
+        } else if self.recordingButton.status == .recording {
+            self.recordingButton.changeStatus(to: .loading)
+        } else { return }
         self.updateRecording()
     }
     
     private func updateRecording() {
-        let recording: Bool = self.recordingButton.isSelected
+        let recording: Bool = self.recordingButton.status == .recording
         self.renderer.isRecording = recording
         
         if recording {
@@ -164,7 +168,7 @@ extension MainVC {
         
         print("memory warning!!!")
         memoryAlert()
-        self.recordingButton.isSelected = false
+        self.recordingButton.changeStatus(to: .ready)
         self.updateRecording()
     }
     
@@ -182,6 +186,7 @@ extension MainVC: TaskDelegate {
     func showUploadResult(result: NetworkResult) {
         DispatchQueue.main.async { [weak self] in
             self?.statusLabel.changeText(to: .removed)
+            self?.recordingButton.changeStatus(to: .ready)
             switch result.status {
             case .SUCCESS:
                 self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")

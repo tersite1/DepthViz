@@ -9,12 +9,41 @@
 import UIKit
 
 final class RecordingButton: UIButton {
-    let width: CGFloat = 70
+    private let width: CGFloat = 70
+    private(set) var status: Status = .ready {
+        didSet {
+            switch status {
+            case .ready:
+                self.hideLoadingIndicator()
+                self.setImage(UIImage(named: "startRecording"), for: .normal)
+            case .recording:
+                self.hideLoadingIndicator()
+                self.setImage(UIImage(named: "stopRecording"), for: .normal)
+            case .loading:
+                self.setImage(nil, for: .normal)
+                self.showLoadingIndicator()
+            }
+        }
+    }
+    enum Status {
+        case ready
+        case recording
+        case loading
+    }
+    private var loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView()
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.stopAnimating()
+        indicator.tintColor = .white
+        indicator.style = .large
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
     
     convenience init() {
         self.init(frame: CGRect())
         self.configureLayout()
-        self.isSelected = false
+        self.setImage(UIImage(named: "startRecording"), for: .normal)
     }
     
     private func configureLayout() {
@@ -28,23 +57,23 @@ final class RecordingButton: UIButton {
             self.widthAnchor.constraint(equalToConstant: width),
             self.heightAnchor.constraint(equalToConstant: width)
         ])
+        
+        self.addSubview(self.loadingIndicator)
+        NSLayoutConstraint.activate([
+            self.loadingIndicator.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+            self.loadingIndicator.centerYAnchor.constraint(equalTo: self.centerYAnchor)
+        ])
     }
     
-    override var isSelected: Bool {
-        didSet {
-            if isSelected {
-                self.stopRecording()
-            } else {
-                self.startRecording()
-            }
-        }
+    func changeStatus(to status: Status) {
+        self.status = status
     }
     
-    private func stopRecording() {
-        self.setImage(UIImage(named: "stopRecording"), for: .normal)
+    private func showLoadingIndicator() {
+        self.loadingIndicator.startAnimating()
     }
     
-    private func startRecording() {
-        self.setImage(UIImage(named: "startRecording"), for: .normal)
+    private func hideLoadingIndicator() {
+        self.loadingIndicator.stopAnimating()
     }
 }

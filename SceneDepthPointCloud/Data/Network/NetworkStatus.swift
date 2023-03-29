@@ -14,7 +14,7 @@ enum NetworkStatus: String {
     
     static func status(_ statusCode: Int) -> NetworkStatus {
         switch statusCode {
-        case 200: return .SUCCESS
+        case 200, 201: return .SUCCESS
         default: return .ERROR
         }
     }

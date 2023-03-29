@@ -456,15 +456,18 @@ extension Renderer {
     //            }
                 
                 // MARK: Upload PLY file
-                self.delegate?.startUploadingData()
-                if let fileData = fileToWrite.data(using: .utf8) {
-                    // TODO: 해당로직은 구조변경이 필요
-                    let apiService = MainApiService()
-                    apiService.uploadPlyData(fileName: "\(getTimeStr()).ply", fileData: fileData) { [weak self] result in
-                        guard let self = self else { return }
-                        self.delegate?.showUploadResult(result: result)
-                    }
-                }
+//                self.delegate?.startUploadingData()
+//                if let fileData = fileToWrite.data(using: .utf8) {
+//                    // TODO: 해당로직은 구조변경이 필요
+//                    let apiService = MainApiService()
+//                    apiService.uploadPlyData(fileName: "\(getTimeStr()).ply", fileData: fileData) { [weak self] result in
+//                        guard let self = self else { return }
+//                        self.delegate?.showUploadResult(result: result)
+//                    }
+//                }
+                
+                // MARK: Select Share OR Upload PLY file
+                self.delegate?.showShareOrUpload(stringData: fileToWrite, fileName: "\(getTimeStr()).ply")
             }
         }
     }

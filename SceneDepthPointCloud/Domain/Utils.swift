@@ -151,6 +151,7 @@ protocol TaskDelegate: AnyObject {
     func startMakingPlyFile()
     func finishMakingPlyFile()
     func startUploadingData()
+    func showShareOrUpload(stringData: String, fileName: String)
 }
 
 /// Deep copy CVPixelBuffer for depth data

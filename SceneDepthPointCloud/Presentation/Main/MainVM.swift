@@ -23,11 +23,7 @@ final class MainVM {
     /// 측정전, 측정중, 로딩중, 업로드중 상태값
     @Published private(set) var mode: Mode = .ready
     /// 측정중인 Point Cloud Data 개수
-    @Published private(set) var pointCount: Int = 0 {
-        didSet {
-            print(pointCount)
-        }
-    }
+    @Published private(set) var pointCount: Int = 0
     /// 측정종료 후 반환된 LiDAR data 값
     @Published private(set) var lidarData: LiDARData?
     /// 전송 후 네트워킹 결과값

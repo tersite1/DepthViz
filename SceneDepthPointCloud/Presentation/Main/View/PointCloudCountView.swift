@@ -32,6 +32,12 @@ final class PointCloudCountView: UIView {
         return label
     }()
     
+    private let numberFormatter: NumberFormatter = {
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        return numberFormatter
+    }()
+    
     convenience init() {
         self.init(frame: CGRect())
         self.configure()
@@ -52,8 +58,8 @@ final class PointCloudCountView: UIView {
         self.addSubview(stackView)
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: self.topAnchor, constant: 3),
-            stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 5),
-            stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -5),
+            stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 8),
+            stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -8),
             stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -3)
         ])
         
@@ -64,6 +70,6 @@ final class PointCloudCountView: UIView {
 // MARK: INPUT
 extension PointCloudCountView {
     func updateCount(to count: Int) {
-        self.countLabel.text = "\(count) P"
+        self.countLabel.text = "\(self.numberFormatter.string(for: count)!) P"
     }
 }

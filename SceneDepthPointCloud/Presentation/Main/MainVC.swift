@@ -16,6 +16,8 @@ final class MainVC: UIViewController, ARSessionDelegate {
     private let recordingButton = RecordingButton()
     /// 현재 동작상태 표시 텍스트
     private let statusLabel = StatusIndicatorLabel()
+    /// 현재 측정중인 Point Cloud 개수 표시 뷰
+    private let pointCloudCountView = PointCloudCountView()
     /// Point Cloud 표시를 위한 Session
     private let session = ARSession()
     /// 메인화면과 관련된 로직담당 객체
@@ -54,6 +56,13 @@ extension MainVC {
         NSLayoutConstraint.activate([
             self.statusLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             self.statusLabel.topAnchor.constraint(equalTo: self.recordingButton.topAnchor, constant: -60)
+        ])
+        
+        // pointCloudCountView
+        self.view.addSubview(self.pointCloudCountView)
+        NSLayoutConstraint.activate([
+            self.pointCloudCountView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            self.pointCloudCountView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 12)
         ])
     }
     
@@ -99,6 +108,7 @@ extension MainVC {
     /// viewModel 에서 값 변화를 수신하기 위한 함수
     private func bindViewModel() {
         self.bindMode()
+        self.bindPointCount()
         self.bindLidarData()
     }
     
@@ -119,6 +129,16 @@ extension MainVC {
                 }
                 
                 self?.changeStatusLabel(to: mode)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    /// viewModel 의 pointCount 값 변화를 수신하여 표시하기 위한 함수
+    private func bindPointCount() {
+        self.viewModel?.$pointCount
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] count in
+                self?.pointCloudCountView.updateCount(to: count)
             })
             .store(in: &self.cancellables)
     }

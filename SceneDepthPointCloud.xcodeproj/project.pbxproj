@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8711C71429D131A200F6D5CC /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 8711C71329D131A200F6D5CC /* Alamofire */; };
+		8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */; };
 		8793524F29B9D8F200D6A079 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8793524E29B9D8F200D6A079 /* Utils.swift */; };
 		87ABC85B29D175A700881FFB /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85A29D175A700881FFB /* Network.swift */; };
 		87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85C29D176C700881FFB /* NetworkResult.swift */; };
@@ -32,6 +33,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudCountView.swift; sourceTree = "<group>"; };
 		8793524E29B9D8F200D6A079 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		87ABC85929D173BC00881FFB /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
 		87ABC85A29D175A700881FFB /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
@@ -126,6 +128,16 @@
 			path = Network;
 			sourceTree = "<group>";
 		};
+		8749E16829EEE2720093F7A7 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				87ABC86B29D290E900881FFB /* RecordingButton.swift */,
+				87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */,
+				8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
 		87ABC85829D173AC00881FFB /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
@@ -157,8 +169,7 @@
 			children = (
 				E73DD13724636FEF00D77039 /* MainVC.swift */,
 				87FDBC1A29EE270A00D90D02 /* MainVM.swift */,
-				87ABC86B29D290E900881FFB /* RecordingButton.swift */,
-				87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */,
+				8749E16829EEE2720093F7A7 /* View */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -300,6 +311,7 @@
 				87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */,
 				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,
 				87ABC86229D178BD00881FFB /* MainApiService.swift in Sources */,
+				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,
 				8793524F29B9D8F200D6A079 /* Utils.swift in Sources */,
 				87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */,
 				E73DD13624636FEF00D77039 /* Renderer.swift in Sources */,

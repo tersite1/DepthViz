@@ -19,6 +19,7 @@
 		87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */; };
 		87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC87029D30EE000881FFB /* MeasuredData.swift */; };
 		87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1A29EE270A00D90D02 /* MainVM.swift */; };
+		87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */; };
 		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
 		E73DD13324636FEF00D77039 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13224636FEF00D77039 /* Shaders.metal */; };
 		E73DD13624636FEF00D77039 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13524636FEF00D77039 /* Renderer.swift */; };
@@ -43,6 +44,7 @@
 		87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorLabel.swift; sourceTree = "<group>"; };
 		87ABC87029D30EE000881FFB /* MeasuredData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasuredData.swift; sourceTree = "<group>"; };
 		87FDBC1A29EE270A00D90D02 /* MainVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVM.swift; sourceTree = "<group>"; };
+		87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARData.swift; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E73DD12D24636FEF00D77039 /* Point Cloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Point Cloud.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E73DD13024636FEF00D77039 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 		8711C71629D1323800F6D5CC /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				87FDBC1C29EEA52100D90D02 /* Entity */,
 				8711C71829D1329C00F6D5CC /* Metal */,
 				E73DD13524636FEF00D77039 /* Renderer.swift */,
 				8793524E29B9D8F200D6A079 /* Utils.swift */,
@@ -166,6 +169,14 @@
 				87ABC87029D30EE000881FFB /* MeasuredData.swift */,
 			);
 			path = Codable;
+			sourceTree = "<group>";
+		};
+		87FDBC1C29EEA52100D90D02 /* Entity */ = {
+			isa = PBXGroup;
+			children = (
+				87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */,
+			);
+			path = Entity;
 			sourceTree = "<group>";
 		};
 		E73DD12424636FEF00D77039 = {
@@ -284,6 +295,7 @@
 				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,
 				87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */,
+				87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */,
 				87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */,
 				87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */,
 				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,

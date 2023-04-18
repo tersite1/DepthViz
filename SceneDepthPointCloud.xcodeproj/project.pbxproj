@@ -18,6 +18,7 @@
 		87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86B29D290E900881FFB /* RecordingButton.swift */; };
 		87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */; };
 		87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC87029D30EE000881FFB /* MeasuredData.swift */; };
+		87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1A29EE270A00D90D02 /* MainVM.swift */; };
 		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
 		E73DD13324636FEF00D77039 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13224636FEF00D77039 /* Shaders.metal */; };
 		E73DD13624636FEF00D77039 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13524636FEF00D77039 /* Renderer.swift */; };
@@ -41,6 +42,7 @@
 		87ABC86B29D290E900881FFB /* RecordingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingButton.swift; sourceTree = "<group>"; };
 		87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorLabel.swift; sourceTree = "<group>"; };
 		87ABC87029D30EE000881FFB /* MeasuredData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasuredData.swift; sourceTree = "<group>"; };
+		87FDBC1A29EE270A00D90D02 /* MainVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVM.swift; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E73DD12D24636FEF00D77039 /* Point Cloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Point Cloud.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E73DD13024636FEF00D77039 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -95,9 +97,7 @@
 			children = (
 				87ABC86F29D30D7600881FFB /* Codable */,
 				87ABC86029D178AB00881FFB /* ApiService */,
-				8711C71929D132F400F6D5CC /* Repositories */,
 				8711C71A29D132FF00F6D5CC /* Network */,
-				8711C71B29D1330700F6D5CC /* PersistantStorages */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -112,13 +112,6 @@
 			path = Metal;
 			sourceTree = "<group>";
 		};
-		8711C71929D132F400F6D5CC /* Repositories */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Repositories;
-			sourceTree = "<group>";
-		};
 		8711C71A29D132FF00F6D5CC /* Network */ = {
 			isa = PBXGroup;
 			children = (
@@ -128,13 +121,6 @@
 				87ABC86329D1924900881FFB /* NetworkURL.swift */,
 			);
 			path = Network;
-			sourceTree = "<group>";
-		};
-		8711C71B29D1330700F6D5CC /* PersistantStorages */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = PersistantStorages;
 			sourceTree = "<group>";
 		};
 		87ABC85829D173AC00881FFB /* Configuration */ = {
@@ -167,6 +153,7 @@
 			isa = PBXGroup;
 			children = (
 				E73DD13724636FEF00D77039 /* MainVC.swift */,
+				87FDBC1A29EE270A00D90D02 /* MainVM.swift */,
 				87ABC86B29D290E900881FFB /* RecordingButton.swift */,
 				87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */,
 			);
@@ -292,6 +279,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				87ABC86429D1924900881FFB /* NetworkURL.swift in Sources */,
+				87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */,
 				E73DD13324636FEF00D77039 /* Shaders.metal in Sources */,
 				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,

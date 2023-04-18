@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// 측정중인 point Count를 표시하기 위한 커스텀 뷰
 final class PointCloudCountView: UIView {
     private var icon: UIImageView = {
         let imageView = UIImageView()
@@ -69,6 +70,7 @@ final class PointCloudCountView: UIView {
 
 // MARK: INPUT
 extension PointCloudCountView {
+    /// count 개수를 받아 label 내용을 업데이트 반영
     func updateCount(to count: Int) {
         self.countLabel.text = "\(self.numberFormatter.string(for: count)!) P"
     }

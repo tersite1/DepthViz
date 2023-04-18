@@ -9,22 +9,25 @@ import UIKit
 import Metal
 import MetalKit
 import ARKit
+import Combine
 
 final class MainVC: UIViewController, ARSessionDelegate {
-    // MARK: View
-    private let confidenceControl = UISegmentedControl(items: ["Low", "Medium", "High"])
-    private let rgbRadiusSlider = UISlider()
-    private let session = ARSession()
-    private var renderer: Renderer!
-    private let statusLabel = StatusIndicatorLabel()
+    /// 기록측정 및 종료 버튼
     private let recordingButton = RecordingButton()
+    /// 현재 동작상태 표시 텍스트
+    private let statusLabel = StatusIndicatorLabel()
+    /// Point Cloud 표시를 위한 Session
+    private let session = ARSession()
+    /// 메인화면과 관련된 로직담당 객체
+    private var viewModel: MainVM?
+    private var cancellables: Set<AnyCancellable> = []
     
     /// MainVC 최초 접근시 configure
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.configureMetalKitView()
-        self.configureRendererDelegegate()
         self.configureUI()
+        self.configureViewModel()
+        self.bindViewModel()
     }
     
     /// MainVC 화면 진입시 configure
@@ -36,36 +39,6 @@ final class MainVC: UIViewController, ARSessionDelegate {
 
 // MARK: Configure
 extension MainVC {
-    /// MetalKitView 설정 및 view 설정
-    private func configureMetalKitView() {
-        guard let device = MTLCreateSystemDefaultDevice() else {
-            print("Metal is not supported on this device")
-            return
-        }
-        
-        self.session.delegate = self
-        
-        // Set the view to use the default device
-        if let view = view as? MTKView {
-            view.device = device
-            
-            view.backgroundColor = UIColor.clear
-            // we need this to enable depth test
-            view.depthStencilPixelFormat = .depth32Float
-            view.contentScaleFactor = 1
-            view.delegate = self
-            
-            // Configure the renderer to draw to the view
-            self.renderer = Renderer(session: self.session, metalDevice: device, renderDestination: view)
-            self.renderer.drawRectResized(size: view.bounds.size)
-        }
-    }
-    
-    /// Renderer -> MainVC 연결
-    private func configureRendererDelegegate() {
-        self.renderer.delegate = self
-    }
-    
     /// MainVC 표시할 UI 설정
     private func configureUI() {
         // recordingButton
@@ -84,12 +57,33 @@ extension MainVC {
         ])
     }
     
+    /// View를 나타내기 위한 데이터 처리담당 설정 함수
+    private func configureViewModel() {
+        guard let device = MTLCreateSystemDefaultDevice() else {
+            print("Metal is not supported on this device")
+            return
+        }
+        
+        // Set the view to use the default device
+        if let view = view as? MTKView {
+            view.device = device
+            
+            view.backgroundColor = UIColor.clear
+            // we need this to enable depth test
+            view.depthStencilPixelFormat = .depth32Float
+            view.contentScaleFactor = 1
+            view.delegate = self
+            
+            // Configure the ViewModel, Renderer to draw to the view
+            self.viewModel = MainVM(session: self.session, device: device, view: view)
+        }
+    }
+    
     /// session 설정 및 화면꺼짐방지
     private func configureARWorldTracking() {
         // Create a world-tracking configuration, and
         // enable the scene depth frame-semantic.
         let configuration = ARWorldTrackingConfiguration()
-        // MARK: SAVE PLY
         configuration.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
 
         // Run the view's session
@@ -100,24 +94,69 @@ extension MainVC {
     }
 }
 
+// MARK: INPUT
+extension MainVC {
+    /// viewModel 에서 값 변화를 수신하기 위한 함수
+    private func bindViewModel() {
+        self.bindMode()
+        self.bindLidarData()
+    }
+    
+    /// viewModel 의 mode 값 변화를 수신하기 위한 함수
+    private func bindMode() {
+        self.viewModel?.$mode
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] mode in
+                switch mode {
+                case .ready:
+                    self?.recordingButton.changeStatus(to: .ready)
+                case .recording:
+                    self?.recordingButton.changeStatus(to: .recording)
+                case .loading:
+                    self?.recordingButton.changeStatus(to: .loading)
+                default:
+                    return
+                }
+                
+                self?.changeStatusLabel(to: mode)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    /// viewModel 의 lidarData 값 변화를 수신하여 SelectLocationVC 로 전달하기 위한 함수
+    private func bindLidarData() {
+        self.viewModel?.$lidarData
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] lidarData in
+                guard let lidarData = lidarData else { return }
+                // MARK: Make SelectLocationVM, Show SelectLocationVC
+                dump(lidarData)
+            })
+            .store(in: &self.cancellables)
+    }
+}
+
 // MARK: Action
 extension MainVC {
     /// RecordingButton Tab 액션
     @objc private func tapRecordingButton(_ sender: UIButton) {
-        if self.recordingButton.status == .ready {
-            self.recordingButton.changeStatus(to: .recording)
-        } else if self.recordingButton.status == .recording {
-            self.recordingButton.changeStatus(to: .loading)
-        } else { return }
-        self.updateRecording()
+        self.viewModel?.changeMode()
     }
-    
-    private func updateRecording() {
-        let recording: Bool = self.recordingButton.status == .recording
-        self.renderer.isRecording = recording
-        
-        if recording {
+}
+
+extension MainVC {
+    private func changeStatusLabel(to mode: MainVM.Mode) {
+        switch mode {
+        case .ready:
+            self.statusLabel.changeText(to: .readyForRecording)
+        case .recording:
             self.statusLabel.changeText(to: .recording)
+        case .loading:
+            self.statusLabel.changeText(to: .loading)
+        case .uploading:
+            self.statusLabel.changeText(to: .uploading)
+        case .cantRecord:
+            self.statusLabel.changeText(to: .removed)
         }
     }
 }
@@ -139,12 +178,12 @@ extension MainVC {
 extension MainVC: MTKViewDelegate {
     // Called whenever view changes orientation or layout is changed
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        renderer.drawRectResized(size: size)
+        self.viewModel?.rendererResize(to: size)
     }
     
     // Called whenever the view needs to render
     func draw(in view: MTKView) {
-        renderer.draw()
+        self.viewModel?.rendererDraw()
     }
 }
 
@@ -166,10 +205,8 @@ extension MainVC {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         
-        print("memory warning!!!")
-        memoryAlert()
-        self.recordingButton.changeStatus(to: .ready)
-        self.updateRecording()
+        self.memoryAlert()
+        self.viewModel?.terminateRecording()
     }
     
     private func memoryAlert() {

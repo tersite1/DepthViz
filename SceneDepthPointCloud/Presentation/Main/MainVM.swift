@@ -69,6 +69,22 @@ extension MainVM {
             return
         }
     }
+    
+    /// MTKViewDelegate 관련 함수로 resize 반영해주는 함수
+    func rendererResize(to size: CGSize) {
+        self.renderer.drawRectResized(size: size)
+    }
+
+    /// Renderer를 draw 시키기 위한 함수
+    func rendererDraw() {
+        self.renderer.draw()
+    }
+    
+    /// 메모리 부족으로 인한 LiDAR 측정 종료 함수
+    func terminateRecording() {
+        self.stopRecording()
+        self.mode = .loading
+    }
 }
 
 extension MainVM {
@@ -88,6 +104,8 @@ extension MainVM {
                       let pointCount = self?.renderer.currentPointCount else { return }
                 
                 self?.lidarData = LiDARData(rawStringData: rawStringData, pointCount: pointCount)
+                
+                // MARK: Renderer 초기화 부분 필요
             }
             .store(in: &self.cancellables)
     }
@@ -100,5 +118,6 @@ extension MainVM {
     /// LiDAR 측정 종료 함수
     private func stopRecording() {
         self.renderer.isRecording = false
+        self.renderer.savePointCloud()
     }
 }

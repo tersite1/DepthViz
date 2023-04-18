@@ -108,13 +108,7 @@ final class Renderer {
     
     // MARK: SAVE PLY
     // Whether recording is on
-    public var isRecording = false {
-        didSet {
-            if isRecording == false {
-                self.savePointCloud()
-            }
-        }
-    }
+    var isRecording = false
     // Current folder for saving data
     public var currentFolder = ""
     // Pick every n frames (~1/sampling frequency)

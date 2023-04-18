@@ -11,10 +11,11 @@ import ARKit
 // MARK: SAVE PLY
 import Foundation
 import UIKit
+import Combine
 
 final class Renderer {
     // Maximum number of points we store in the point cloud
-    private let maxPoints = 500_000
+    private let maxPoints = 5000000
     // Number of sample points on the grid
     private let numGridPoints = 500
     // Particle's size in pixels
@@ -82,7 +83,7 @@ final class Renderer {
     // Saves the point cloud data, filled by unprojectVertex func in Shaders.metal
     private var particlesBuffer: MetalBuffer<ParticleUniforms>
     private var currentPointIndex = 0
-    private var currentPointCount = 0
+    @Published private(set) var currentPointCount = 0
     
     // Camera data
     private var sampleFrame: ARFrame { session.currentFrame! }
@@ -121,6 +122,8 @@ final class Renderer {
     public var currentFrameIndex = 0;
     // Task delegate for informing ViewController of tasks
     public weak var delegate: TaskDelegate?
+    
+    @Published private(set) var lidarRawStringData: String?
     
     init(session: ARSession, metalDevice device: MTLDevice, renderDestination: RenderDestinationProvider) {
         self.session = session
@@ -448,26 +451,7 @@ extension Renderer {
                     fileToWrite += "\n"
                 }
                 
-                self.delegate?.finishMakingPlyFile()
-                
-                // MARK: Share PLY file option
-    //            if let file = shareFile(content: fileToWrite, filename: "\(getTimeStr()).ply", folder: self.currentFolder) {
-    //                self.delegate?.sharePLY(file: file)
-    //            }
-                
-                // MARK: Upload PLY file
-//                self.delegate?.startUploadingData()
-//                if let fileData = fileToWrite.data(using: .utf8) {
-//                    // TODO: 해당로직은 구조변경이 필요
-//                    let apiService = MainApiService()
-//                    apiService.uploadPlyData(fileName: "\(getTimeStr()).ply", fileData: fileData) { [weak self] result in
-//                        guard let self = self else { return }
-//                        self.delegate?.showUploadResult(result: result)
-//                    }
-//                }
-                
-                // MARK: Select Share OR Upload PLY file
-                self.delegate?.showShareOrUpload(stringData: fileToWrite, fileName: "\(getTimeStr()).ply")
+                self.lidarRawStringData = fileToWrite
             }
         }
     }

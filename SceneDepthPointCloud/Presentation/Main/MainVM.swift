@@ -27,6 +27,8 @@ final class MainVM {
     @Published private(set) var pointCount: Int = 0
     /// 측정종료 후 반환된 LiDAR data 값
     @Published private(set) var lidarData: LiDARData?
+    /// 위치정보 데이터 값
+    @Published private(set) var currentLocation: LocationData?
     /// 전송 후 네트워킹 결과값
     @Published private(set) var networkStatus: NetworkStatus?
     
@@ -34,6 +36,8 @@ final class MainVM {
     private let renderer: Renderer
     /// 메인화면 관련 네트워킹 로직 담당 객체
     private let apiService: MainApiService
+    /// GPS 정보와 관련된 로직담당 객체
+    private let locationUsecase: LocationUsecase
     /// 메인화면에서 측정된 gps 값들
     private var locations: [LocationData] = []
     /// Renderer 로부터 수신받기 위한 property
@@ -44,7 +48,9 @@ final class MainVM {
         self.networkStatus = nil
         self.renderer = Renderer(session: session, metalDevice: device, renderDestination: view)
         self.renderer.drawRectResized(size: view.bounds.size)
+        
         self.apiService = MainApiService()
+        self.locationUsecase = LocationUsecase()
         
         self.bindRenderer()
     }
@@ -136,5 +142,11 @@ extension MainVM {
     private func stopRecording() {
         self.renderer.isRecording = false
         self.renderer.savePointCloud()
+        self.getLocationData()
+    }
+    
+    /// locationUsecase 에서 위치정보 받아와 currentLocation 값을 반영하는 함수
+    private func getLocationData() {
+        self.currentLocation = self.locationUsecase.getSuitableLocation(from: self.locations)
     }
 }

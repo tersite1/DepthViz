@@ -129,6 +129,7 @@ extension MainVC {
         self.bindMode()
         self.bindPointCount()
         self.bindLidarData()
+        self.bindCurrentLocation()
     }
     
     /// viewModel 의 mode 값 변화를 수신하기 위한 함수
@@ -182,6 +183,18 @@ extension MainVC {
                 guard let lidarData = lidarData else { return }
                 // MARK: Make SelectLocationVM, Show SelectLocationVC
                 dump(lidarData)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    /// viewModel 의 currentLocation 값 변화를 수신하여 SelectLocationVC 로 전달하기 위한 함수
+    func bindCurrentLocation() {
+        self.viewModel?.$currentLocation
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] location in
+                guard let location = location else { return }
+                // MARK: Make SelectLocationVM, Show SelectLocationVC
+                dump(location)
             })
             .store(in: &self.cancellables)
     }

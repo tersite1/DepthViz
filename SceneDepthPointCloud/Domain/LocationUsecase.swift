@@ -17,6 +17,8 @@ final class LocationUsecase {
         var longitude: CLLocationDegrees = 0
         var altitude: CLLocationDistance = 0
         var floor: Int = 0
+        
+        let count = Double(locations.count)
         var floorCount = 0
         
         for location in locations {
@@ -31,6 +33,6 @@ final class LocationUsecase {
         
         let calculatedFloor = floorCount == 0 ? nil : Int(round(Double(floor)/Double(floorCount)))
         
-        return LocationData(latitude, longitude, altitude, calculatedFloor)
+        return LocationData(latitude/count, longitude/count, altitude/count, calculatedFloor)
     }
 }

@@ -138,18 +138,24 @@ extension MainVC {
             .sink(receiveValue: { [weak self] mode in
                 switch mode {
                 case .ready:
+                    self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .ready)
                 case .recording:
+                    self?.locationManager.startUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .recording)
                 case .loading:
+                    self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .loading)
                 case .cantRecord:
+                    self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
                     self?.configureCantRecording()
                 case .cantGetGPS:
+                    self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
                     self?.configureCantGetGPS()
                 default:
+                    self?.locationManager.stopUpdatingLocation()
                     return
                 }
                 
@@ -364,13 +370,8 @@ extension MainVC: CLLocationManagerDelegate {
     
     /// 새 위치데이터를 수신받은 경우 delegate 에게 전달합니다.
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // 가장 최근의 위치 데이터는 마지막 값이므로 마지막값을 사용
+        // 가장 최근의 위치 데이터는 마지막 값이므로 마지막값을 사용하여 viewModel 로 전달
         guard let location = locations.last else { return }
-        print(location.coordinate.latitude)
-        print(location.coordinate.longitude)
-        print(location.altitude)
-        print(location.floor?.level ?? 0)
-        
         self.viewModel?.appendLocation(location)
     }
 }

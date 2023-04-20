@@ -35,11 +35,7 @@ final class MainVM {
     /// 메인화면 관련 네트워킹 로직 담당 객체
     private let apiService: MainApiService
     /// 메인화면에서 측정된 gps 값들
-    private var locations: [LocationData] = [] {
-        didSet {
-            print(locations.count, locations.last)
-        }
-    }
+    private var locations: [LocationData] = []
     /// Renderer 로부터 수신받기 위한 property
     private var cancellables: Set<AnyCancellable> = []
     

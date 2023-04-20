@@ -11,6 +11,7 @@ import MetalKit
 import ARKit
 import Combine
 
+/// 메인화면의 UI 및 UX 담당
 final class MainVC: UIViewController, ARSessionDelegate {
     /// 기록측정 및 종료 버튼
     private let recordingButton = RecordingButton()
@@ -129,7 +130,6 @@ extension MainVC {
         self.bindMode()
         self.bindPointCount()
         self.bindLidarData()
-        self.bindCurrentLocation()
     }
     
     /// viewModel 의 mode 값 변화를 수신하기 위한 함수
@@ -180,21 +180,10 @@ extension MainVC {
         self.viewModel?.$lidarData
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] lidarData in
-                guard let lidarData = lidarData else { return }
-                // MARK: Make SelectLocationVM, Show SelectLocationVC
-                dump(lidarData)
-            })
-            .store(in: &self.cancellables)
-    }
-    
-    /// viewModel 의 currentLocation 값 변화를 수신하여 SelectLocationVC 로 전달하기 위한 함수
-    func bindCurrentLocation() {
-        self.viewModel?.$currentLocation
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] location in
-                guard let location = location else { return }
-                // MARK: Make SelectLocationVM, Show SelectLocationVC
-                dump(location)
+                guard let lidarData = lidarData,
+                      let locationData = self?.viewModel?.currentLocation else { return }
+                
+                self?.popupSelectLocationVC(lidarData, locationData)
             })
             .store(in: &self.cancellables)
     }
@@ -386,5 +375,22 @@ extension MainVC: CLLocationManagerDelegate {
         // 가장 최근의 위치 데이터는 마지막 값이므로 마지막값을 사용하여 viewModel 로 전달
         guard let location = locations.last else { return }
         self.viewModel?.appendLocation(location)
+    }
+}
+
+extension MainVC {
+    /// SelectLocationVC 를 Modal 형식으로 띄우는 함수
+    private func popupSelectLocationVC(_ lidarData: LiDARData, _ locationData: LocationData) {
+        let storyboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        
+        if let vc = storyboard.instantiateViewController(identifier: SelectLocationVC.identifier) as? SelectLocationVC {
+            let viewModel = SelectLocationVM(lidarData: lidarData, locationData: locationData)
+            // viewModel 로 측정된 liDarData, locationData 전달
+            vc.configureViewModel(viewModel)
+            // model 이 제스처로 닫히지 않도록 설정
+            vc.isModalInPresentation = true
+            
+            self.present(vc, animated: true)
+        }
     }
 }

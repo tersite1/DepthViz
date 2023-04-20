@@ -9,6 +9,7 @@
 import UIKit
 
 extension UIViewController {
+    /// title, text를 표시하는 Alert
     func showAlert(title: String, text: String?) {
         let alert = UIAlertController(title: title, message: text, preferredStyle: .alert)
         let ok = UIAlertAction(title: "OK", style: .default)
@@ -16,6 +17,7 @@ extension UIViewController {
         self.present(alert, animated: true)
     }
     
+    /// 위치 정보가 필요한 경우의 Alert
     func showGPSWarning() {
         let alert = UIAlertController(title: "\"Point Cloud\"의 위치 사용 권한이 필요합니다.", message: "위치 권한을 허용해야만 앱을 사용하실 수 있습니다.", preferredStyle: .alert)
         let setting = UIAlertAction(title: "설정", style: .cancel) { _ in

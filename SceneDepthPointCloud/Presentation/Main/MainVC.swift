@@ -20,6 +20,8 @@ final class MainVC: UIViewController, ARSessionDelegate {
     private let pointCloudCountView = PointCloudCountView()
     /// Point Cloud 표시를 위한 Session
     private let session = ARSession()
+    /// gps 측정을 위한 객체
+    private var locationManager = CLLocationManager()
     /// 메인화면과 관련된 로직담당 객체
     private var viewModel: MainVM?
     private var cancellables: Set<AnyCancellable> = []
@@ -91,12 +93,7 @@ extension MainVC {
     
     /// gps 값 수신을 위한 설정 함수
     private func configureLocationManager() {
-        if (CLLocationManager.headingAvailable()) {
-           // Enable the app’s compass features.
-        } else {
-            self.viewModel?.cantRecording()
-        }
-        self.viewModel?.cantRecording()
+        self.locationManager.delegate = self
     }
     
     /// session 설정 및 화면꺼짐방지
@@ -117,6 +114,11 @@ extension MainVC {
     private func configureCantRecording() {
         // MARK: 기록측정불가 UI 구현 필요
         print("cant Recording")
+    }
+    
+    private func configureCantGetGPS() {
+        // MARK: GPS 수신불가 UI 구현 필요
+        print("cant get gps")
     }
 }
 
@@ -144,6 +146,9 @@ extension MainVC {
                 case .cantRecord:
                     self?.recordingButton.changeStatus(to: .cantRecording)
                     self?.configureCantRecording()
+                case .cantGetGPS:
+                    self?.recordingButton.changeStatus(to: .cantRecording)
+                    self?.configureCantGetGPS()
                 default:
                     return
                 }
@@ -195,7 +200,7 @@ extension MainVC {
             self.statusLabel.changeText(to: .loading)
         case .uploading:
             self.statusLabel.changeText(to: .uploading)
-        case .cantRecord:
+        case .cantRecord, .cantGetGPS:
             self.statusLabel.changeText(to: .removed)
         }
     }
@@ -326,6 +331,34 @@ extension MainVC: TaskDelegate {
             alert.addAction(share)
             alert.addAction(upload)
             self?.present(alert, animated: true)
+        }
+    }
+}
+
+// MARK: Location-related properties and delegate methods.
+extension MainVC: CLLocationManagerDelegate {
+    /// 앱이 위치 관리자를 생성할 때와 권한 부여 상태가 변경될 때 대리자에게 알립니다.
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse:
+            // Location services are available.
+            self.viewModel?.readyForRecording()
+            break
+            
+        case .restricted, .denied:
+            // Location services currently unavailable.
+            self.showGPSWarning()
+            self.viewModel?.cantGetGPS()
+            break
+            
+        case .notDetermined:
+            // Authorization not determined yet.
+            manager.requestWhenInUseAuthorization()
+            self.viewModel?.cantGetGPS()
+            break
+            
+        default:
+            break
         }
     }
 }

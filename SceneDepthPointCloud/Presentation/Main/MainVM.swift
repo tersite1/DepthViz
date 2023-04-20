@@ -14,6 +14,7 @@ import Combine
 final class MainVM {
     enum Mode {
         case cantRecord // LiDAR 스캔이 불가능한 경우
+        case cantGetGPS // 위치정보를 받을 수 없는 경우
         case ready // LiDAR 측정 전 상태
         case recording // LiDAR 측정중 상태
         case loading // LiDAR 측정종료 및 데이터생성중 상태
@@ -82,9 +83,18 @@ extension MainVM {
         self.mode = .loading
     }
     
-    /// GPS 비활성화, LiDAR 측정불가 상태로 인한 측정불가한 경우 동작 비활성화를 위한 함수
+    func readyForRecording() {
+        self.mode = .ready
+    }
+    
+    /// LiDAR 측정불가 상태로 인한 측정불가한 경우 동작 비활성화를 위한 함수
     func cantRecording() {
         self.mode = .cantRecord
+    }
+    
+    /// GPS 측정불가 상태로 인한 측정불가한 경우 동작 비활성화를 위한 함수
+    func cantGetGPS() {
+        self.mode = .cantGetGPS
     }
 }
 

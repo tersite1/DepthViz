@@ -18,11 +18,12 @@ final class CancelButton: UIButton {
     private func configure() {
         self.translatesAutoresizingMaskIntoConstraints = false
         self.setImage(UIImage.init(systemName: "xmark"), for: .normal)
+        self.setPreferredSymbolConfiguration(.init(pointSize: 18, weight: .regular, scale: .large), forImageIn: .normal)
         self.tintColor = .white
         
         NSLayoutConstraint.activate([
-            self.widthAnchor.constraint(equalToConstant: 18),
-            self.heightAnchor.constraint(equalToConstant: 18)
+            self.widthAnchor.constraint(equalToConstant: 22),
+            self.heightAnchor.constraint(equalToConstant: 22)
         ])
     }
 }

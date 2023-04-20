@@ -25,6 +25,7 @@
 		87C8FAFB29F1867E000C37CE /* SelectLocationVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FAFA29F1867E000C37CE /* SelectLocationVM.swift */; };
 		87C8FAFE29F18DB3000C37CE /* SelectLocationTitleLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FAFD29F18DB3000C37CE /* SelectLocationTitleLabel.swift */; };
 		87C8FB0029F1911B000C37CE /* CancelButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FAFF29F1911B000C37CE /* CancelButton.swift */; };
+		87C8FB0329F1933B000C37CE /* SelectLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0229F1933B000C37CE /* SelectLocationDelegate.swift */; };
 		87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1A29EE270A00D90D02 /* MainVM.swift */; };
 		87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */; };
 		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
@@ -57,6 +58,7 @@
 		87C8FAFA29F1867E000C37CE /* SelectLocationVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationVM.swift; sourceTree = "<group>"; };
 		87C8FAFD29F18DB3000C37CE /* SelectLocationTitleLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationTitleLabel.swift; sourceTree = "<group>"; };
 		87C8FAFF29F1911B000C37CE /* CancelButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancelButton.swift; sourceTree = "<group>"; };
+		87C8FB0229F1933B000C37CE /* SelectLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationDelegate.swift; sourceTree = "<group>"; };
 		87FDBC1A29EE270A00D90D02 /* MainVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVM.swift; sourceTree = "<group>"; };
 		87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARData.swift; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 				E73DD13724636FEF00D77039 /* MainVC.swift */,
 				87FDBC1A29EE270A00D90D02 /* MainVM.swift */,
 				8749E16829EEE2720093F7A7 /* View */,
+				87C8FB0129F19302000C37CE /* Protocol */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -213,6 +216,14 @@
 				87C8FAFF29F1911B000C37CE /* CancelButton.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		87C8FB0129F19302000C37CE /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				87C8FB0229F1933B000C37CE /* SelectLocationDelegate.swift */,
+			);
+			path = Protocol;
 			sourceTree = "<group>";
 		};
 		87FDBC1C29EEA52100D90D02 /* Entity */ = {
@@ -335,6 +346,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				87ABC86429D1924900881FFB /* NetworkURL.swift in Sources */,
+				87C8FB0329F1933B000C37CE /* SelectLocationDelegate.swift in Sources */,
 				87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */,
 				E73DD13324636FEF00D77039 /* Shaders.metal in Sources */,
 				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,

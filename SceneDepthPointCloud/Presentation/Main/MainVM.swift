@@ -109,6 +109,12 @@ extension MainVM {
     func appendLocation(_ location: CLLocation) {
         self.locations.append(LocationData(cllocation: location))
     }
+    
+    func uploadCancel() {
+        // MARK: renderer 초기화 필요
+        self.networkStatus = NetworkStatus.status(400)
+        self.mode = .ready
+    }
 }
 
 extension MainVM {

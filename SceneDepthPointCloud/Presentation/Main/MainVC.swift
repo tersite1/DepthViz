@@ -130,6 +130,7 @@ extension MainVC {
         self.bindMode()
         self.bindPointCount()
         self.bindLidarData()
+        self.bindNetworkStatus()
     }
     
     /// viewModel 의 mode 값 변화를 수신하기 위한 함수
@@ -184,6 +185,23 @@ extension MainVC {
                       let locationData = self?.viewModel?.currentLocation else { return }
                 
                 self?.popupSelectLocationVC(lidarData, locationData)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    /// viewModel 의 networkStatus 값 변화를 수신하여 성공 및 실패를 표시하기 위한 함수
+    private func bindNetworkStatus() {
+        self.viewModel?.$networkStatus
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] status in
+                guard let status = status else { return }
+                
+                switch status {
+                case .SUCCESS:
+                    self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
+                case .ERROR:
+                    self?.showAlert(title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
+                }
             })
             .store(in: &self.cancellables)
     }
@@ -272,21 +290,7 @@ extension MainVC {
 }
 
 // update textlabel on tasks start/finish
-extension MainVC: TaskDelegate {
-    func showUploadResult(result: NetworkResult) {
-        DispatchQueue.main.async { [weak self] in
-            self?.statusLabel.changeText(to: .removed)
-            self?.recordingButton.changeStatus(to: .ready)
-            switch result.status {
-            case .SUCCESS:
-                self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
-            case .ERROR:
-                self?.showAlert(title: "Upload Fail", text: "\(result.status.rawValue)")
-            }
-            
-        }
-    }
-    
+extension MainVC {
     func sharePLY(file: Any) {
         let activityViewController = UIActivityViewController(activityItems: [file], applicationActivities: nil)
         
@@ -296,9 +300,7 @@ extension MainVC: TaskDelegate {
         }
         
         DispatchQueue.main.async {
-            self.present(activityViewController, animated: true) { [weak self] in
-                self?.showUploadResult(result: NetworkResult(data: nil, status: .SUCCESS))
-            }
+            self.present(activityViewController, animated: true)
         }
     }
     
@@ -332,7 +334,7 @@ extension MainVC: TaskDelegate {
                 if let fileData = stringData.data(using: .utf8) {
                     let apiService = MainApiService()
                     apiService.uploadPlyData(fileName: fileName, fileData: fileData) { [weak self] result in
-                        self?.showUploadResult(result: result)
+//                        self?.showUploadResult(result: result)
                     }
                 }
             }
@@ -385,6 +387,8 @@ extension MainVC {
         
         if let vc = storyboard.instantiateViewController(identifier: SelectLocationVC.identifier) as? SelectLocationVC {
             let viewModel = SelectLocationVM(lidarData: lidarData, locationData: locationData)
+            // delegate 로 MainVC 전달
+            vc.configureDelegate(self)
             // viewModel 로 측정된 liDarData, locationData 전달
             vc.configureViewModel(viewModel)
             // model 이 제스처로 닫히지 않도록 설정
@@ -392,5 +396,13 @@ extension MainVC {
             
             self.present(vc, animated: true)
         }
+    }
+}
+
+// MARK: SelectLocationVC 에서 MainVC 의 함수 일부를 위임받는 부분
+extension MainVC: SelectLocationDelegate {
+    /// 측정된 데이터 서버 업로드 취소 함수
+    func uploadCancel() {
+        self.viewModel?.uploadCancel()
     }
 }

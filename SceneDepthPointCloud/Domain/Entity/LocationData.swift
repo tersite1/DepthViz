@@ -24,6 +24,13 @@ struct LocationData {
         self.floor = cllocation.floor?.level
     }
     
+    init(_ latitude: CLLocationDegrees, _ longitude: CLLocationDegrees, _ altitude: CLLocationDistance, _ floor: Int?) {
+        self.latitude = latitude
+        self.longitude = longitude
+        self.altitude = altitude
+        self.floor = floor
+    }
+    
     mutating func updateRoadAddress(to address: String) {
         self.roadAddressName = address
     }

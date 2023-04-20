@@ -337,7 +337,7 @@ extension MainVC: TaskDelegate {
 
 // MARK: Location-related properties and delegate methods.
 extension MainVC: CLLocationManagerDelegate {
-    /// 앱이 위치 관리자를 생성할 때와 권한 부여 상태가 변경될 때 대리자에게 알립니다.
+    /// 앱이 위치 관리자를 생성할 때와 권한 부여 상태가 변경될 때 delegate 에게 알립니다.
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
         case .authorizedWhenInUse:
@@ -360,5 +360,15 @@ extension MainVC: CLLocationManagerDelegate {
         default:
             break
         }
+    }
+    
+    /// 새 위치데이터를 수신받은 경우 delegate 에게 전달합니다.
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        // 가장 최근의 위치 데이터는 마지막 값이므로 마지막값을 사용
+        guard let location = locations.last else { return }
+        print(location.coordinate.latitude)
+        print(location.coordinate.longitude)
+        print(location.altitude)
+        print(location.floor ?? 0)
     }
 }

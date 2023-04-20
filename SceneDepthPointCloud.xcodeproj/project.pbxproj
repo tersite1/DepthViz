@@ -19,6 +19,7 @@
 		87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86B29D290E900881FFB /* RecordingButton.swift */; };
 		87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */; };
 		87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC87029D30EE000881FFB /* MeasuredData.swift */; };
+		87AE167829F124EF00B101A6 /* LocationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AE167729F124EF00B101A6 /* LocationData.swift */; };
 		87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1A29EE270A00D90D02 /* MainVM.swift */; };
 		87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */; };
 		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
@@ -45,6 +46,7 @@
 		87ABC86B29D290E900881FFB /* RecordingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingButton.swift; sourceTree = "<group>"; };
 		87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorLabel.swift; sourceTree = "<group>"; };
 		87ABC87029D30EE000881FFB /* MeasuredData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasuredData.swift; sourceTree = "<group>"; };
+		87AE167729F124EF00B101A6 /* LocationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationData.swift; sourceTree = "<group>"; };
 		87FDBC1A29EE270A00D90D02 /* MainVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVM.swift; sourceTree = "<group>"; };
 		87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARData.swift; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -186,6 +188,7 @@
 			isa = PBXGroup;
 			children = (
 				87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */,
+				87AE167729F124EF00B101A6 /* LocationData.swift */,
 			);
 			path = Entity;
 			sourceTree = "<group>";
@@ -304,6 +307,7 @@
 				87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */,
 				E73DD13324636FEF00D77039 /* Shaders.metal in Sources */,
 				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,
+				87AE167829F124EF00B101A6 /* LocationData.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,
 				87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */,
 				87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */,

@@ -369,6 +369,6 @@ extension MainVC: CLLocationManagerDelegate {
         print(location.coordinate.latitude)
         print(location.coordinate.longitude)
         print(location.altitude)
-        print(location.floor ?? 0)
+        print(location.floor?.level ?? 0)
     }
 }

@@ -29,6 +29,7 @@ final class MainVC: UIViewController, ARSessionDelegate {
         super.viewDidLoad()
         self.configureUI()
         self.configureViewModel()
+        self.configureLocationManager()
         self.bindViewModel()
     }
     
@@ -88,6 +89,16 @@ extension MainVC {
         }
     }
     
+    /// gps 값 수신을 위한 설정 함수
+    private func configureLocationManager() {
+        if (CLLocationManager.headingAvailable()) {
+           // Enable the app’s compass features.
+        } else {
+            self.viewModel?.cantRecording()
+        }
+        self.viewModel?.cantRecording()
+    }
+    
     /// session 설정 및 화면꺼짐방지
     private func configureARWorldTracking() {
         // Create a world-tracking configuration, and
@@ -100,6 +111,12 @@ extension MainVC {
         
         // The screen shouldn't dim during AR experiences.
         UIApplication.shared.isIdleTimerDisabled = true
+    }
+    
+    /// 기록측정 불가 상태의 UI 표시 함수
+    private func configureCantRecording() {
+        // MARK: 기록측정불가 UI 구현 필요
+        print("cant Recording")
     }
 }
 
@@ -124,6 +141,9 @@ extension MainVC {
                     self?.recordingButton.changeStatus(to: .recording)
                 case .loading:
                     self?.recordingButton.changeStatus(to: .loading)
+                case .cantRecord:
+                    self?.recordingButton.changeStatus(to: .cantRecording)
+                    self?.configureCantRecording()
                 default:
                     return
                 }

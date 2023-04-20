@@ -81,6 +81,11 @@ extension MainVM {
         self.stopRecording()
         self.mode = .loading
     }
+    
+    /// GPS 비활성화, LiDAR 측정불가 상태로 인한 측정불가한 경우 동작 비활성화를 위한 함수
+    func cantRecording() {
+        self.mode = .cantRecord
+    }
 }
 
 extension MainVM {

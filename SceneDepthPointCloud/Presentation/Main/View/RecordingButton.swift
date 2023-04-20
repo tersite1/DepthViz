@@ -22,6 +22,10 @@ final class RecordingButton: UIButton {
             case .loading:
                 self.setImage(nil, for: .normal)
                 self.showLoadingIndicator()
+            case .cantRecording:
+                self.hideLoadingIndicator()
+                self.setImage(UIImage(named: "cantRecording"), for: .normal)
+                self.isUserInteractionEnabled = false
             }
         }
     }
@@ -29,6 +33,7 @@ final class RecordingButton: UIButton {
         case ready
         case recording
         case loading
+        case cantRecording
     }
     private var loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView()

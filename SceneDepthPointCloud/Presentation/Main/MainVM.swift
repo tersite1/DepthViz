@@ -34,6 +34,12 @@ final class MainVM {
     private let renderer: Renderer
     /// 메인화면 관련 네트워킹 로직 담당 객체
     private let apiService: MainApiService
+    /// 메인화면에서 측정된 gps 값들
+    private var locations: [LocationData] = [] {
+        didSet {
+            print(locations.count, locations.last)
+        }
+    }
     /// Renderer 로부터 수신받기 위한 property
     private var cancellables: Set<AnyCancellable> = []
     
@@ -95,6 +101,10 @@ extension MainVM {
     /// GPS 측정불가 상태로 인한 측정불가한 경우 동작 비활성화를 위한 함수
     func cantGetGPS() {
         self.mode = .cantGetGPS
+    }
+    
+    func appendLocation(_ location: CLLocation) {
+        self.locations.append(LocationData(cllocation: location))
     }
 }
 

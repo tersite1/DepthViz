@@ -370,5 +370,7 @@ extension MainVC: CLLocationManagerDelegate {
         print(location.coordinate.longitude)
         print(location.altitude)
         print(location.floor?.level ?? 0)
+        
+        self.viewModel?.appendLocation(location)
     }
 }

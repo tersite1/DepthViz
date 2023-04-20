@@ -17,11 +17,11 @@ struct LocationData {
     let floor: Int?
     var roadAddressName: String?
     
-    init(location: CLLocation) {
-        self.latitude = location.coordinate.latitude
-        self.longitude = location.coordinate.longitude
-        self.altitude = location.altitude
-        self.floor = location.floor?.level
+    init(cllocation: CLLocation) {
+        self.latitude = cllocation.coordinate.latitude
+        self.longitude = cllocation.coordinate.longitude
+        self.altitude = cllocation.altitude
+        self.floor = cllocation.floor?.level
     }
     
     mutating func updateRoadAddress(to address: String) {

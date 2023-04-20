@@ -14,6 +14,7 @@ import Combine
 final class MainVM {
     enum Mode {
         case cantRecord // LiDAR 스캔이 불가능한 경우
+        case cantGetGPS // 위치정보를 받을 수 없는 경우
         case ready // LiDAR 측정 전 상태
         case recording // LiDAR 측정중 상태
         case loading // LiDAR 측정종료 및 데이터생성중 상태
@@ -26,6 +27,8 @@ final class MainVM {
     @Published private(set) var pointCount: Int = 0
     /// 측정종료 후 반환된 LiDAR data 값
     @Published private(set) var lidarData: LiDARData?
+    /// 위치정보 데이터 값
+    @Published private(set) var currentLocation: LocationData?
     /// 전송 후 네트워킹 결과값
     @Published private(set) var networkStatus: NetworkStatus?
     
@@ -33,6 +36,10 @@ final class MainVM {
     private let renderer: Renderer
     /// 메인화면 관련 네트워킹 로직 담당 객체
     private let apiService: MainApiService
+    /// GPS 정보와 관련된 로직담당 객체
+    private let locationUsecase: LocationUsecase
+    /// 메인화면에서 측정된 gps 값들
+    private var locations: [LocationData] = []
     /// Renderer 로부터 수신받기 위한 property
     private var cancellables: Set<AnyCancellable> = []
     
@@ -41,7 +48,9 @@ final class MainVM {
         self.networkStatus = nil
         self.renderer = Renderer(session: session, metalDevice: device, renderDestination: view)
         self.renderer.drawRectResized(size: view.bounds.size)
+        
         self.apiService = MainApiService()
+        self.locationUsecase = LocationUsecase()
         
         self.bindRenderer()
     }
@@ -81,6 +90,24 @@ extension MainVM {
         self.stopRecording()
         self.mode = .loading
     }
+    
+    func readyForRecording() {
+        self.mode = .ready
+    }
+    
+    /// LiDAR 측정불가 상태로 인한 측정불가한 경우 동작 비활성화를 위한 함수
+    func cantRecording() {
+        self.mode = .cantRecord
+    }
+    
+    /// GPS 측정불가 상태로 인한 측정불가한 경우 동작 비활성화를 위한 함수
+    func cantGetGPS() {
+        self.mode = .cantGetGPS
+    }
+    
+    func appendLocation(_ location: CLLocation) {
+        self.locations.append(LocationData(cllocation: location))
+    }
 }
 
 extension MainVM {
@@ -115,5 +142,11 @@ extension MainVM {
     private func stopRecording() {
         self.renderer.isRecording = false
         self.renderer.savePointCloud()
+        self.getLocationData()
+    }
+    
+    /// locationUsecase 에서 위치정보 받아와 currentLocation 값을 반영하는 함수
+    private func getLocationData() {
+        self.currentLocation = self.locationUsecase.getSuitableLocation(from: self.locations)
     }
 }

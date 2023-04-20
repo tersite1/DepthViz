@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string></string>
 	<key>NSAppTransportSecurity</key>
 	<dict/>
 	<key>Allow Arbitary Loads</key>
@@ -46,6 +48,9 @@
 		<string>armv7</string>
 		<string>arkit</string>
 		<string>metal</string>
+		<string>gps</string>
+		<string>location-services</string>
+		<string>magnetometer</string>
 	</array>
 	<key>UIRequiresFullScreen</key>
 	<true/>

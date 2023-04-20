@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// SelectLocationVC 상단 titleLabel 커스텀뷰
 final class SelectLocationTitleLabel: UILabel {
     enum Status {
         case selectLocation
@@ -30,6 +31,7 @@ final class SelectLocationTitleLabel: UILabel {
         self.changeText(to: .selectLocation)
     }
     
+    /// Status 값에 따라 text 내용 변경하는 함수
     func changeText(to status: Status) {
         if status == .selectLocation {
             self.text = "측정 위치를 설정하세요"

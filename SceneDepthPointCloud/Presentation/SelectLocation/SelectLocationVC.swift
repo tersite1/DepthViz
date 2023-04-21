@@ -74,6 +74,29 @@ extension SelectLocationVC {
             self.mapView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             self.mapView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -80)
         ])
+        
+        // mapView center pin
+        let centerPin = UIImageView(image: UIImage(named: "largePin"))
+        let pinShadow = UIImageView(image: UIImage(named: "pihShadow"))
+        centerPin.translatesAutoresizingMaskIntoConstraints = false
+        pinShadow.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.mapView.addSubview(pinShadow)
+        self.mapView.addSubview(centerPin)
+        
+        NSLayoutConstraint.activate([
+            centerPin.widthAnchor.constraint(equalToConstant: 42),
+            centerPin.heightAnchor.constraint(equalToConstant: 42),
+            pinShadow.widthAnchor.constraint(equalToConstant: 12),
+            pinShadow.heightAnchor.constraint(equalToConstant: 7)
+        ])
+        
+        NSLayoutConstraint.activate([
+            centerPin.centerXAnchor.constraint(equalTo: self.mapView.centerXAnchor),
+            centerPin.centerYAnchor.constraint(equalTo: self.mapView.centerYAnchor, constant: -21),
+            pinShadow.centerXAnchor.constraint(equalTo: centerPin.centerXAnchor),
+            pinShadow.centerYAnchor.constraint(equalTo: centerPin.bottomAnchor)
+        ])
     }
     
     /// mapView 화면을 표시할 초기화 함수

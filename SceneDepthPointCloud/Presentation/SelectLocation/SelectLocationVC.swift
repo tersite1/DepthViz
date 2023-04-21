@@ -8,6 +8,7 @@
 
 import UIKit
 import Combine
+import MapKit
 
 /// 측정위치 선택화면의 UI 및 UX 담당
 final class SelectLocationVC: UIViewController {
@@ -20,6 +21,8 @@ final class SelectLocationVC: UIViewController {
     private let cancelButton = CancelButton()
     /// 현재위치 기준 주소표시 텍스트
     private let currentLocationLabel = RoadAddressLabel()
+    /// 2D 지도 view
+    private let mapView = MKMapView()
     /// 측정위치 선택화면 관련된 로직담당 객체
     private var viewModel: SelectLocationVM?
     private var cancellables: Set<AnyCancellable> = []
@@ -28,6 +31,7 @@ final class SelectLocationVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureUI()
+        self.configureMapView()
         self.bindViewModel()
     }
 }
@@ -60,6 +64,32 @@ extension SelectLocationVC {
             self.currentLocationLabel.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 14),
             self.currentLocationLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)
         ])
+        
+        // mapView
+        self.mapView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(self.mapView)
+        NSLayoutConstraint.activate([
+            self.mapView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 8),
+            self.mapView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.mapView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            self.mapView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -80)
+        ])
+    }
+    
+    /// mapView 화면을 표시할 초기화 함수
+    private func configureMapView() {
+        guard let locationData = self.viewModel?.locationData else { return }
+        
+        let latitude = locationData.latitude
+        let longitude = locationData.longitude
+        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: latitude, longitude: longitude), span: .init(latitudeDelta: 0.002, longitudeDelta: 0.002))
+        
+        self.mapView.setRegion(region, animated: true)
+        self.mapView.showsUserLocation = true
+        self.mapView.isPitchEnabled = false
+        self.mapView.showsCompass = true
+        
+        self.mapView.delegate = self
     }
 }
 
@@ -98,5 +128,11 @@ extension SelectLocationVC {
                 self?.showAlert(title: error.title, text: error.text)
             })
             .store(in: &self.cancellables)
+    }
+}
+
+extension SelectLocationVC: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        // mapView 의 중심좌표로 locationData 를 업데이트 한다
     }
 }

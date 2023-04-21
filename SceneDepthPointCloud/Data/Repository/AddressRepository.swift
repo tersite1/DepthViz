@@ -16,6 +16,14 @@ final class AddressRepository: AddressRepositoryInterface {
         let x = Double(location.longitude)
         let y = Double(location.altitude)
         
-        endpoint.fetchAddress(x: x, y: y, completion: completion)
+        endpoint.fetchAddress(x: x, y: y) { addressDTO in
+            guard let document = addressDTO?.documents.last else {
+                completion(nil)
+                return
+            }
+            
+            let address = document.roadAddress.addressName
+            completion(address)
+        }
     }
 }

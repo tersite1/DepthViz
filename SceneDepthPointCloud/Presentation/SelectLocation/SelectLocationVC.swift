@@ -79,7 +79,7 @@ extension SelectLocationVC {
     /// mapView 화면을 표시할 초기화 함수
     private func configureMapView() {
         guard let locationData = self.viewModel?.locationData else { return }
-        
+        print("측정 위치: \(locationData.latitude), \(locationData.longitude)")
         let latitude = locationData.latitude
         let longitude = locationData.longitude
         let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: latitude, longitude: longitude), span: .init(latitudeDelta: 0.002, longitudeDelta: 0.002))
@@ -115,6 +115,7 @@ extension SelectLocationVC {
         self.viewModel?.$locationData
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] locationData in
+                print("새 위치 업데이트: \(locationData.latitude), \(locationData.longitude)")
                 self?.currentLocationLabel.updateAddress(to: locationData.roadAddressName)
             })
             .store(in: &self.cancellables)
@@ -134,5 +135,7 @@ extension SelectLocationVC {
 extension SelectLocationVC: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         // mapView 의 중심좌표로 locationData 를 업데이트 한다
+        let center = mapView.centerCoordinate
+        self.viewModel?.updateLocation(to: center)
     }
 }

@@ -30,18 +30,25 @@ final class SelectLocationVM {
     }
     
     /// locationData 값을 토대로 도로명주소를locationData 값으로 반영하는 함수
-    func updateLocation(location: CLLocation? = nil) {
+    func updateLocation(to location: CLLocationCoordinate2D? = nil) {
         var locationData: LocationData = self.locationData
         if let location = location {
-            // MARK: LocationData 값 생성
+            // 전달받은 location 값으로 LocationData 생성
+            locationData = LocationData(location.latitude, location.longitude, locationData.altitude, locationData.floor)
         }
         
-        self.addressRepository.fetchAddress(from: locationData) { [weak self] result in
-            switch result {
-            case .success(let address):
-                self?.locationData.updateRoadAddress(to: address)
-            case .failure(let fetchError):
-                self?.networkError = (title: "Fetch Address Error", text: fetchError.message)
+        DispatchQueue.global().async { [weak self] in
+            self?.addressRepository.fetchAddress(from: locationData) { [weak self] result in
+                switch result {
+                case .success(let address):
+                    self?.locationData.updateRoadAddress(to: address)
+                case .failure(let fetchError):
+                    if case.decode = fetchError {
+                        print("Decode Error")
+                    } else {
+                        self?.networkError = (title: "Fetch Address Error", text: fetchError.message)
+                    }
+                }
             }
         }
     }

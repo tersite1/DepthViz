@@ -8,14 +8,16 @@
 
 import Foundation
 
-enum NetworkStatus: String {
-    case SUCCESS // 200~204
-    case ERROR
+enum NetworkStatus {
+    case SUCCESS
+    case ERROR(Int)
     
     static func status(_ statusCode: Int) -> NetworkStatus {
         switch statusCode {
-        case 200, 201: return .SUCCESS
-        default: return .ERROR
+        case (200...299):
+            return .SUCCESS
+        default:
+            return .ERROR(statusCode)
         }
     }
 }

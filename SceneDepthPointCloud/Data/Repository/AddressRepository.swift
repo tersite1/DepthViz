@@ -10,20 +10,27 @@ import Foundation
 
 /// 주소 정보 Repository
 final class AddressRepository: AddressRepositoryInterface {
-    func fetchAddress(from location: LocationData, completion: @escaping (String?) -> Void) {
+    func fetchAddress(from location: LocationData, completion: @escaping (Result<String, FetchError>) -> Void) {
         let endpoint = AddressApiService()
         
         let x = Double(location.longitude)
         let y = Double(location.altitude)
         
-        endpoint.fetchAddress(x: x, y: y) { addressDTO in
-            guard let document = addressDTO?.documents.last else {
-                completion(nil)
-                return
+        endpoint.fetchAddress(x: x, y: y) { result in
+            switch result {
+            case .success(let addressDTO):
+                guard let document = addressDTO.documents.last else {
+                    completion(.failure(.basic))
+                    return
+                }
+                
+                let address = document.roadAddress.addressName
+                completion(.success(address))
+                
+            case .failure(let error):
+                completion(.failure(error))
             }
             
-            let address = document.roadAddress.addressName
-            completion(address)
         }
     }
 }

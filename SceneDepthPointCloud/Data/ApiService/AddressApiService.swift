@@ -10,7 +10,7 @@ import Foundation
 
 /// Address 수신받기 위한 Network Service 담당
 struct AddressApiService {
-    func fetchAddress(x: Double, y: Double, completion: @escaping (AddressFromGpsDTO?) -> Void) {
+    func fetchAddress(x: Double, y: Double, completion: @escaping (Result<AddressFromGpsDTO, FetchError>) -> Void) {
         
     }
 }

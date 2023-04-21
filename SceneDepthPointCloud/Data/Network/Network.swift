@@ -41,7 +41,7 @@ struct Network {
         
         guard let statusCode = response.response?.statusCode else {
             print("Network Fail: No Status Code: \(String(describing: response.error?.localizedDescription))")
-            return NetworkResult(data: nil, status: .ERROR)
+            return NetworkResult(data: nil, status: NetworkStatus.status(-1))
         }
         
         let status = NetworkStatus.status(statusCode)

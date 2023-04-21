@@ -23,6 +23,8 @@ final class SelectLocationVC: UIViewController {
     private let currentLocationLabel = RoadAddressLabel()
     /// 2D 지도 view
     private let mapView = MKMapView()
+    /// 선택 및 데이터 업로드 버튼
+    private let bottomButton = SelectLocationLargeButton()
     /// 측정위치 선택화면 관련된 로직담당 객체
     private var viewModel: SelectLocationVM?
     private var cancellables: Set<AnyCancellable> = []
@@ -96,6 +98,17 @@ extension SelectLocationVC {
             centerPin.centerYAnchor.constraint(equalTo: self.mapView.centerYAnchor, constant: -21),
             pinShadow.centerXAnchor.constraint(equalTo: centerPin.centerXAnchor),
             pinShadow.centerYAnchor.constraint(equalTo: centerPin.bottomAnchor)
+        ])
+        
+        // bottomButton
+        self.bottomButton.addAction(UIAction(handler: { [weak self] _ in
+            self?.viewModel?.changeMode()
+        }), for: .touchUpInside)
+        self.view.addSubview(self.bottomButton)
+        NSLayoutConstraint.activate([
+            self.bottomButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            self.bottomButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+            self.bottomButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
         ])
     }
     

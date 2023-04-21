@@ -28,7 +28,10 @@ final class SelectLocationVM {
         
         self.updateLocation()
     }
-    
+}
+
+// MARK: INPUT
+extension SelectLocationVM {
     /// locationData 값을 토대로 도로명주소를locationData 값으로 반영하는 함수
     func updateLocation(to location: CLLocationCoordinate2D? = nil) {
         var locationData: LocationData = self.locationData
@@ -51,5 +54,11 @@ final class SelectLocationVM {
                 }
             }
         }
+    }
+    
+    /// 현재 mode 값에 따라 다음 mode 값으로 변경하는 함수
+    func changeMode() {
+        print("change mode")
+        // MARK: mode 값 변경 로직 필요
     }
 }

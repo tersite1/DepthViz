@@ -28,6 +28,10 @@ final class SelectLocationLargeButton: UIButton {
         self.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
         self.titleLabel?.textColor = .white
         
+        NSLayoutConstraint.activate([
+            self.heightAnchor.constraint(equalToConstant: 50)
+        ])
+        
         self.changeStatus(to: .selectable)
     }
     

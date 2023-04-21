@@ -21,23 +21,14 @@ final class SelectLocationVC: UIViewController {
     /// 현재위치 기준 주소표시 텍스트
     private let currentLocationLabel = RoadAddressLabel()
     /// 측정위치 선택화면 관련된 로직담당 객체
-    private var viewModel: SelectLocationVM!
+    private var viewModel: SelectLocationVM?
+    private var cancellables: Set<AnyCancellable> = []
     
     /// SelectLocationVC 최초 접근시 configure
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureUI()
-    }
-}
-
-// MARK: INPUT
-extension SelectLocationVC {
-    func configureDelegate(_ delegate: SelectLocationDelegate) {
-        self.delegate = delegate
-    }
-    
-    func configureViewModel(_ viewModel: SelectLocationVM) {
-        self.viewModel = viewModel
+        self.bindViewModel()
     }
 }
 
@@ -69,5 +60,43 @@ extension SelectLocationVC {
             self.currentLocationLabel.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 14),
             self.currentLocationLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)
         ])
+    }
+}
+
+// MARK: INPUT from MainVC
+extension SelectLocationVC {
+    func configureDelegate(_ delegate: SelectLocationDelegate) {
+        self.delegate = delegate
+    }
+    
+    func configureViewModel(_ viewModel: SelectLocationVM) {
+        self.viewModel = viewModel
+    }
+}
+
+// MARK: INPUT from ViewModel
+extension SelectLocationVC {
+    private func bindViewModel() {
+        self.bindLocationData()
+        self.bindNetworkError()
+    }
+    
+    private func bindLocationData() {
+        self.viewModel?.$locationData
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] locationData in
+                self?.currentLocationLabel.updateAddress(to: locationData.roadAddressName)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindNetworkError() {
+        self.viewModel?.$networkError
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] error in
+                guard let error = error else { return }
+                self?.showAlert(title: error.title, text: error.text)
+            })
+            .store(in: &self.cancellables)
     }
 }

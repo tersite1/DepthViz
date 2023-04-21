@@ -15,7 +15,7 @@ struct LocationData {
     let longitude: CLLocationDegrees
     let altitude: CLLocationDistance
     let floor: Int?
-    var roadAddressName: String?
+    var roadAddressName: String = "Get current address..."
     
     init(cllocation: CLLocation) {
         self.latitude = cllocation.coordinate.latitude

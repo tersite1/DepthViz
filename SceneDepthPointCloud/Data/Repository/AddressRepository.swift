@@ -15,7 +15,7 @@ final class AddressRepository: AddressRepositoryInterface {
         let endpoint = AddressApiService()
         
         let x = Double(location.longitude)
-        let y = Double(location.altitude)
+        let y = Double(location.latitude)
         
         endpoint.getCoordToAddress(x: x, y: y) { result in
             switch result {

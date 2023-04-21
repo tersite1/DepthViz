@@ -12,7 +12,7 @@ import Alamofire
 struct Network {
     /// Network 실제 통신 -> configurationNetworkResult 함수를 통해 NetworkResult 반환
     static func request(url: String, method: HTTPMethod, parameters: [String: Any]? = nil, completion: @escaping (NetworkResult) -> Void) {
-        AF.request(url, method: method, parameters: parameters)
+        AF.request(url, method: method, parameters: parameters, interceptor: NetworkInterceptor())
             .validate()
             .response { response in
                 completion(Network.configurationNetworkResult(response))
@@ -52,8 +52,8 @@ struct Network {
         }
         
         // check 용 출력
-        print("statusCode: \(statusCode)")
-        print("Data: \(String(data: data, encoding: .utf8)!)")
+//        print("statusCode: \(statusCode)")
+//        print("Data: \(String(data: data, encoding: .utf8)!)")
         
         return NetworkResult(data: data, status: status)
     }

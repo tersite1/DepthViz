@@ -54,7 +54,7 @@ struct AddressDTO: Decodable {
     let subAddressNo: String
     let zipCode: String
     
-    enum codingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case addressName = "address_name"
         case region1DepthName = "region_1depth_name"
         case region2DepthName = "region_2depth_name"

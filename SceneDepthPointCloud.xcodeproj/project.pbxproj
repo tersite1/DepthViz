@@ -29,6 +29,7 @@
 		87C8FB0529F22E1B000C37CE /* RoadAddressLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0429F22E1B000C37CE /* RoadAddressLabel.swift */; };
 		87C8FB0A29F23717000C37CE /* AddressRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0929F23717000C37CE /* AddressRepository.swift */; };
 		87C8FB0D29F2382C000C37CE /* AddressRepositoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0C29F2382C000C37CE /* AddressRepositoryInterface.swift */; };
+		87C8FB0F29F238DA000C37CE /* AddressApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0E29F238DA000C37CE /* AddressApiService.swift */; };
 		87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1A29EE270A00D90D02 /* MainVM.swift */; };
 		87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */; };
 		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
@@ -65,6 +66,7 @@
 		87C8FB0429F22E1B000C37CE /* RoadAddressLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoadAddressLabel.swift; sourceTree = "<group>"; };
 		87C8FB0929F23717000C37CE /* AddressRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressRepository.swift; sourceTree = "<group>"; };
 		87C8FB0C29F2382C000C37CE /* AddressRepositoryInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressRepositoryInterface.swift; sourceTree = "<group>"; };
+		87C8FB0E29F238DA000C37CE /* AddressApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressApiService.swift; sourceTree = "<group>"; };
 		87FDBC1A29EE270A00D90D02 /* MainVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVM.swift; sourceTree = "<group>"; };
 		87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARData.swift; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 			isa = PBXGroup;
 			children = (
 				87ABC86129D178BD00881FFB /* MainApiService.swift */,
+				87C8FB0E29F238DA000C37CE /* AddressApiService.swift */,
 			);
 			path = ApiService;
 			sourceTree = "<group>";
@@ -389,6 +392,7 @@
 				87C8FAFE29F18DB3000C37CE /* SelectLocationTitleLabel.swift in Sources */,
 				87ABC86229D178BD00881FFB /* MainApiService.swift in Sources */,
 				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,
+				87C8FB0F29F238DA000C37CE /* AddressApiService.swift in Sources */,
 				8793524F29B9D8F200D6A079 /* Utils.swift in Sources */,
 				87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */,
 				87C8FB0A29F23717000C37CE /* AddressRepository.swift in Sources */,

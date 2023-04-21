@@ -13,7 +13,8 @@ final class RoadAddressLabel: UIView {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.image = UIImage(named: "pin")
-        imageView.contentMode = .scaleAspectFill
+        imageView.contentMode = .scaleAspectFit
+        
         NSLayoutConstraint.activate([
             imageView.widthAnchor.constraint(equalToConstant: 14),
             imageView.heightAnchor.constraint(equalToConstant: 14)
@@ -28,6 +29,7 @@ final class RoadAddressLabel: UIView {
         label.font = UIFont.systemFont(ofSize: 13, weight: .regular)
         label.textColor = .white
         label.textAlignment = .left
+        label.text = "Get current address..."
         
         return label
     }()
@@ -39,9 +41,11 @@ final class RoadAddressLabel: UIView {
     
     private func configure() {
         self.translatesAutoresizingMaskIntoConstraints = false
+        
         let stackView = UIStackView(arrangedSubviews: [self.icon, self.label])
-        stackView.axis = .horizontal
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.alignment = .center
+        stackView.axis = .horizontal
         stackView.spacing = 3
         
         self.addSubview(stackView)
@@ -51,8 +55,6 @@ final class RoadAddressLabel: UIView {
             stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             stackView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ])
-        
-        self.updateAddress(to: "Get current address...")
     }
     
     func updateAddress(to address: String) {

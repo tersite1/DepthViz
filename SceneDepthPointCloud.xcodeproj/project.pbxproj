@@ -21,6 +21,19 @@
 		87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */; };
 		87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC87029D30EE000881FFB /* MeasuredData.swift */; };
 		87AE167829F124EF00B101A6 /* LocationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AE167729F124EF00B101A6 /* LocationData.swift */; };
+		87C8FAF929F171D1000C37CE /* SelectLocationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FAF829F171D1000C37CE /* SelectLocationVC.swift */; };
+		87C8FAFB29F1867E000C37CE /* SelectLocationVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FAFA29F1867E000C37CE /* SelectLocationVM.swift */; };
+		87C8FAFE29F18DB3000C37CE /* SelectLocationTitleLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FAFD29F18DB3000C37CE /* SelectLocationTitleLabel.swift */; };
+		87C8FB0029F1911B000C37CE /* CancelButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FAFF29F1911B000C37CE /* CancelButton.swift */; };
+		87C8FB0329F1933B000C37CE /* SelectLocationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0229F1933B000C37CE /* SelectLocationDelegate.swift */; };
+		87C8FB0529F22E1B000C37CE /* RoadAddressLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0429F22E1B000C37CE /* RoadAddressLabel.swift */; };
+		87C8FB0A29F23717000C37CE /* AddressRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0929F23717000C37CE /* AddressRepository.swift */; };
+		87C8FB0D29F2382C000C37CE /* AddressRepositoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0C29F2382C000C37CE /* AddressRepositoryInterface.swift */; };
+		87C8FB0F29F238DA000C37CE /* AddressApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0E29F238DA000C37CE /* AddressApiService.swift */; };
+		87C8FB1129F23ADE000C37CE /* AddressFromGpsDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB1029F23ADE000C37CE /* AddressFromGpsDTO.swift */; };
+		87C8FB1329F24EDF000C37CE /* FetchError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB1229F24EDF000C37CE /* FetchError.swift */; };
+		87C8FB1529F263C8000C37CE /* NetworkInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB1429F263C8000C37CE /* NetworkInterceptor.swift */; };
+		87C8FB1729F28F8A000C37CE /* SelectLocationLargeButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB1629F28F8A000C37CE /* SelectLocationLargeButton.swift */; };
 		87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1A29EE270A00D90D02 /* MainVM.swift */; };
 		87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */; };
 		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
@@ -49,6 +62,19 @@
 		87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorLabel.swift; sourceTree = "<group>"; };
 		87ABC87029D30EE000881FFB /* MeasuredData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasuredData.swift; sourceTree = "<group>"; };
 		87AE167729F124EF00B101A6 /* LocationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationData.swift; sourceTree = "<group>"; };
+		87C8FAF829F171D1000C37CE /* SelectLocationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationVC.swift; sourceTree = "<group>"; };
+		87C8FAFA29F1867E000C37CE /* SelectLocationVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationVM.swift; sourceTree = "<group>"; };
+		87C8FAFD29F18DB3000C37CE /* SelectLocationTitleLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationTitleLabel.swift; sourceTree = "<group>"; };
+		87C8FAFF29F1911B000C37CE /* CancelButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancelButton.swift; sourceTree = "<group>"; };
+		87C8FB0229F1933B000C37CE /* SelectLocationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationDelegate.swift; sourceTree = "<group>"; };
+		87C8FB0429F22E1B000C37CE /* RoadAddressLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoadAddressLabel.swift; sourceTree = "<group>"; };
+		87C8FB0929F23717000C37CE /* AddressRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressRepository.swift; sourceTree = "<group>"; };
+		87C8FB0C29F2382C000C37CE /* AddressRepositoryInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressRepositoryInterface.swift; sourceTree = "<group>"; };
+		87C8FB0E29F238DA000C37CE /* AddressApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressApiService.swift; sourceTree = "<group>"; };
+		87C8FB1029F23ADE000C37CE /* AddressFromGpsDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressFromGpsDTO.swift; sourceTree = "<group>"; };
+		87C8FB1229F24EDF000C37CE /* FetchError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchError.swift; sourceTree = "<group>"; };
+		87C8FB1429F263C8000C37CE /* NetworkInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkInterceptor.swift; sourceTree = "<group>"; };
+		87C8FB1629F28F8A000C37CE /* SelectLocationLargeButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationLargeButton.swift; sourceTree = "<group>"; };
 		87FDBC1A29EE270A00D90D02 /* MainVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVM.swift; sourceTree = "<group>"; };
 		87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARData.swift; sourceTree = "<group>"; };
 		B57D60B9736905755DECF7CE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -85,6 +111,7 @@
 			children = (
 				87ABC86529D1945200881FFB /* Extension */,
 				87ABC86829D2805300881FFB /* Main */,
+				87C8FAF729F171BB000C37CE /* SelectLocation */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -105,7 +132,8 @@
 		8711C71729D1324000F6D5CC /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				87ABC86F29D30D7600881FFB /* Codable */,
+				87C8FB0829F236EE000C37CE /* Repository */,
+				87ABC86F29D30D7600881FFB /* DTO */,
 				87ABC86029D178AB00881FFB /* ApiService */,
 				8711C71A29D132FF00F6D5CC /* Network */,
 			);
@@ -129,6 +157,7 @@
 				87ABC85C29D176C700881FFB /* NetworkResult.swift */,
 				87ABC85E29D176F700881FFB /* NetworkStatus.swift */,
 				87ABC86329D1924900881FFB /* NetworkURL.swift */,
+				87C8FB1429F263C8000C37CE /* NetworkInterceptor.swift */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -157,6 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				87ABC86129D178BD00881FFB /* MainApiService.swift */,
+				87C8FB0E29F238DA000C37CE /* AddressApiService.swift */,
 			);
 			path = ApiService;
 			sourceTree = "<group>";
@@ -175,16 +205,64 @@
 				E73DD13724636FEF00D77039 /* MainVC.swift */,
 				87FDBC1A29EE270A00D90D02 /* MainVM.swift */,
 				8749E16829EEE2720093F7A7 /* View */,
+				87C8FB0129F19302000C37CE /* Protocol */,
 			);
 			path = Main;
 			sourceTree = "<group>";
 		};
-		87ABC86F29D30D7600881FFB /* Codable */ = {
+		87ABC86F29D30D7600881FFB /* DTO */ = {
 			isa = PBXGroup;
 			children = (
 				87ABC87029D30EE000881FFB /* MeasuredData.swift */,
+				87C8FB1029F23ADE000C37CE /* AddressFromGpsDTO.swift */,
 			);
-			path = Codable;
+			path = DTO;
+			sourceTree = "<group>";
+		};
+		87C8FAF729F171BB000C37CE /* SelectLocation */ = {
+			isa = PBXGroup;
+			children = (
+				87C8FAF829F171D1000C37CE /* SelectLocationVC.swift */,
+				87C8FAFA29F1867E000C37CE /* SelectLocationVM.swift */,
+				87C8FAFC29F18DA2000C37CE /* View */,
+				87C8FB0B29F2380B000C37CE /* Protocol */,
+			);
+			path = SelectLocation;
+			sourceTree = "<group>";
+		};
+		87C8FAFC29F18DA2000C37CE /* View */ = {
+			isa = PBXGroup;
+			children = (
+				87C8FAFD29F18DB3000C37CE /* SelectLocationTitleLabel.swift */,
+				87C8FAFF29F1911B000C37CE /* CancelButton.swift */,
+				87C8FB0429F22E1B000C37CE /* RoadAddressLabel.swift */,
+				87C8FB1629F28F8A000C37CE /* SelectLocationLargeButton.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		87C8FB0129F19302000C37CE /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				87C8FB0229F1933B000C37CE /* SelectLocationDelegate.swift */,
+			);
+			path = Protocol;
+			sourceTree = "<group>";
+		};
+		87C8FB0829F236EE000C37CE /* Repository */ = {
+			isa = PBXGroup;
+			children = (
+				87C8FB0929F23717000C37CE /* AddressRepository.swift */,
+			);
+			path = Repository;
+			sourceTree = "<group>";
+		};
+		87C8FB0B29F2380B000C37CE /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				87C8FB0C29F2382C000C37CE /* AddressRepositoryInterface.swift */,
+			);
+			path = Protocol;
 			sourceTree = "<group>";
 		};
 		87FDBC1C29EEA52100D90D02 /* Entity */ = {
@@ -192,6 +270,7 @@
 			children = (
 				87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */,
 				87AE167729F124EF00B101A6 /* LocationData.swift */,
+				87C8FB1229F24EDF000C37CE /* FetchError.swift */,
 			);
 			path = Entity;
 			sourceTree = "<group>";
@@ -307,26 +386,39 @@
 			buildActionMask = 2147483647;
 			files = (
 				87ABC86429D1924900881FFB /* NetworkURL.swift in Sources */,
+				87C8FB0329F1933B000C37CE /* SelectLocationDelegate.swift in Sources */,
 				87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */,
 				E73DD13324636FEF00D77039 /* Shaders.metal in Sources */,
+				87C8FB1129F23ADE000C37CE /* AddressFromGpsDTO.swift in Sources */,
 				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,
 				87AE167829F124EF00B101A6 /* LocationData.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,
+				87C8FB0D29F2382C000C37CE /* AddressRepositoryInterface.swift in Sources */,
 				87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */,
 				87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */,
 				87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */,
+				87C8FB0529F22E1B000C37CE /* RoadAddressLabel.swift in Sources */,
+				87C8FB0029F1911B000C37CE /* CancelButton.swift in Sources */,
+				87C8FB1729F28F8A000C37CE /* SelectLocationLargeButton.swift in Sources */,
 				87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */,
 				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,
 				872C7A9E29F1332B002D91D2 /* LocationUsecase.swift in Sources */,
+				87C8FB1529F263C8000C37CE /* NetworkInterceptor.swift in Sources */,
+				87C8FAFE29F18DB3000C37CE /* SelectLocationTitleLabel.swift in Sources */,
 				87ABC86229D178BD00881FFB /* MainApiService.swift in Sources */,
 				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,
+				87C8FB0F29F238DA000C37CE /* AddressApiService.swift in Sources */,
 				8793524F29B9D8F200D6A079 /* Utils.swift in Sources */,
 				87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */,
+				87C8FB0A29F23717000C37CE /* AddressRepository.swift in Sources */,
+				87C8FAFB29F1867E000C37CE /* SelectLocationVM.swift in Sources */,
 				E73DD13624636FEF00D77039 /* Renderer.swift in Sources */,
 				E73DD13824636FEF00D77039 /* MainVC.swift in Sources */,
 				87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */,
+				87C8FAF929F171D1000C37CE /* SelectLocationVC.swift in Sources */,
 				87ABC85F29D176F700881FFB /* NetworkStatus.swift in Sources */,
 				E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */,
+				87C8FB1329F24EDF000C37CE /* FetchError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,7 +570,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";
@@ -506,7 +598,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";

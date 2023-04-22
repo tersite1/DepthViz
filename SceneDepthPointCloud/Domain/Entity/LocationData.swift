@@ -11,11 +11,16 @@ import CoreLocation
 
 /// 위치정보 데이터 구조체
 struct LocationData {
+    /// 위도
     let latitude: CLLocationDegrees
+    /// 경도
     let longitude: CLLocationDegrees
+    /// 고도
     let altitude: CLLocationDistance
+    /// 층수
     let floor: Int?
-    var roadAddressName: String?
+    /// 도로명주소
+    var roadAddressName: String = "Get current address..."
     
     init(cllocation: CLLocation) {
         self.latitude = cllocation.coordinate.latitude

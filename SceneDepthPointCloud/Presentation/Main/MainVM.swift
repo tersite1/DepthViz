@@ -11,6 +11,7 @@ import ARKit
 import MetalKit
 import Combine
 
+/// 메인화면의 View 를 나타내기 위한 데이터 처리 담당
 final class MainVM {
     enum Mode {
         case cantRecord // LiDAR 스캔이 불가능한 경우
@@ -107,6 +108,12 @@ extension MainVM {
     
     func appendLocation(_ location: CLLocation) {
         self.locations.append(LocationData(cllocation: location))
+    }
+    
+    func uploadCancel() {
+        // MARK: renderer 초기화 필요
+        self.networkStatus = NetworkStatus.status(400)
+        self.mode = .ready
     }
 }
 

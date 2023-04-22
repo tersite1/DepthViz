@@ -10,6 +10,17 @@ import Foundation
 
 struct NetworkURL {
     static let baseURL: String = Bundle.main.infoDictionary!["BASE_URL"] as! String
-    static let domain = baseURL + "/LidarDemo"
-    static let uploadPly: String = domain + "/v1/collect/building"
+    
+    enum Domain {
+        static let server = baseURL + "/LidarDemo"
+        static let kakao = "https://dapi.kakao.com"
+    }
+    
+    enum Server {
+        static let uploadPly: String = Domain.server + "/v1/collect/building"
+    }
+    
+    enum Kakao {
+        static let coordToAddress: String = Domain.kakao + "/v2/local/geo/coord2address.JSON"
+    }
 }

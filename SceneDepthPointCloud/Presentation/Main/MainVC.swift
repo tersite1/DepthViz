@@ -11,6 +11,7 @@ import MetalKit
 import ARKit
 import Combine
 
+/// 메인화면의 UI 및 UX 담당
 final class MainVC: UIViewController, ARSessionDelegate {
     /// 기록측정 및 종료 버튼
     private let recordingButton = RecordingButton()
@@ -129,7 +130,7 @@ extension MainVC {
         self.bindMode()
         self.bindPointCount()
         self.bindLidarData()
-        self.bindCurrentLocation()
+        self.bindNetworkStatus()
     }
     
     /// viewModel 의 mode 값 변화를 수신하기 위한 함수
@@ -180,21 +181,27 @@ extension MainVC {
         self.viewModel?.$lidarData
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] lidarData in
-                guard let lidarData = lidarData else { return }
-                // MARK: Make SelectLocationVM, Show SelectLocationVC
-                dump(lidarData)
+                guard let lidarData = lidarData,
+                      let locationData = self?.viewModel?.currentLocation else { return }
+                
+                self?.popupSelectLocationVC(lidarData, locationData)
             })
             .store(in: &self.cancellables)
     }
     
-    /// viewModel 의 currentLocation 값 변화를 수신하여 SelectLocationVC 로 전달하기 위한 함수
-    func bindCurrentLocation() {
-        self.viewModel?.$currentLocation
+    /// viewModel 의 networkStatus 값 변화를 수신하여 성공 및 실패를 표시하기 위한 함수
+    private func bindNetworkStatus() {
+        self.viewModel?.$networkStatus
             .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] location in
-                guard let location = location else { return }
-                // MARK: Make SelectLocationVM, Show SelectLocationVC
-                dump(location)
+            .sink(receiveValue: { [weak self] status in
+                guard let status = status else { return }
+                
+                switch status {
+                case .SUCCESS:
+                    self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
+                case .ERROR:
+                    self?.showAlert(title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
+                }
             })
             .store(in: &self.cancellables)
     }
@@ -283,21 +290,7 @@ extension MainVC {
 }
 
 // update textlabel on tasks start/finish
-extension MainVC: TaskDelegate {
-    func showUploadResult(result: NetworkResult) {
-        DispatchQueue.main.async { [weak self] in
-            self?.statusLabel.changeText(to: .removed)
-            self?.recordingButton.changeStatus(to: .ready)
-            switch result.status {
-            case .SUCCESS:
-                self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
-            case .ERROR:
-                self?.showAlert(title: "Upload Fail", text: "\(result.status.rawValue)")
-            }
-            
-        }
-    }
-    
+extension MainVC {
     func sharePLY(file: Any) {
         let activityViewController = UIActivityViewController(activityItems: [file], applicationActivities: nil)
         
@@ -307,9 +300,7 @@ extension MainVC: TaskDelegate {
         }
         
         DispatchQueue.main.async {
-            self.present(activityViewController, animated: true) { [weak self] in
-                self?.showUploadResult(result: NetworkResult(data: nil, status: .SUCCESS))
-            }
+            self.present(activityViewController, animated: true)
         }
     }
     
@@ -343,7 +334,7 @@ extension MainVC: TaskDelegate {
                 if let fileData = stringData.data(using: .utf8) {
                     let apiService = MainApiService()
                     apiService.uploadPlyData(fileName: fileName, fileData: fileData) { [weak self] result in
-                        self?.showUploadResult(result: result)
+//                        self?.showUploadResult(result: result)
                     }
                 }
             }
@@ -386,5 +377,33 @@ extension MainVC: CLLocationManagerDelegate {
         // 가장 최근의 위치 데이터는 마지막 값이므로 마지막값을 사용하여 viewModel 로 전달
         guard let location = locations.last else { return }
         self.viewModel?.appendLocation(location)
+    }
+}
+
+extension MainVC {
+    /// SelectLocationVC 를 Modal 형식으로 띄우는 함수
+    private func popupSelectLocationVC(_ lidarData: LiDARData, _ locationData: LocationData) {
+        let storyboard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+        
+        if let vc = storyboard.instantiateViewController(identifier: SelectLocationVC.identifier) as? SelectLocationVC {
+            let AddressRepository = AddressRepository()
+            let viewModel = SelectLocationVM(lidarData: lidarData, locationData: locationData, addressRepository: AddressRepository)
+            // delegate 로 MainVC 전달
+            vc.configureDelegate(self)
+            // viewModel 로 측정된 liDarData, locationData 전달
+            vc.configureViewModel(viewModel)
+            // model 이 제스처로 닫히지 않도록 설정
+            vc.isModalInPresentation = true
+            
+            self.present(vc, animated: true)
+        }
+    }
+}
+
+// MARK: SelectLocationVC 에서 MainVC 의 함수 일부를 위임받는 부분
+extension MainVC: SelectLocationDelegate {
+    /// 측정된 데이터 서버 업로드 취소 함수
+    func uploadCancel() {
+        self.viewModel?.uploadCancel()
     }
 }

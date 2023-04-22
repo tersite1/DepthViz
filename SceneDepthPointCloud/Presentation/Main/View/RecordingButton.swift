@@ -16,12 +16,15 @@ final class RecordingButton: UIButton {
             case .ready:
                 self.hideLoadingIndicator()
                 self.setImage(UIImage(named: "startRecording"), for: .normal)
+                self.isUserInteractionEnabled = true
             case .recording:
                 self.hideLoadingIndicator()
                 self.setImage(UIImage(named: "stopRecording"), for: .normal)
+                self.isUserInteractionEnabled = true
             case .loading:
                 self.setImage(nil, for: .normal)
                 self.showLoadingIndicator()
+                self.isUserInteractionEnabled = false
             case .cantRecording:
                 self.hideLoadingIndicator()
                 self.setImage(UIImage(named: "cantRecording"), for: .normal)

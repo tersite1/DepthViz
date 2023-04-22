@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// SelectLocationVC 중앙하단 버튼
 final class SelectLocationLargeButton: UIButton {
     enum Status {
         case selectable
@@ -35,6 +36,7 @@ final class SelectLocationLargeButton: UIButton {
         self.changeStatus(to: .selectable)
     }
     
+    /// Status 값에 따라 버튼의 텍스트 설정하는 함수
     func changeStatus(to status: Status) {
         switch status {
         case .selectable:

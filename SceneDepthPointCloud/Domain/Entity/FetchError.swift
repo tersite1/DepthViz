@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// Network 를 통한 정보수신 중 에러값
 enum FetchError: Error {
     case client
     case server(Int)
@@ -30,6 +31,7 @@ enum FetchError: Error {
         }
     }
     
+    /// statusCode 값을 통해 FetchError 를 반환하는 함수
     static func error(type: FetchError, _ statusCode: Int = 0) -> FetchError {
         switch type {
         case .server(_):

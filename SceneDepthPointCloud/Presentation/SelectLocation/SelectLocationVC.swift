@@ -169,6 +169,7 @@ extension SelectLocationVC {
 }
 
 extension SelectLocationVC: MKMapViewDelegate {
+    /// mapView 위치 이동으로 인해 지역이 변경됨을 수신하는 함수
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         // mapView 의 중심좌표로 locationData 를 업데이트 한다
         let center = mapView.centerCoordinate

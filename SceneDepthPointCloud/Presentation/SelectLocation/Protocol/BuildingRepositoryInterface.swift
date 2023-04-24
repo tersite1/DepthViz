@@ -11,5 +11,5 @@ import Foundation
 /// Data Layer를 간접접근하기 위한 인터페이스
 protocol BuildingRepositoryInterface: AnyObject {
     /// LocationData로부터 100m근방 장소들을 받는 함수
-    func fetchBuildingInfo(from location: LocationData, completion: @escaping (Result<BuildingInfo, FetchError>) -> Void)
+    func fetchBuildingInfo(from location: LocationData, page: Int, completion: @escaping (Result<(infos: [BuildingInfo], isLastPage: Bool), FetchError>) -> Void)
 }

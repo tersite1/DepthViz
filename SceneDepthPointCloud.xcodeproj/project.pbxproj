@@ -13,6 +13,7 @@
 		877F533B29F62E2300A0F931 /* BackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533A29F62E2300A0F931 /* BackButton.swift */; };
 		877F533D29F6328D00A0F931 /* BuildingNearByGpsDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533C29F6328D00A0F931 /* BuildingNearByGpsDTO.swift */; };
 		877F533F29F63E1F00A0F931 /* BuildingInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533E29F63E1F00A0F931 /* BuildingInfo.swift */; };
+		877F534129F6400900A0F931 /* BuildingApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534029F6400900A0F931 /* BuildingApiService.swift */; };
 		8793524F29B9D8F200D6A079 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8793524E29B9D8F200D6A079 /* Utils.swift */; };
 		87ABC85B29D175A700881FFB /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85A29D175A700881FFB /* Network.swift */; };
 		87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85C29D176C700881FFB /* NetworkResult.swift */; };
@@ -56,6 +57,7 @@
 		877F533A29F62E2300A0F931 /* BackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackButton.swift; sourceTree = "<group>"; };
 		877F533C29F6328D00A0F931 /* BuildingNearByGpsDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingNearByGpsDTO.swift; sourceTree = "<group>"; };
 		877F533E29F63E1F00A0F931 /* BuildingInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingInfo.swift; sourceTree = "<group>"; };
+		877F534029F6400900A0F931 /* BuildingApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingApiService.swift; sourceTree = "<group>"; };
 		8793524E29B9D8F200D6A079 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		87ABC85929D173BC00881FFB /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
 		87ABC85A29D175A700881FFB /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
@@ -193,6 +195,7 @@
 			children = (
 				87ABC86129D178BD00881FFB /* MainApiService.swift */,
 				87C8FB0E29F238DA000C37CE /* AddressApiService.swift */,
+				877F534029F6400900A0F931 /* BuildingApiService.swift */,
 			);
 			path = ApiService;
 			sourceTree = "<group>";
@@ -410,6 +413,7 @@
 				87C8FB0529F22E1B000C37CE /* RoadAddressLabel.swift in Sources */,
 				87C8FB0029F1911B000C37CE /* CancelButton.swift in Sources */,
 				87C8FB1729F28F8A000C37CE /* SelectLocationLargeButton.swift in Sources */,
+				877F534129F6400900A0F931 /* BuildingApiService.swift in Sources */,
 				87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */,
 				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,
 				872C7A9E29F1332B002D91D2 /* LocationUsecase.swift in Sources */,

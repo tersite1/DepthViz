@@ -17,6 +17,8 @@ final class SelectLocationVC: UIViewController {
     private weak var delegate: SelectLocationDelegate?
     /// 화면 상단 타이틀 텍스트
     private let titleLabel = SelectLocationTitleLabel()
+    /// 뒤로가기 버튼
+    private let backButton = BackButton()
     /// 측정위치 선택 취소 및 창닫기 버튼
     private let cancelButton = CancelButton()
     /// 현재위치 기준 주소표시 텍스트
@@ -48,6 +50,17 @@ extension SelectLocationVC {
             self.titleLabel.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 20),
             self.titleLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)
         ])
+        
+        // backButton
+        self.backButton.addAction(UIAction(handler: { [weak self] _ in
+            self?.viewModel?.prevMode()
+        }), for: .touchUpInside)
+        self.view.addSubview(self.backButton)
+        NSLayoutConstraint.activate([
+            self.backButton.centerYAnchor.constraint(equalTo: self.titleLabel.centerYAnchor),
+            self.backButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 20)
+        ])
+        self.backButton.isHidden = true
         
         // cancelButton
         self.cancelButton.addAction(UIAction(handler: { [weak self] _ in
@@ -145,6 +158,7 @@ extension SelectLocationVC {
     private func bindViewModel() {
         self.bindLocationData()
         self.bindNetworkError()
+        self.bindMode()
     }
     
     private func bindLocationData() {
@@ -163,6 +177,25 @@ extension SelectLocationVC {
             .sink(receiveValue: { [weak self] error in
                 guard let error = error else { return }
                 self?.showAlert(title: error.title, text: error.text)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindMode() {
+        self.viewModel?.$mode
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] mode in
+                switch mode {
+                case .selectLocation:
+                    print("asdefsadf")
+                    self?.backButton.isHidden = true
+                    // MARK: showMapView 필요
+                case .selectBuilding:
+                    print("selectBuilding")
+                    // MARK: showBuildingListView 필요
+                default:
+                    return
+                }
             })
             .store(in: &self.cancellables)
     }

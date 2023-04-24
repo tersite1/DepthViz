@@ -77,6 +77,11 @@ extension SelectLocationVM {
             return
         }
     }
+    
+    /// 뒤로가기 버튼으로 인한 mode값 변경
+    func prevMode() {
+        
+    }
 }
 
 extension SelectLocationVM {

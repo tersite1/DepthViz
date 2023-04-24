@@ -20,6 +20,7 @@ final class BackButton: UIButton {
         self.setImage(UIImage(systemName: "chevron.left"), for: .normal)
         self.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 18, weight: .regular, scale: .large), forImageIn: .normal)
         self.tintColor = .white
+        self.contentMode = .scaleAspectFit
         
         NSLayoutConstraint.activate([
             self.widthAnchor.constraint(equalToConstant: 22),

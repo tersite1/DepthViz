@@ -128,7 +128,7 @@ extension SelectLocationVC {
     /// mapView 화면을 표시할 초기화 함수
     private func configureMapView() {
         guard let locationData = self.viewModel?.locationData else { return }
-        print("측정 위치: \(locationData.latitude), \(locationData.longitude)")
+        
         let latitude = locationData.latitude
         let longitude = locationData.longitude
         let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: latitude, longitude: longitude), span: .init(latitudeDelta: 0.002, longitudeDelta: 0.002))
@@ -187,7 +187,6 @@ extension SelectLocationVC {
             .sink(receiveValue: { [weak self] mode in
                 switch mode {
                 case .selectLocation:
-                    print("asdefsadf")
                     self?.backButton.isHidden = true
                     // MARK: showMapView 필요
                 case .selectBuilding:

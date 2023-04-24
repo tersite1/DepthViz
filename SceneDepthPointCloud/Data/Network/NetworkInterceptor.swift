@@ -13,7 +13,6 @@ import Alamofire
 final class NetworkInterceptor: RequestInterceptor {
     /// KakaoApi를 사용하는 경우 Kakao Auth 를 추가 후 request 진행 설정
     func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, Error>) -> Void) {
-        print("get in")
         guard urlRequest.url?.absoluteString.hasPrefix(NetworkURL.Domain.kakao) == true else {
             completion(.success(urlRequest))
             return
@@ -27,7 +26,7 @@ final class NetworkInterceptor: RequestInterceptor {
         
         var urlRequest = urlRequest
         urlRequest.setValue("KakaoAK \(kakaoApiAuth)", forHTTPHeaderField: "Authorization")
-        print("set header")
+        
         completion(.success(urlRequest))
     }
 }

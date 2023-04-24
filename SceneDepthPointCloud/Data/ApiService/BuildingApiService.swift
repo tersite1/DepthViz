@@ -18,7 +18,7 @@ struct BuildingApiService {
         parameters["sort"] = "distance" // 거리값 기준 정렬로 고정
         parameters["category_group_code"] = " " // 모든 카테고리 값으로 고정
         
-        Network.request(url: NetworkURL.Kakao.searchByCategory, method: .get) { result in
+        Network.request(url: NetworkURL.Kakao.searchByCategory, method: .get, parameters: parameters) { result in
             switch result.status {
             case .SUCCESS:
                 guard let data = result.data else {

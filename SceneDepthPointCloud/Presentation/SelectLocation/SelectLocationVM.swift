@@ -96,7 +96,15 @@ extension SelectLocationVM {
     
     /// 뒤로가기 버튼으로 인한 mode값 변경
     func prevMode() {
-        
+        switch self.mode {
+        case .selectLocation:
+            return
+        case .selectBuilding:
+            self.buildingList = []
+            self.mode = .selectLocation
+        default:
+            return
+        }
     }
 }
 

@@ -16,7 +16,7 @@
 		877F534129F6400900A0F931 /* BuildingApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534029F6400900A0F931 /* BuildingApiService.swift */; };
 		877F534329F642EC00A0F931 /* BuildingRepositoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534229F642EC00A0F931 /* BuildingRepositoryInterface.swift */; };
 		877F534529F643B600A0F931 /* BuildingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534429F643B600A0F931 /* BuildingRepository.swift */; };
-		877F534929F666AF00A0F931 /* BuildingListCellCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534829F666AF00A0F931 /* BuildingListCellCollectionViewCell.swift */; };
+		877F534929F666AF00A0F931 /* BuildingListCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534829F666AF00A0F931 /* BuildingListCollectionViewCell.swift */; };
 		8793524F29B9D8F200D6A079 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8793524E29B9D8F200D6A079 /* Utils.swift */; };
 		87ABC85B29D175A700881FFB /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85A29D175A700881FFB /* Network.swift */; };
 		87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85C29D176C700881FFB /* NetworkResult.swift */; };
@@ -63,7 +63,7 @@
 		877F534029F6400900A0F931 /* BuildingApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingApiService.swift; sourceTree = "<group>"; };
 		877F534229F642EC00A0F931 /* BuildingRepositoryInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingRepositoryInterface.swift; sourceTree = "<group>"; };
 		877F534429F643B600A0F931 /* BuildingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingRepository.swift; sourceTree = "<group>"; };
-		877F534829F666AF00A0F931 /* BuildingListCellCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingListCellCollectionViewCell.swift; sourceTree = "<group>"; };
+		877F534829F666AF00A0F931 /* BuildingListCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingListCollectionViewCell.swift; sourceTree = "<group>"; };
 		8793524E29B9D8F200D6A079 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		87ABC85929D173BC00881FFB /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
 		87ABC85A29D175A700881FFB /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
@@ -254,7 +254,7 @@
 				87C8FB0429F22E1B000C37CE /* RoadAddressLabel.swift */,
 				87C8FB1629F28F8A000C37CE /* SelectLocationLargeButton.swift */,
 				877F533A29F62E2300A0F931 /* BackButton.swift */,
-				877F534829F666AF00A0F931 /* BuildingListCellCollectionViewCell.swift */,
+				877F534829F666AF00A0F931 /* BuildingListCollectionViewCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -444,7 +444,7 @@
 				87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */,
 				87C8FAF929F171D1000C37CE /* SelectLocationVC.swift in Sources */,
 				87ABC85F29D176F700881FFB /* NetworkStatus.swift in Sources */,
-				877F534929F666AF00A0F931 /* BuildingListCellCollectionViewCell.swift in Sources */,
+				877F534929F666AF00A0F931 /* BuildingListCollectionViewCell.swift in Sources */,
 				E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */,
 				87C8FB1329F24EDF000C37CE /* FetchError.swift in Sources */,
 			);

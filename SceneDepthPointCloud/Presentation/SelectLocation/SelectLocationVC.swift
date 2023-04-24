@@ -26,12 +26,19 @@ final class SelectLocationVC: UIViewController {
     /// 2D 지도 view
     private let mapView = MKMapView()
     /// 주변 건물리스트표시 view
-    private let buildingListView = UICollectionView()
+    private var buildingListView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 10
+        layout.scrollDirection = .vertical
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        return UICollectionView(frame: .zero, collectionViewLayout: layout)
+    }()
     /// 선택 및 데이터 업로드 버튼
     private let bottomButton = SelectLocationLargeButton()
     /// 측정위치 선택화면 관련된 로직담당 객체
     private var viewModel: SelectLocationVM?
     private var cancellables: Set<AnyCancellable> = []
+    private var buildingListDataSource: UICollectionViewDiffableDataSource<BuildingListCollectionViewCell.Section, BuildingInfo>!
     
     /// SelectLocationVC 최초 접근시 configure
     override func viewDidLoad() {
@@ -39,6 +46,7 @@ final class SelectLocationVC: UIViewController {
         self.configureUI()
         self.configureMapView()
         self.configureBuildingListView()
+        self.configureBuildingListDataSource()
         self.bindViewModel()
     }
 }
@@ -116,8 +124,6 @@ extension SelectLocationVC {
             pinShadow.centerYAnchor.constraint(equalTo: centerPin.bottomAnchor)
         ])
         
-        self.mapView.isHidden = true
-        
         // bottomButton
         self.bottomButton.addAction(UIAction(handler: { [weak self] _ in
             self?.viewModel?.changeMode()
@@ -127,6 +133,16 @@ extension SelectLocationVC {
             self.bottomButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
             self.bottomButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             self.bottomButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+        ])
+        
+        // buildingListView
+        self.buildingListView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(self.buildingListView)
+        NSLayoutConstraint.activate([
+            self.buildingListView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 8),
+            self.buildingListView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.buildingListView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            self.buildingListView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -80)
         ])
     }
     
@@ -144,10 +160,25 @@ extension SelectLocationVC {
         self.mapView.showsCompass = true
         
         self.mapView.delegate = self
+        self.mapView.isHidden = true
     }
     
     private func configureBuildingListView() {
+        self.buildingListView.backgroundColor = .clear
+        self.buildingListView.register(BuildingListCollectionViewCell.self, forCellWithReuseIdentifier: BuildingListCollectionViewCell.identifier)
         self.buildingListView.delegate = self
+        self.buildingListView.isHidden = true
+    }
+    
+    private func configureBuildingListDataSource() {
+        let cellRegistration = UICollectionView.CellRegistration<BuildingListCollectionViewCell, BuildingInfo> { (cell, indexPath, info) in
+            let isSelected = self.viewModel?.mode == .setIndoorInfo
+            cell.updateCell(info: info, isSelected: isSelected)
+        }
+        
+        self.buildingListDataSource = UICollectionViewDiffableDataSource<BuildingListCollectionViewCell.Section, BuildingInfo>(collectionView: self.buildingListView) { (collectionView: UICollectionView, indexPath: IndexPath, identifier: BuildingInfo) -> UICollectionViewCell? in
+            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
+        }
     }
 }
 
@@ -168,6 +199,7 @@ extension SelectLocationVC {
         self.bindLocationData()
         self.bindNetworkError()
         self.bindMode()
+        self.bindBuildingList()
     }
     
     private func bindLocationData() {
@@ -197,13 +229,33 @@ extension SelectLocationVC {
                 switch mode {
                 case .selectLocation:
                     self?.backButton.isHidden = true
-                    // MARK: showMapView 필요
+                    self?.titleLabel.changeText(to: .selectLocation)
+                    self?.mapView.isHidden = false
+                    self?.mapView.isScrollEnabled = true
+                    self?.buildingListView.isHidden = true
+                    self?.bottomButton.changeStatus(to: .selectable)
                 case .selectBuilding:
-                    print("selectBuilding")
-                    // MARK: showBuildingListView 필요
+                    self?.backButton.isHidden = false
+                    self?.titleLabel.changeText(to: .selectBuilding)
+                    self?.mapView.isHidden = true
+                    self?.mapView.isScrollEnabled = false
+                    self?.buildingListView.isHidden = false
+                    self?.bottomButton.changeStatus(to: .beforeSetting)
                 default:
                     return
                 }
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindBuildingList() {
+        self.viewModel?.$buildingList
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] buildingList in
+                var snapshot = NSDiffableDataSourceSnapshot<BuildingListCollectionViewCell.Section, BuildingInfo>()
+                snapshot.appendSections([.main])
+                snapshot.appendItems(buildingList)
+                self?.buildingListDataSource.apply(snapshot, animatingDifferences: true)
             })
             .store(in: &self.cancellables)
     }
@@ -218,13 +270,9 @@ extension SelectLocationVC: MKMapViewDelegate {
     }
 }
 
-extension SelectLocationVC: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 0
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        return UICollectionViewCell.init()
+extension SelectLocationVC: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.frame.width - (16*2), height: 60)
     }
 }
 

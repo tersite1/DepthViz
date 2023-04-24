@@ -1,5 +1,5 @@
 //
-//  BuildingListCellCollectionViewCell.swift
+//  BuildingListCollectionViewCell.swift
 //  SceneDepthPointCloud
 //
 //  Created by Kang Minsang on 2023/04/24.
@@ -9,8 +9,12 @@
 import UIKit
 
 /// BuildingListView 에서 표시되는 Cell
-final class BuildingListCellCollectionViewCell: UICollectionViewCell {
-    static let identifier = "BuildingListCellCollectionViewCell"
+final class BuildingListCollectionViewCell: UICollectionViewCell {
+    static let identifier = "BuildingListCollectionViewCell"
+    enum Section: CaseIterable {
+        case main
+    }
+    
     private var buildingNameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -73,11 +77,15 @@ final class BuildingListCellCollectionViewCell: UICollectionViewCell {
             self.distanceLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -12),
             self.distanceLabel.leadingAnchor.constraint(equalTo: stackView.trailingAnchor, constant: 12)
         ])
+        
+        self.backgroundColor = UIColor(named: "buildingCellBackgroundColor")
+        self.layer.cornerRadius = 8
+        self.layer.cornerCurve = .continuous
     }
 }
 
 // MARK: INPUT
-extension BuildingListCellCollectionViewCell {
+extension BuildingListCollectionViewCell {
     /// cell 내용설정 함수
     func updateCell(info: BuildingInfo, isSelected: Bool) {
         self.buildingNameLabel.text = info.placeName

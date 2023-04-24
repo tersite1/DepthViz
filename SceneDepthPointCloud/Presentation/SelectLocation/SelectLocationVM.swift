@@ -31,7 +31,8 @@ final class SelectLocationVM {
     /// 건물리스트 api 사용시 pagenation 을 위한 현재 page 값
     private var page: Int = 1
     /// pagenation 불가능 여부값
-    private var isLastPage: Bool = false
+    private(set) var isLastPage: Bool = false
+    private(set) var fetching: Bool = false
     /// Address 데이터를 담당하는 객체
     private let addressRepository: AddressRepositoryInterface
     /// BuildingInfo 데이터를 담당하는 객체
@@ -51,11 +52,11 @@ final class SelectLocationVM {
 extension SelectLocationVM {
     /// locationData 값을 토대로 도로명주소를locationData 값으로 반영하는 함수
     func updateLocation(to location: CLLocationCoordinate2D? = nil) {
-        var locationData: LocationData = self.locationData
         if let location = location {
             // 전달받은 location 값으로 LocationData 생성
-            locationData = LocationData(location.latitude, location.longitude, locationData.altitude, locationData.floor)
+            self.locationData = LocationData(location.latitude, location.longitude, locationData.altitude, locationData.floor)
         }
+        let locationData: LocationData = self.locationData
         
         DispatchQueue.global().async { [weak self] in
             self?.addressRepository.fetchAddress(from: locationData) { [weak self] result in
@@ -111,8 +112,10 @@ extension SelectLocationVM {
 extension SelectLocationVM {
     /// locationData 값을 토대로 getBuildingList() 함수호출을 통해 buildingList 배열에 추가하는 함수
     private func fetchBuildingList() {
-        guard self.isLastPage == false else { return }
+        guard self.fetching == false,
+              self.isLastPage == false else { return }
         
+        self.fetching = true
         let locationData = self.locationData
         let page = self.page
         
@@ -126,6 +129,7 @@ extension SelectLocationVM {
                 case .failure(let fetchError):
                     self?.networkError = (title: "Fetch BuildingList Error", text: fetchError.message)
                 }
+                self?.fetching = false
             })
         }
     }

@@ -280,4 +280,13 @@ extension SelectLocationVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print("select")
     }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if self.buildingListView.contentOffset.y > (self.buildingListView.contentSize.height - self.buildingListView.bounds.size.height) {
+            guard self.viewModel?.fetching == false,
+                  self.viewModel?.isLastPage == false else { return }
+            
+            self.viewModel?.nextPageBuildingListFetch()
+        }
+    }
 }

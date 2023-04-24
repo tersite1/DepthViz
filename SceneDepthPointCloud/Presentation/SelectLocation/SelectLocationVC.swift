@@ -25,6 +25,8 @@ final class SelectLocationVC: UIViewController {
     private let currentLocationLabel = RoadAddressLabel()
     /// 2D 지도 view
     private let mapView = MKMapView()
+    /// 주변 건물리스트표시 view
+    private let buildingListView = UICollectionView()
     /// 선택 및 데이터 업로드 버튼
     private let bottomButton = SelectLocationLargeButton()
     /// 측정위치 선택화면 관련된 로직담당 객체
@@ -112,6 +114,8 @@ extension SelectLocationVC {
             pinShadow.centerXAnchor.constraint(equalTo: centerPin.centerXAnchor),
             pinShadow.centerYAnchor.constraint(equalTo: centerPin.bottomAnchor)
         ])
+        
+        self.mapView.isHidden = true
         
         // bottomButton
         self.bottomButton.addAction(UIAction(handler: { [weak self] _ in

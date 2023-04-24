@@ -10,9 +10,9 @@ import Foundation
 
 /// Building 정보 데이터 구조체
 struct BuildingInfo {
-    let roadAddress: String
-    let placeName: String
-    let distance: Int
+    let roadAddress: String // 도로명주소
+    let placeName: String // 장소명(건물명)
+    let distance: Int // 거리(m단위)
     let addressName: String
     let categoryGroupCode: String
     let categoryGroupName: String

@@ -160,14 +160,14 @@ extension SelectLocationVC {
         self.mapView.showsCompass = true
         
         self.mapView.delegate = self
-        self.mapView.isHidden = true
+        self.mapView.alpha = 0
     }
     
     private func configureBuildingListView() {
         self.buildingListView.backgroundColor = .clear
         self.buildingListView.register(BuildingListCollectionViewCell.self, forCellWithReuseIdentifier: BuildingListCollectionViewCell.identifier)
         self.buildingListView.delegate = self
-        self.buildingListView.isHidden = true
+        self.buildingListView.alpha = 0
     }
     
     private func configureBuildingListDataSource() {
@@ -230,16 +230,16 @@ extension SelectLocationVC {
                 case .selectLocation:
                     self?.backButton.isHidden = true
                     self?.titleLabel.changeText(to: .selectLocation)
-                    self?.mapView.isHidden = false
+                    self?.mapView.fadeIn()
                     self?.mapView.isScrollEnabled = true
-                    self?.buildingListView.isHidden = true
+                    self?.buildingListView.fadeOut()
                     self?.bottomButton.changeStatus(to: .selectable)
                 case .selectBuilding:
                     self?.backButton.isHidden = false
                     self?.titleLabel.changeText(to: .selectBuilding)
-                    self?.mapView.isHidden = true
+                    self?.mapView.disappear()
                     self?.mapView.isScrollEnabled = false
-                    self?.buildingListView.isHidden = false
+                    self?.buildingListView.fadeIn()
                     self?.bottomButton.changeStatus(to: .beforeSetting)
                 default:
                     return

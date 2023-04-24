@@ -54,5 +54,4 @@ struct BuildingNearByGpsDocumentDTO: Decodable {
         case longitude = "x"
         case latitude = "y"
     }
-    
 }

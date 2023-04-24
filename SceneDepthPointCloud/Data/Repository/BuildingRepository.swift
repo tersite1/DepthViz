@@ -21,7 +21,7 @@ final class BuildingRepository: BuildingRepositoryInterface {
         endpoint.getSearchByCategory(x: x, y: y, page: page) { result in
             switch result {
             case .success(let buildingDTO):
-                let infos = buildingDTO.documents.map { BuildingInfo(dto: $0) }
+                let infos = buildingDTO.documents.map { $0.toDomain() }
                 let isLastPage = buildingDTO.meta.isEnd
                 completion(.success((infos: infos, isLastPage: isLastPage)))
                 

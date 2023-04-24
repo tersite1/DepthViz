@@ -54,4 +54,19 @@ struct BuildingNearByGpsDocumentDTO: Decodable {
         case longitude = "x"
         case latitude = "y"
     }
+    
+    func toDomain() -> BuildingInfo {
+        return .init(roadAddress: self.addressName,
+                     placeName: self.placeName,
+                     distance: Int(self.distance) ?? 0,
+                     addressName: self.addressName,
+                     categoryGroupCode: self.categoryGroupCode,
+                     categoryGroupName: self.categoryGroupName,
+                     categoryName: self.categoryName,
+                     id: self.id,
+                     phone: self.phone,
+                     placeUrl: self.placeUrl,
+                     longitude: self.longitude,
+                     latitude: self.latitude)
+    }
 }

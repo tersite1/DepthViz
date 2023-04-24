@@ -9,7 +9,7 @@
 import Foundation
 
 /// Building 정보 데이터 구조체
-struct BuildingInfo {
+struct BuildingInfo: Hashable {
     let roadAddress: String // 도로명주소
     let placeName: String // 장소명(건물명)
     let distance: Int // 거리(m단위)
@@ -23,18 +23,7 @@ struct BuildingInfo {
     let longitude: String
     let latitude: String
     
-    init(dto: BuildingNearByGpsDocumentDTO) {
-        self.roadAddress = dto.roadAddressName
-        self.placeName = dto.placeName
-        self.distance = Int(dto.distance) ?? 0
-        self.addressName = dto.addressName
-        self.categoryGroupCode = dto.categoryGroupCode
-        self.categoryGroupName = dto.categoryGroupName
-        self.categoryName = dto.categoryName
-        self.id = dto.id
-        self.phone = dto.phone
-        self.placeUrl = dto.placeUrl
-        self.longitude = dto.longitude
-        self.latitude = dto.latitude
+    static func == (lhs: BuildingInfo, rhs: BuildingInfo) -> Bool {
+        return lhs.id == rhs.id
     }
 }

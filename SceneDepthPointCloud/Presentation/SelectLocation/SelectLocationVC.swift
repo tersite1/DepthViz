@@ -38,6 +38,7 @@ final class SelectLocationVC: UIViewController {
         super.viewDidLoad()
         self.configureUI()
         self.configureMapView()
+        self.configureBuildingListView()
         self.bindViewModel()
     }
 }
@@ -144,6 +145,10 @@ extension SelectLocationVC {
         
         self.mapView.delegate = self
     }
+    
+    private func configureBuildingListView() {
+        self.buildingListView.delegate = self
+    }
 }
 
 // MARK: INPUT from MainVC
@@ -210,5 +215,21 @@ extension SelectLocationVC: MKMapViewDelegate {
         // mapView 의 중심좌표로 locationData 를 업데이트 한다
         let center = mapView.centerCoordinate
         self.viewModel?.updateLocation(to: center)
+    }
+}
+
+extension SelectLocationVC: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        return UICollectionViewCell.init()
+    }
+}
+
+extension SelectLocationVC: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print("select")
     }
 }

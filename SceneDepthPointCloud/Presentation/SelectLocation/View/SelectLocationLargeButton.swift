@@ -13,6 +13,7 @@ final class SelectLocationLargeButton: UIButton {
     enum Status {
         case selectable
         case beforeSetting
+        case settingChanged
         case uploadable
     }
     
@@ -44,9 +45,13 @@ final class SelectLocationLargeButton: UIButton {
             self.isUserInteractionEnabled = true
             self.backgroundColor = UIColor(named: "mainColor")
         case .beforeSetting:
-            self.setTitle("데이터 업로드", for: .normal)
+            self.setTitle("설정 완료", for: .normal)
             self.isUserInteractionEnabled = false
             self.backgroundColor = UIColor(named: "deActivateMainColor")
+        case .settingChanged:
+            self.setTitle("설정 완료", for: .normal)
+            self.isUserInteractionEnabled = true
+            self.backgroundColor = UIColor(named: "mainColor")
         case .uploadable:
             self.setTitle("데이터 업로드", for: .normal)
             self.isUserInteractionEnabled = true

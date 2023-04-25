@@ -35,6 +35,7 @@ final class SelectLocationVC: UIViewController {
     }()
     private var collectionViewBottom: NSLayoutConstraint!
     private var collectionViewHeight: NSLayoutConstraint!
+    private let indoorSettingView = IndoorSettingView()
     /// 선택 및 데이터 업로드 버튼
     private let bottomButton = SelectLocationLargeButton()
     /// 측정위치 선택화면 관련된 로직담당 객체
@@ -49,6 +50,7 @@ final class SelectLocationVC: UIViewController {
         self.configureMapView()
         self.configureBuildingListView()
         self.configureBuildingListDataSource()
+        self.configureIndoorSettingView()
         self.bindViewModel()
     }
 }
@@ -151,6 +153,14 @@ extension SelectLocationVC {
         ])
         
         self.collectionViewHeight = self.buildingListView.heightAnchor.constraint(equalToConstant: 60)
+        
+        // indoorSettingView
+        self.view.addSubview(self.indoorSettingView)
+        NSLayoutConstraint.activate([
+            self.indoorSettingView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 76+52),
+            self.indoorSettingView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.indoorSettingView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        ])
     }
     
     /// mapView 화면을 표시할 초기화 함수
@@ -187,6 +197,35 @@ extension SelectLocationVC {
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
         }
     }
+    
+    private func configureIndoorSettingView() {
+        self.indoorSettingView.floorSwitch.addTarget(self, action: #selector(checkIndoorSetting(_:)), for: .allEvents)
+        self.indoorSettingView.floorField.delegate = self
+        self.indoorSettingView.alpha = 0
+    }
+}
+
+extension SelectLocationVC {
+    @objc func checkIndoorSetting(_ sender: UISegmentedControl) {
+        self.checkIndoorSetting()
+    }
+    
+    private func checkIndoorSetting() {
+        let selectedIndex = self.indoorSettingView.floorSwitch.selectedSegmentIndex
+        guard selectedIndex >= 0,
+              let floorText = self.indoorSettingView.floorField.text,
+              let floor = Int(floorText) else {
+            self.viewModel?.setIndoorValue(to: nil)
+            return
+        }
+        
+        print(selectedIndex)
+        if selectedIndex == 0 {
+            self.viewModel?.setIndoorValue(to: -floor)
+        } else {
+            self.viewModel?.setIndoorValue(to: floor)
+        }
+    }
 }
 
 // MARK: INPUT from MainVC
@@ -207,6 +246,7 @@ extension SelectLocationVC {
         self.bindNetworkError()
         self.bindMode()
         self.bindBuildingList()
+        self.bindIndoorFloor()
     }
     
     private func bindLocationData() {
@@ -247,13 +287,17 @@ extension SelectLocationVC {
                     self?.mapView.disappear()
                     self?.mapView.isScrollEnabled = false
                     self?.buildingListView.fadeIn()
+                    self?.collectionViewHeight.isActive = false
+                    self?.collectionViewBottom.isActive = true
+                    self?.indoorSettingView.fadeOut()
                     self?.bottomButton.changeStatus(to: .beforeSetting)
                 case .setIndoorInfo:
                     self?.collectionViewBottom.isActive = false
                     self?.collectionViewHeight.isActive = true
-                    self?.mapView.isScrollEnabled = false
-                default:
-                    return
+                    self?.indoorSettingView.fadeIn()
+                    self?.bottomButton.changeStatus(to: .beforeSetting)
+                case .done:
+                    self?.bottomButton.changeStatus(to: .uploadable)
                 }
             })
             .store(in: &self.cancellables)
@@ -267,6 +311,21 @@ extension SelectLocationVC {
                 snapshot.appendSections([.main])
                 snapshot.appendItems(buildingList)
                 self?.buildingListDataSource.apply(snapshot, animatingDifferences: true)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindIndoorFloor() {
+        self.viewModel?.$indoorFloor
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] floor in
+                guard self?.viewModel?.mode == .setIndoorInfo else { return }
+                
+                if let floor = floor {
+                    self?.bottomButton.changeStatus(to: .settingChanged)
+                } else {
+                    self?.bottomButton.changeStatus(to: .beforeSetting)
+                }
             })
             .store(in: &self.cancellables)
     }
@@ -301,5 +360,13 @@ extension SelectLocationVC: UICollectionViewDelegate {
             
             self.viewModel?.nextPageBuildingListFetch()
         }
+    }
+}
+
+extension SelectLocationVC: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.checkIndoorSetting()
+        self.view.endEditing(true)
+        return true
     }
 }

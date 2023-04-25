@@ -387,7 +387,8 @@ extension MainVC {
         
         if let vc = storyboard.instantiateViewController(identifier: SelectLocationVC.identifier) as? SelectLocationVC {
             let AddressRepository = AddressRepository()
-            let viewModel = SelectLocationVM(lidarData: lidarData, locationData: locationData, addressRepository: AddressRepository)
+            let buildingRepository = BuildingRepository()
+            let viewModel = SelectLocationVM(lidarData: lidarData, locationData: locationData, addressRepository: AddressRepository, buildingRepository: buildingRepository)
             // delegate 로 MainVC 전달
             vc.configureDelegate(self)
             // viewModel 로 측정된 liDarData, locationData 전달

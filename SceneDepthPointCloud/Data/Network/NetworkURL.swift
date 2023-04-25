@@ -22,5 +22,6 @@ struct NetworkURL {
     
     enum Kakao {
         static let coordToAddress: String = Domain.kakao + "/v2/local/geo/coord2address.JSON"
+        static let searchByCategory: String = Domain.kakao + "/v2/local/search/category.JSON"
     }
 }

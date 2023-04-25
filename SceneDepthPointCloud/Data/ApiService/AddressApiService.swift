@@ -10,7 +10,7 @@ import Foundation
 
 /// Address 수신받기 위한 Network Service 담당
 struct AddressApiService {
-    /// KakaoAPI 를 통해 AddressFromGpsDTO 를 반환하는 함수
+    /// KakaoAPI를 통해 AddressFromGpsDTO를 반환하는 함수
     func getCoordToAddress(x: Double, y: Double, completion: @escaping (Result<AddressFromGpsDTO, FetchError>) -> Void) {
         let parameters = ["x": x, "y": y]
         
@@ -18,19 +18,19 @@ struct AddressApiService {
             switch result.status {
             case .SUCCESS:
                 guard let data = result.data else {
-                    completion(.failure(FetchError.empty))
+                    completion(.failure(.empty))
                     return
                 }
                 
                 guard let dto = try? JSONDecoder().decode(AddressFromGpsDTO.self, from: data) else {
-                    completion(.failure(FetchError.decode))
+                    completion(.failure(.decode))
                     return
                 }
                 
                 completion(.success(dto))
                 
             case .ERROR(let statusCode):
-                completion(.failure(FetchError.server(statusCode)))
+                completion(.failure(.server(statusCode)))
             }
         }
     }

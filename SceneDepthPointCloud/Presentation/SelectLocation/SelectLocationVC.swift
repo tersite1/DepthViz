@@ -17,23 +17,36 @@ final class SelectLocationVC: UIViewController {
     private weak var delegate: SelectLocationDelegate?
     /// 화면 상단 타이틀 텍스트
     private let titleLabel = SelectLocationTitleLabel()
+    /// 뒤로가기 버튼
+    private let backButton = BackButton()
     /// 측정위치 선택 취소 및 창닫기 버튼
     private let cancelButton = CancelButton()
     /// 현재위치 기준 주소표시 텍스트
     private let currentLocationLabel = RoadAddressLabel()
     /// 2D 지도 view
     private let mapView = MKMapView()
+    /// 주변 건물리스트표시 view
+    private var buildingListView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 10
+        layout.scrollDirection = .vertical
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        return UICollectionView(frame: .zero, collectionViewLayout: layout)
+    }()
     /// 선택 및 데이터 업로드 버튼
     private let bottomButton = SelectLocationLargeButton()
     /// 측정위치 선택화면 관련된 로직담당 객체
     private var viewModel: SelectLocationVM?
     private var cancellables: Set<AnyCancellable> = []
+    private var buildingListDataSource: UICollectionViewDiffableDataSource<BuildingListCollectionViewCell.Section, BuildingInfo>!
     
     /// SelectLocationVC 최초 접근시 configure
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureUI()
         self.configureMapView()
+        self.configureBuildingListView()
+        self.configureBuildingListDataSource()
         self.bindViewModel()
     }
 }
@@ -48,6 +61,17 @@ extension SelectLocationVC {
             self.titleLabel.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 20),
             self.titleLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor)
         ])
+        
+        // backButton
+        self.backButton.addAction(UIAction(handler: { [weak self] _ in
+            self?.viewModel?.prevMode()
+        }), for: .touchUpInside)
+        self.view.addSubview(self.backButton)
+        NSLayoutConstraint.activate([
+            self.backButton.centerYAnchor.constraint(equalTo: self.titleLabel.centerYAnchor),
+            self.backButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 20)
+        ])
+        self.backButton.isHidden = true
         
         // cancelButton
         self.cancelButton.addAction(UIAction(handler: { [weak self] _ in
@@ -110,12 +134,22 @@ extension SelectLocationVC {
             self.bottomButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             self.bottomButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
         ])
+        
+        // buildingListView
+        self.buildingListView.translatesAutoresizingMaskIntoConstraints = false
+        self.view.addSubview(self.buildingListView)
+        NSLayoutConstraint.activate([
+            self.buildingListView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 8),
+            self.buildingListView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.buildingListView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            self.buildingListView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -80)
+        ])
     }
     
     /// mapView 화면을 표시할 초기화 함수
     private func configureMapView() {
         guard let locationData = self.viewModel?.locationData else { return }
-        print("측정 위치: \(locationData.latitude), \(locationData.longitude)")
+        
         let latitude = locationData.latitude
         let longitude = locationData.longitude
         let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: latitude, longitude: longitude), span: .init(latitudeDelta: 0.002, longitudeDelta: 0.002))
@@ -126,6 +160,25 @@ extension SelectLocationVC {
         self.mapView.showsCompass = true
         
         self.mapView.delegate = self
+        self.mapView.alpha = 0
+    }
+    
+    private func configureBuildingListView() {
+        self.buildingListView.backgroundColor = .clear
+        self.buildingListView.register(BuildingListCollectionViewCell.self, forCellWithReuseIdentifier: BuildingListCollectionViewCell.identifier)
+        self.buildingListView.delegate = self
+        self.buildingListView.alpha = 0
+    }
+    
+    private func configureBuildingListDataSource() {
+        let cellRegistration = UICollectionView.CellRegistration<BuildingListCollectionViewCell, BuildingInfo> { (cell, indexPath, info) in
+            let isSelected = self.viewModel?.mode == .setIndoorInfo
+            cell.updateCell(info: info, isSelected: isSelected)
+        }
+        
+        self.buildingListDataSource = UICollectionViewDiffableDataSource<BuildingListCollectionViewCell.Section, BuildingInfo>(collectionView: self.buildingListView) { (collectionView: UICollectionView, indexPath: IndexPath, identifier: BuildingInfo) -> UICollectionViewCell? in
+            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
+        }
     }
 }
 
@@ -145,6 +198,8 @@ extension SelectLocationVC {
     private func bindViewModel() {
         self.bindLocationData()
         self.bindNetworkError()
+        self.bindMode()
+        self.bindBuildingList()
     }
     
     private func bindLocationData() {
@@ -166,6 +221,44 @@ extension SelectLocationVC {
             })
             .store(in: &self.cancellables)
     }
+    
+    private func bindMode() {
+        self.viewModel?.$mode
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] mode in
+                switch mode {
+                case .selectLocation:
+                    self?.backButton.isHidden = true
+                    self?.titleLabel.changeText(to: .selectLocation)
+                    self?.mapView.fadeIn()
+                    self?.mapView.isScrollEnabled = true
+                    self?.buildingListView.fadeOut()
+                    self?.bottomButton.changeStatus(to: .selectable)
+                case .selectBuilding:
+                    self?.backButton.isHidden = false
+                    self?.titleLabel.changeText(to: .selectBuilding)
+                    self?.mapView.disappear()
+                    self?.mapView.isScrollEnabled = false
+                    self?.buildingListView.fadeIn()
+                    self?.bottomButton.changeStatus(to: .beforeSetting)
+                default:
+                    return
+                }
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindBuildingList() {
+        self.viewModel?.$buildingList
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] buildingList in
+                var snapshot = NSDiffableDataSourceSnapshot<BuildingListCollectionViewCell.Section, BuildingInfo>()
+                snapshot.appendSections([.main])
+                snapshot.appendItems(buildingList)
+                self?.buildingListDataSource.apply(snapshot, animatingDifferences: true)
+            })
+            .store(in: &self.cancellables)
+    }
 }
 
 extension SelectLocationVC: MKMapViewDelegate {
@@ -174,5 +267,26 @@ extension SelectLocationVC: MKMapViewDelegate {
         // mapView 의 중심좌표로 locationData 를 업데이트 한다
         let center = mapView.centerCoordinate
         self.viewModel?.updateLocation(to: center)
+    }
+}
+
+extension SelectLocationVC: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.frame.width - (16*2), height: 60)
+    }
+}
+
+extension SelectLocationVC: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print("select")
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if self.buildingListView.contentOffset.y > (self.buildingListView.contentSize.height - self.buildingListView.bounds.size.height) {
+            guard self.viewModel?.fetching == false,
+                  self.viewModel?.isLastPage == false else { return }
+            
+            self.viewModel?.nextPageBuildingListFetch()
+        }
     }
 }

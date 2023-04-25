@@ -10,7 +10,7 @@ import Foundation
 
 /// 주소 정보 Repository
 final class AddressRepository: AddressRepositoryInterface {
-    /// AddressApiService로부터 AddressFromGpsDTO 를 받아 String 값만 반환하는 함수
+    /// AddressApiService로부터 AddressFromGpsDTO를 받아 String 값만 반환하는 함수
     func fetchAddress(from location: LocationData, completion: @escaping (Result<String, FetchError>) -> Void) {
         let endpoint = AddressApiService()
         

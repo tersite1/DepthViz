@@ -10,7 +10,7 @@ import Foundation
 
 /// Building 정보 데이터 구조체
 struct BuildingInfo: Hashable {
-    let uuid = UUID()
+    var uuid = UUID()
     let roadAddress: String // 도로명주소
     let placeName: String // 장소명(건물명)
     let distance: Int // 거리(m단위)
@@ -26,5 +26,9 @@ struct BuildingInfo: Hashable {
     
     static func == (lhs: BuildingInfo, rhs: BuildingInfo) -> Bool {
         return lhs.uuid == rhs.uuid
+    }
+    
+    mutating func updateUUID() {
+        self.uuid = UUID()
     }
 }

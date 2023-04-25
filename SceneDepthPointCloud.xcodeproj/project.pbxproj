@@ -18,6 +18,7 @@
 		877F534529F643B600A0F931 /* BuildingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534429F643B600A0F931 /* BuildingRepository.swift */; };
 		877F534929F666AF00A0F931 /* BuildingListCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534829F666AF00A0F931 /* BuildingListCollectionViewCell.swift */; };
 		877F534B29F69D1600A0F931 /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534A29F69D1600A0F931 /* UIView+Extension.swift */; };
+		877F534D29F7C46600A0F931 /* Collection+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534C29F7C46600A0F931 /* Collection+Extension.swift */; };
 		8793524F29B9D8F200D6A079 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8793524E29B9D8F200D6A079 /* Utils.swift */; };
 		87ABC85B29D175A700881FFB /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85A29D175A700881FFB /* Network.swift */; };
 		87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85C29D176C700881FFB /* NetworkResult.swift */; };
@@ -66,6 +67,7 @@
 		877F534429F643B600A0F931 /* BuildingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingRepository.swift; sourceTree = "<group>"; };
 		877F534829F666AF00A0F931 /* BuildingListCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingListCollectionViewCell.swift; sourceTree = "<group>"; };
 		877F534A29F69D1600A0F931 /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
+		877F534C29F7C46600A0F931 /* Collection+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+Extension.swift"; sourceTree = "<group>"; };
 		8793524E29B9D8F200D6A079 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		87ABC85929D173BC00881FFB /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
 		87ABC85A29D175A700881FFB /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
@@ -213,6 +215,7 @@
 			children = (
 				87ABC86629D1946400881FFB /* UIViewController+Extension.swift */,
 				877F534A29F69D1600A0F931 /* UIView+Extension.swift */,
+				877F534C29F7C46600A0F931 /* Collection+Extension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -445,6 +448,7 @@
 				877F533D29F6328D00A0F931 /* BuildingNearByGpsDTO.swift in Sources */,
 				E73DD13824636FEF00D77039 /* MainVC.swift in Sources */,
 				87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */,
+				877F534D29F7C46600A0F931 /* Collection+Extension.swift in Sources */,
 				877F534B29F69D1600A0F931 /* UIView+Extension.swift in Sources */,
 				87C8FAF929F171D1000C37CE /* SelectLocationVC.swift in Sources */,
 				87ABC85F29D176F700881FFB /* NetworkStatus.swift in Sources */,
@@ -602,7 +606,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";
@@ -630,7 +634,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";

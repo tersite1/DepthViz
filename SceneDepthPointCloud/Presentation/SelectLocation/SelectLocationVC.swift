@@ -33,6 +33,8 @@ final class SelectLocationVC: UIViewController {
         layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         return UICollectionView(frame: .zero, collectionViewLayout: layout)
     }()
+    private var collectionViewBottom: NSLayoutConstraint!
+    private var collectionViewHeight: NSLayoutConstraint!
     /// 선택 및 데이터 업로드 버튼
     private let bottomButton = SelectLocationLargeButton()
     /// 측정위치 선택화면 관련된 로직담당 객체
@@ -95,7 +97,7 @@ extension SelectLocationVC {
         self.mapView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(self.mapView)
         NSLayoutConstraint.activate([
-            self.mapView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 8),
+            self.mapView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 16),
             self.mapView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.mapView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             self.mapView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -80)
@@ -138,12 +140,17 @@ extension SelectLocationVC {
         // buildingListView
         self.buildingListView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(self.buildingListView)
+        
+        self.collectionViewBottom = self.buildingListView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -80)
+        
         NSLayoutConstraint.activate([
-            self.buildingListView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 8),
+            self.buildingListView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 16),
             self.buildingListView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.buildingListView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            self.buildingListView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -80)
+            self.collectionViewBottom
         ])
+        
+        self.collectionViewHeight = self.buildingListView.heightAnchor.constraint(equalToConstant: 60)
     }
     
     /// mapView 화면을 표시할 초기화 함수
@@ -241,6 +248,10 @@ extension SelectLocationVC {
                     self?.mapView.isScrollEnabled = false
                     self?.buildingListView.fadeIn()
                     self?.bottomButton.changeStatus(to: .beforeSetting)
+                case .setIndoorInfo:
+                    self?.collectionViewBottom.isActive = false
+                    self?.collectionViewHeight.isActive = true
+                    self?.mapView.isScrollEnabled = false
                 default:
                     return
                 }
@@ -265,6 +276,8 @@ extension SelectLocationVC: MKMapViewDelegate {
     /// mapView 위치 이동으로 인해 지역이 변경됨을 수신하는 함수
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         // mapView 의 중심좌표로 locationData 를 업데이트 한다
+        guard self.viewModel?.mode == .selectLocation else { return }
+        
         let center = mapView.centerCoordinate
         self.viewModel?.updateLocation(to: center)
     }
@@ -278,7 +291,7 @@ extension SelectLocationVC: UICollectionViewDelegateFlowLayout {
 
 extension SelectLocationVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("select")
+        self.viewModel?.selectBuilding(to: indexPath.item)
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

@@ -90,6 +90,8 @@ extension SelectLocationVM {
             self.page = 1
             self.isLastPage = false
             self.fetchBuildingList()
+        case .selectBuilding:
+            self.mode = .setIndoorInfo
         default:
             return
         }
@@ -103,9 +105,22 @@ extension SelectLocationVM {
         case .selectBuilding:
             self.buildingList = []
             self.mode = .selectLocation
+        case .setIndoorInfo:
+            self.mode = .selectBuilding
         default:
             return
         }
+    }
+    
+    func selectBuilding(to index: Int) {
+        guard var selected = self.buildingList[safe: index] else {
+            print("/// out of index: \(index)")
+            return
+        }
+        
+        selected.updateUUID()
+        self.changeMode()
+        self.buildingList = [selected]
     }
 }
 

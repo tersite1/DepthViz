@@ -39,6 +39,8 @@ final class SelectLocationVC: UIViewController {
     private var collectionViewHeight: NSLayoutConstraint!
     /// 실내위치 설정 view
     private let indoorSettingView = IndoorSettingView()
+    /// 업로드될 데이터 표시 view
+    private let settedInfoView = SettedInfoView()
     /// 선택 및 데이터 업로드 버튼
     private let bottomButton = SelectLocationLargeButton()
     /// 측정위치 선택화면 관련된 로직담당 객체
@@ -165,6 +167,15 @@ extension SelectLocationVC {
             self.indoorSettingView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.indoorSettingView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         ])
+        
+        // settedInfoView
+        self.view.addSubview(self.settedInfoView)
+        NSLayoutConstraint.activate([
+            self.settedInfoView.topAnchor.constraint(equalTo: self.indoorSettingView.bottomAnchor, constant: 52),
+            self.settedInfoView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.settedInfoView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        ])
+        self.settedInfoView.alpha = 0
     }
     
     /// mapView 화면을 표시할 초기화 함수
@@ -209,6 +220,14 @@ extension SelectLocationVC {
         self.indoorSettingView.floorSwitch.addTarget(self, action: #selector(checkIndoorSetting(_:)), for: .allEvents)
         self.indoorSettingView.floorField.delegate = self
         self.indoorSettingView.alpha = 0
+    }
+    
+    private func configureSettedInfoView() {
+        guard let buildingInfo = self.viewModel?.buildingList.first,
+              let floor = self.viewModel?.indoorFloor,
+              let lidarData = self.viewModel?.lidarData else { return }
+        
+        self.settedInfoView.configureInfos(buildingInfo: buildingInfo, floor: floor, lidarData: lidarData)
     }
 }
 
@@ -310,8 +329,11 @@ extension SelectLocationVC {
                     self?.collectionViewBottom.isActive = false
                     self?.collectionViewHeight.isActive = true
                     self?.indoorSettingView.fadeIn()
+                    self?.settedInfoView.fadeOut()
                     self?.bottomButton.changeStatus(to: .beforeSetting)
                 case .done:
+                    self?.configureSettedInfoView()
+                    self?.settedInfoView.fadeIn()
                     self?.bottomButton.changeStatus(to: .uploadable)
                 }
             })

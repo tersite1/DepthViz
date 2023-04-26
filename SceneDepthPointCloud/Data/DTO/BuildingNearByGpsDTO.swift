@@ -56,7 +56,7 @@ struct BuildingNearByGpsDocumentDTO: Decodable {
     }
     
     func toDomain() -> BuildingInfo {
-        return .init(roadAddress: self.addressName,
+        return .init(roadAddress: self.roadAddressName,
                      placeName: self.placeName,
                      distance: Int(self.distance) ?? 0,
                      addressName: self.addressName,

@@ -5,7 +5,7 @@
 	<key>KAKAO_AUTH</key>
 	<string>$(KAKAO_AUTH)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>LiDAR 측정을 위해 권한이 필요합니다.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict/>
 	<key>Allow Arbitary Loads</key>

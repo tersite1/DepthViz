@@ -23,9 +23,9 @@ struct Network {
     static func uploadData(url: String, address: String, location: String, file: LiDARData, completion: @escaping (NetworkResult) -> Void) {
         // multipart/form-data 인코딩
         let multipartFormData = MultipartFormData()
-        multipartFormData.append(address.data(using: .utf8)!, withName: "address", mimeType: "text/plain")
-        multipartFormData.append(location.data(using: .utf8)!, withName: "location", mimeType: "text/plain")
-        multipartFormData.append(file.lidarData, withName: "file", fileName: file.lidarFileName, mimeType: "text/plain")
+        multipartFormData.append(address.data(using: .utf8)!, withName: "address", mimeType: "application/json")
+        multipartFormData.append(location.data(using: .utf8)!, withName: "location", mimeType: "application/json")
+        multipartFormData.append(file.lidarData, withName: "file", fileName: file.lidarFileName, mimeType: "application/octet-stream")
         
         // 파일 업로드
         AF.upload(multipartFormData: multipartFormData, to: url)

@@ -33,14 +33,18 @@ final class SelectLocationVC: UIViewController {
         layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         return UICollectionView(frame: .zero, collectionViewLayout: layout)
     }()
+    /// buildingListView의 bottomAnchor 값
     private var collectionViewBottom: NSLayoutConstraint!
+    /// buildingListView의 heightAnchor 값
     private var collectionViewHeight: NSLayoutConstraint!
+    /// 실내위치 설정 view
     private let indoorSettingView = IndoorSettingView()
     /// 선택 및 데이터 업로드 버튼
     private let bottomButton = SelectLocationLargeButton()
     /// 측정위치 선택화면 관련된 로직담당 객체
     private var viewModel: SelectLocationVM?
     private var cancellables: Set<AnyCancellable> = []
+    /// buildingListView에 표시될 dataSource 담당 프로퍼티
     private var buildingListDataSource: UICollectionViewDiffableDataSource<BuildingListCollectionViewCell.Section, BuildingInfo>!
     
     /// SelectLocationVC 최초 접근시 configure
@@ -180,6 +184,7 @@ extension SelectLocationVC {
         self.mapView.alpha = 0
     }
     
+    /// buildingListView 화면을 표시할 초기화 함수
     private func configureBuildingListView() {
         self.buildingListView.backgroundColor = .clear
         self.buildingListView.register(BuildingListCollectionViewCell.self, forCellWithReuseIdentifier: BuildingListCollectionViewCell.identifier)
@@ -187,6 +192,7 @@ extension SelectLocationVC {
         self.buildingListView.alpha = 0
     }
     
+    /// buildingListView 화면에 표시될 dataSource를 초기화하는 함수
     private func configureBuildingListDataSource() {
         let cellRegistration = UICollectionView.CellRegistration<BuildingListCollectionViewCell, BuildingInfo> { (cell, indexPath, info) in
             let isSelected = self.viewModel?.mode == .setIndoorInfo
@@ -198,6 +204,7 @@ extension SelectLocationVC {
         }
     }
     
+    /// indoorSettingView 화면을 표시할 초기화 함수
     private func configureIndoorSettingView() {
         self.indoorSettingView.floorSwitch.addTarget(self, action: #selector(checkIndoorSetting(_:)), for: .allEvents)
         self.indoorSettingView.floorField.delegate = self
@@ -205,11 +212,27 @@ extension SelectLocationVC {
     }
 }
 
+// MARK: INPUT from MainVC
 extension SelectLocationVC {
+    /// MainVC의 특정함수를 위임받기 위한 delegate 설정 함수
+    func configureDelegate(_ delegate: SelectLocationDelegate) {
+        self.delegate = delegate
+    }
+    
+    /// 의존성주입이 된 viewModel을 설정하기 위한 함수
+    func configureViewModel(_ viewModel: SelectLocationVM) {
+        self.viewModel = viewModel
+    }
+}
+
+// MARK: INPUT from IndoorSettingView
+extension SelectLocationVC {
+    /// segmentedControl 값변화 수신하는 함수
     @objc func checkIndoorSetting(_ sender: UISegmentedControl) {
         self.checkIndoorSetting()
     }
     
+    /// indoorSettingView 값변화시 설정완료된 상태인지 확인하는 함수
     private func checkIndoorSetting() {
         let selectedIndex = self.indoorSettingView.floorSwitch.selectedSegmentIndex
         guard selectedIndex >= 0,
@@ -219,7 +242,6 @@ extension SelectLocationVC {
             return
         }
         
-        print(selectedIndex)
         if selectedIndex == 0 {
             self.viewModel?.setIndoorValue(to: -floor)
         } else {
@@ -228,19 +250,9 @@ extension SelectLocationVC {
     }
 }
 
-// MARK: INPUT from MainVC
-extension SelectLocationVC {
-    func configureDelegate(_ delegate: SelectLocationDelegate) {
-        self.delegate = delegate
-    }
-    
-    func configureViewModel(_ viewModel: SelectLocationVM) {
-        self.viewModel = viewModel
-    }
-}
-
 // MARK: INPUT from ViewModel
 extension SelectLocationVC {
+    /// viewModel 에서 값 변화를 수신하기 위한 함수
     private func bindViewModel() {
         self.bindLocationData()
         self.bindNetworkError()
@@ -249,6 +261,7 @@ extension SelectLocationVC {
         self.bindIndoorFloor()
     }
     
+    /// viewModel의 locationData값 변화를 수신하기 위한 함수
     private func bindLocationData() {
         self.viewModel?.$locationData
             .receive(on: DispatchQueue.main)
@@ -259,6 +272,7 @@ extension SelectLocationVC {
             .store(in: &self.cancellables)
     }
     
+    /// viewModel의 networkError값 변화를 수신하기 위한 함수
     private func bindNetworkError() {
         self.viewModel?.$networkError
             .receive(on: DispatchQueue.main)
@@ -269,6 +283,7 @@ extension SelectLocationVC {
             .store(in: &self.cancellables)
     }
     
+    /// viewModel의 mode값 변화를 수신하기 위한 함수
     private func bindMode() {
         self.viewModel?.$mode
             .receive(on: DispatchQueue.main)
@@ -303,6 +318,7 @@ extension SelectLocationVC {
             .store(in: &self.cancellables)
     }
     
+    /// viewModel의 buildingList값 변화를 수신하기 위한 함수
     private func bindBuildingList() {
         self.viewModel?.$buildingList
             .receive(on: DispatchQueue.main)
@@ -315,6 +331,7 @@ extension SelectLocationVC {
             .store(in: &self.cancellables)
     }
     
+    /// viewModel의 indoorFloor값 변화를 수신하기 위한 함수
     private func bindIndoorFloor() {
         self.viewModel?.$indoorFloor
             .receive(on: DispatchQueue.main)
@@ -343,16 +360,19 @@ extension SelectLocationVC: MKMapViewDelegate {
 }
 
 extension SelectLocationVC: UICollectionViewDelegateFlowLayout {
+    /// BuildingListCollectionViewCell 크기값 반환하는 함수
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width - (16*2), height: 60)
     }
 }
 
 extension SelectLocationVC: UICollectionViewDelegate {
+    /// BuildingListCollectionViewCell 선택시 액션연결 함수
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         self.viewModel?.selectBuilding(to: indexPath.item)
     }
     
+    /// buildingListView의 스크롤위치 수신함수를 통해 pagination 구현한 함수
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if self.buildingListView.contentOffset.y > (self.buildingListView.contentSize.height - self.buildingListView.bounds.size.height) {
             guard self.viewModel?.fetching == false,
@@ -364,6 +384,7 @@ extension SelectLocationVC: UICollectionViewDelegate {
 }
 
 extension SelectLocationVC: UITextFieldDelegate {
+    /// keyboard의 done 액션 수신함수를 통해 키보드내림 구현한 함수
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         self.checkIndoorSetting()
         self.view.endEditing(true)

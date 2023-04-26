@@ -298,62 +298,6 @@ extension MainVC {
     }
 }
 
-// update textlabel on tasks start/finish
-extension MainVC {
-    func sharePLY(file: Any) {
-        let activityViewController = UIActivityViewController(activityItems: [file], applicationActivities: nil)
-        
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            activityViewController.popoverPresentationController?.sourceView = self.view
-            activityViewController.popoverPresentationController?.sourceRect = self.recordingButton.frame
-        }
-        
-        DispatchQueue.main.async {
-            self.present(activityViewController, animated: true)
-        }
-    }
-    
-    func startMakingPlyFile() {
-        DispatchQueue.main.async { [weak self] in
-            self?.statusLabel.changeText(to: .loading)
-        }
-    }
-    
-    func finishMakingPlyFile() {
-        print("finish making ply file")
-    }
-    
-    func startUploadingData() {
-        DispatchQueue.main.async { [weak self] in
-            self?.statusLabel.changeText(to: .uploading)
-        }
-    }
-    
-    func showShareOrUpload(stringData: String, fileName: String) {
-        DispatchQueue.main.async { [weak self] in
-            let alert = UIAlertController(title: "Share OR Upload", message: "AirDrop 공유, 또는 서버 업로드 선택", preferredStyle: .alert)
-            let share = UIAlertAction(title: "Share", style: .default) { [weak self] _ in
-                DispatchQueue.global().async { [weak self] in
-                    if let file = shareFile(content: stringData, filename: fileName, folder: "") {
-                        self?.sharePLY(file: file)
-                    }
-                }
-            }
-//            let upload = UIAlertAction(title: "Upload", style: .default) { [weak self] _ in
-//                if let fileData = stringData.data(using: .utf8) {
-//                    let apiService = MainApiService()
-//                    apiService.uploadPlyData(fileName: fileName, fileData: fileData) { [weak self] result in
-////                        self?.showUploadResult(result: result)
-//                    }
-//                }
-//            }
-//            alert.addAction(share)
-//            alert.addAction(upload)
-//            self?.present(alert, animated: true)
-        }
-    }
-}
-
 // MARK: Location-related properties and delegate methods.
 extension MainVC: CLLocationManagerDelegate {
     /// 앱이 위치 관리자를 생성할 때와 권한 부여 상태가 변경될 때 delegate 에게 알립니다.

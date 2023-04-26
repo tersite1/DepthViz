@@ -29,6 +29,7 @@ final class SelectLocationVM {
     /// 네트워크 통신으로 인한 Error 발생값
     @Published private(set) var networkError: (title: String, text: String)?
     /// 건물리스트 api 사용시 pagenation 을 위한 현재 page 값
+    @Published private(set) var indoorFloor: Int?
     private var page: Int = 1
     /// pagenation 불가능 여부값
     private(set) var isLastPage: Bool = false
@@ -90,8 +91,12 @@ extension SelectLocationVM {
             self.page = 1
             self.isLastPage = false
             self.fetchBuildingList()
-        default:
-            return
+        case .selectBuilding:
+            self.mode = .setIndoorInfo
+        case .setIndoorInfo:
+            self.mode = .done
+        case .done:
+            print("upload")
         }
     }
     
@@ -103,9 +108,30 @@ extension SelectLocationVM {
         case .selectBuilding:
             self.buildingList = []
             self.mode = .selectLocation
-        default:
+        case .setIndoorInfo:
+            self.page = 1
+            self.isLastPage = false
+            self.buildingList = []
+            self.fetchBuildingList()
+            self.mode = .selectBuilding
+        case .done:
+            self.mode = .setIndoorInfo
+        }
+    }
+    
+    func selectBuilding(to index: Int) {
+        guard var selected = self.buildingList[safe: index] else {
+            print("/// out of index: \(index)")
             return
         }
+        
+        selected.updateUUID()
+        self.changeMode()
+        self.buildingList = [selected]
+    }
+    
+    func setIndoorValue(to floor: Int?) {
+        self.indoorFloor = floor
     }
 }
 

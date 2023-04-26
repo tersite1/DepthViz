@@ -158,7 +158,6 @@ extension MainVC {
                     self?.configureCantGetGPS()
                 default:
                     self?.locationManager.stopUpdatingLocation()
-                    return
                 }
                 
                 self?.changeStatusLabel(to: mode)
@@ -216,6 +215,7 @@ extension MainVC {
 }
 
 extension MainVC {
+    /// mode값에 따라 현재 동작상태 표시내용 설정 함수 
     private func changeStatusLabel(to mode: MainVM.Mode) {
         switch mode {
         case .ready:
@@ -406,5 +406,11 @@ extension MainVC: SelectLocationDelegate {
     /// 측정된 데이터 서버 업로드 취소 함수
     func uploadCancel() {
         self.viewModel?.uploadCancel()
+    }
+    
+    /// 업로드 데이터들을 수신받아 업로드를 실행하는 함수
+    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingInfo, floor: Int) {
+        self.viewModel?.changeMode()
+        // MARK: viewModel로 전달
     }
 }

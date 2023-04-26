@@ -71,6 +71,9 @@ extension MainVM {
             self.stopRecording()
             self.mode = .loading
         // 그 외의 경우는 무시된다
+        case.loading:
+            self.mode = .uploading
+            print("upload!")
         default:
             return
         }

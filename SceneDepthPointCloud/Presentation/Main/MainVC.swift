@@ -130,7 +130,8 @@ extension MainVC {
         self.bindMode()
         self.bindPointCount()
         self.bindLidarData()
-        self.bindNetworkStatus()
+        self.bindNetworkError()
+        self.bindUploadSuccess()
     }
     
     /// viewModel 의 mode 값 변화를 수신하기 위한 함수
@@ -188,19 +189,27 @@ extension MainVC {
             .store(in: &self.cancellables)
     }
     
-    /// viewModel 의 networkStatus 값 변화를 수신하여 성공 및 실패를 표시하기 위한 함수
-    private func bindNetworkStatus() {
-        self.viewModel?.$networkStatus
+    /// viewModel 의 networkError 값 변화를 수신하여 실패를 표시하기 위한 함수
+    private func bindNetworkError() {
+        self.viewModel?.$networkError
             .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] status in
-                guard let status = status else { return }
+            .sink(receiveValue: { [weak self] error in
+                guard let error = error else { return }
                 
-                switch status {
-                case .SUCCESS:
-                    self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
-                case .ERROR:
-                    self?.showAlert(title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
-                }
+                self?.showAlert(title: error.title, text: error.text)
+                self?.viewModel?.changeMode()
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindUploadSuccess() {
+        self.viewModel?.$uploadSuccess
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] success in
+                guard success else { return }
+                
+                self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
+                self?.viewModel?.changeMode()
             })
             .store(in: &self.cancellables)
     }
@@ -330,17 +339,17 @@ extension MainVC {
                     }
                 }
             }
-            let upload = UIAlertAction(title: "Upload", style: .default) { [weak self] _ in
-                if let fileData = stringData.data(using: .utf8) {
-                    let apiService = MainApiService()
-                    apiService.uploadPlyData(fileName: fileName, fileData: fileData) { [weak self] result in
-//                        self?.showUploadResult(result: result)
-                    }
-                }
-            }
-            alert.addAction(share)
-            alert.addAction(upload)
-            self?.present(alert, animated: true)
+//            let upload = UIAlertAction(title: "Upload", style: .default) { [weak self] _ in
+//                if let fileData = stringData.data(using: .utf8) {
+//                    let apiService = MainApiService()
+//                    apiService.uploadPlyData(fileName: fileName, fileData: fileData) { [weak self] result in
+////                        self?.showUploadResult(result: result)
+//                    }
+//                }
+//            }
+//            alert.addAction(share)
+//            alert.addAction(upload)
+//            self?.present(alert, animated: true)
         }
     }
 }
@@ -411,6 +420,6 @@ extension MainVC: SelectLocationDelegate {
     /// 업로드 데이터들을 수신받아 업로드를 실행하는 함수
     func uploadMeasuredData(location: LocationData, buildingInfo: BuildingInfo, floor: Int) {
         self.viewModel?.changeMode()
-        // MARK: viewModel로 전달
+        self.viewModel?.uploadMeasuredData(location: location, buildingInfo: buildingInfo, floor: floor)
     }
 }

@@ -19,12 +19,13 @@ struct Network {
             }
             .resume()
     }
-    
-    static func uploadData(url: String, measuredData: MeasuredData, completion: @escaping (NetworkResult) -> Void) {
+    // MARK: Content-Type=multipart/form-data 형식으로 upload하는 함수
+    static func uploadData(url: String, address: String, location: String, file: LiDARData, completion: @escaping (NetworkResult) -> Void) {
         // multipart/form-data 인코딩
         let multipartFormData = MultipartFormData()
-        multipartFormData.append("\(measuredData.collectID)".data(using: .utf8)!, withName: "collectID", mimeType: "text/plain")
-        multipartFormData.append(measuredData.lidar, withName: "lidar", fileName: measuredData.lidarFileName, mimeType: "text/plain")
+        multipartFormData.append(address.data(using: .utf8)!, withName: "address", mimeType: "text/plain")
+        multipartFormData.append(location.data(using: .utf8)!, withName: "location", mimeType: "text/plain")
+        multipartFormData.append(file.lidarData, withName: "file", fileName: file.lidarFileName, mimeType: "text/plain")
         
         // 파일 업로드
         AF.upload(multipartFormData: multipartFormData, to: url)
@@ -52,8 +53,8 @@ struct Network {
         }
         
         // check 용 출력
-//        print("statusCode: \(statusCode)")
-//        print("Data: \(String(data: data, encoding: .utf8)!)")
+        print("statusCode: \(statusCode)")
+        print("Data: \(String(data: data, encoding: .utf8)!)")
         
         return NetworkResult(data: data, status: status)
     }

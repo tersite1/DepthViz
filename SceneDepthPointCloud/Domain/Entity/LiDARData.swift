@@ -13,7 +13,7 @@ struct LiDARData {
     // LiDAR 데이터 파일명
     let lidarFileName: String
     // LiDAR 데이터
-    let lidarData: Data?
+    let lidarData: Data
     // LiDAR 데이터 파일크기
     let lidarFileSize: String
     // LiDAR 데이터 point 개수
@@ -29,7 +29,8 @@ struct LiDARData {
             bcf.countStyle = .file
             self.lidarFileSize = bcf.string(fromByteCount: Int64(data.count))
         } else {
-            self.lidarData = nil
+            print("/// lidarData is nil")
+            self.lidarData = Data()
             self.lidarFileSize = "0 MB"
         }
         

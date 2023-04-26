@@ -12,6 +12,7 @@
 		8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */; };
 		87673BD429F80E0500BD3DC3 /* IndoorSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */; };
 		87673BD629F8BC8700BD3DC3 /* SettedInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87673BD529F8BC8700BD3DC3 /* SettedInfoView.swift */; };
+		87673BD829F8EC4800BD3DC3 /* IndoorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87673BD729F8EC4800BD3DC3 /* IndoorData.swift */; };
 		877F533B29F62E2300A0F931 /* BackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533A29F62E2300A0F931 /* BackButton.swift */; };
 		877F533D29F6328D00A0F931 /* BuildingNearByGpsDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533C29F6328D00A0F931 /* BuildingNearByGpsDTO.swift */; };
 		877F533F29F63E1F00A0F931 /* BuildingInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533E29F63E1F00A0F931 /* BuildingInfo.swift */; };
@@ -30,7 +31,6 @@
 		87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86629D1946400881FFB /* UIViewController+Extension.swift */; };
 		87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86B29D290E900881FFB /* RecordingButton.swift */; };
 		87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */; };
-		87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC87029D30EE000881FFB /* MeasuredData.swift */; };
 		87AE167829F124EF00B101A6 /* LocationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87AE167729F124EF00B101A6 /* LocationData.swift */; };
 		87C8FAF929F171D1000C37CE /* SelectLocationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FAF829F171D1000C37CE /* SelectLocationVC.swift */; };
 		87C8FAFB29F1867E000C37CE /* SelectLocationVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FAFA29F1867E000C37CE /* SelectLocationVM.swift */; };
@@ -63,6 +63,7 @@
 		8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudCountView.swift; sourceTree = "<group>"; };
 		87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndoorSettingView.swift; sourceTree = "<group>"; };
 		87673BD529F8BC8700BD3DC3 /* SettedInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettedInfoView.swift; sourceTree = "<group>"; };
+		87673BD729F8EC4800BD3DC3 /* IndoorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndoorData.swift; sourceTree = "<group>"; };
 		877F533A29F62E2300A0F931 /* BackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackButton.swift; sourceTree = "<group>"; };
 		877F533C29F6328D00A0F931 /* BuildingNearByGpsDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingNearByGpsDTO.swift; sourceTree = "<group>"; };
 		877F533E29F63E1F00A0F931 /* BuildingInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingInfo.swift; sourceTree = "<group>"; };
@@ -82,7 +83,6 @@
 		87ABC86629D1946400881FFB /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
 		87ABC86B29D290E900881FFB /* RecordingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingButton.swift; sourceTree = "<group>"; };
 		87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorLabel.swift; sourceTree = "<group>"; };
-		87ABC87029D30EE000881FFB /* MeasuredData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeasuredData.swift; sourceTree = "<group>"; };
 		87AE167729F124EF00B101A6 /* LocationData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationData.swift; sourceTree = "<group>"; };
 		87C8FAF829F171D1000C37CE /* SelectLocationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationVC.swift; sourceTree = "<group>"; };
 		87C8FAFA29F1867E000C37CE /* SelectLocationVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectLocationVM.swift; sourceTree = "<group>"; };
@@ -238,7 +238,6 @@
 		87ABC86F29D30D7600881FFB /* DTO */ = {
 			isa = PBXGroup;
 			children = (
-				87ABC87029D30EE000881FFB /* MeasuredData.swift */,
 				87C8FB1029F23ADE000C37CE /* AddressFromGpsDTO.swift */,
 				877F533C29F6328D00A0F931 /* BuildingNearByGpsDTO.swift */,
 			);
@@ -304,6 +303,7 @@
 				87AE167729F124EF00B101A6 /* LocationData.swift */,
 				87C8FB1229F24EDF000C37CE /* FetchError.swift */,
 				877F533E29F63E1F00A0F931 /* BuildingInfo.swift */,
+				87673BD729F8EC4800BD3DC3 /* IndoorData.swift */,
 			);
 			path = Entity;
 			sourceTree = "<group>";
@@ -428,6 +428,7 @@
 				87AE167829F124EF00B101A6 /* LocationData.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,
 				877F534529F643B600A0F931 /* BuildingRepository.swift in Sources */,
+				87673BD829F8EC4800BD3DC3 /* IndoorData.swift in Sources */,
 				87C8FB0D29F2382C000C37CE /* AddressRepositoryInterface.swift in Sources */,
 				87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */,
 				87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */,
@@ -454,7 +455,6 @@
 				E73DD13624636FEF00D77039 /* Renderer.swift in Sources */,
 				877F533D29F6328D00A0F931 /* BuildingNearByGpsDTO.swift in Sources */,
 				E73DD13824636FEF00D77039 /* MainVC.swift in Sources */,
-				87ABC87129D30EE000881FFB /* MeasuredData.swift in Sources */,
 				877F534D29F7C46600A0F931 /* Collection+Extension.swift in Sources */,
 				877F534B29F69D1600A0F931 /* UIView+Extension.swift in Sources */,
 				87C8FAF929F171D1000C37CE /* SelectLocationVC.swift in Sources */,

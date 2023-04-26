@@ -12,12 +12,12 @@ struct NetworkURL {
     static let baseURL: String = Bundle.main.infoDictionary!["BASE_URL"] as! String
     
     enum Domain {
-        static let server = baseURL + "/LidarDemo"
+        static let server = baseURL + "/typers"
         static let kakao = "https://dapi.kakao.com"
     }
     
     enum Server {
-        static let uploadPly: String = Domain.server + "/v1/collect/building"
+        static let lidars: String = Domain.server + "/lidars"
     }
     
     enum Kakao {

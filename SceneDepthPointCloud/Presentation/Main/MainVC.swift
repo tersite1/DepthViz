@@ -130,7 +130,8 @@ extension MainVC {
         self.bindMode()
         self.bindPointCount()
         self.bindLidarData()
-        self.bindNetworkStatus()
+        self.bindNetworkError()
+        self.bindUploadSuccess()
     }
     
     /// viewModel 의 mode 값 변화를 수신하기 위한 함수
@@ -158,7 +159,6 @@ extension MainVC {
                     self?.configureCantGetGPS()
                 default:
                     self?.locationManager.stopUpdatingLocation()
-                    return
                 }
                 
                 self?.changeStatusLabel(to: mode)
@@ -189,19 +189,27 @@ extension MainVC {
             .store(in: &self.cancellables)
     }
     
-    /// viewModel 의 networkStatus 값 변화를 수신하여 성공 및 실패를 표시하기 위한 함수
-    private func bindNetworkStatus() {
-        self.viewModel?.$networkStatus
+    /// viewModel 의 networkError 값 변화를 수신하여 실패를 표시하기 위한 함수
+    private func bindNetworkError() {
+        self.viewModel?.$networkError
             .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] status in
-                guard let status = status else { return }
+            .sink(receiveValue: { [weak self] error in
+                guard let error = error else { return }
                 
-                switch status {
-                case .SUCCESS:
-                    self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
-                case .ERROR:
-                    self?.showAlert(title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
-                }
+                self?.showAlert(title: error.title, text: error.text)
+                self?.viewModel?.changeMode()
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindUploadSuccess() {
+        self.viewModel?.$uploadSuccess
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] success in
+                guard success else { return }
+                
+                self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
+                self?.viewModel?.changeMode()
             })
             .store(in: &self.cancellables)
     }
@@ -216,6 +224,7 @@ extension MainVC {
 }
 
 extension MainVC {
+    /// mode값에 따라 현재 동작상태 표시내용 설정 함수 
     private func changeStatusLabel(to mode: MainVM.Mode) {
         switch mode {
         case .ready:
@@ -289,62 +298,6 @@ extension MainVC {
     }
 }
 
-// update textlabel on tasks start/finish
-extension MainVC {
-    func sharePLY(file: Any) {
-        let activityViewController = UIActivityViewController(activityItems: [file], applicationActivities: nil)
-        
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            activityViewController.popoverPresentationController?.sourceView = self.view
-            activityViewController.popoverPresentationController?.sourceRect = self.recordingButton.frame
-        }
-        
-        DispatchQueue.main.async {
-            self.present(activityViewController, animated: true)
-        }
-    }
-    
-    func startMakingPlyFile() {
-        DispatchQueue.main.async { [weak self] in
-            self?.statusLabel.changeText(to: .loading)
-        }
-    }
-    
-    func finishMakingPlyFile() {
-        print("finish making ply file")
-    }
-    
-    func startUploadingData() {
-        DispatchQueue.main.async { [weak self] in
-            self?.statusLabel.changeText(to: .uploading)
-        }
-    }
-    
-    func showShareOrUpload(stringData: String, fileName: String) {
-        DispatchQueue.main.async { [weak self] in
-            let alert = UIAlertController(title: "Share OR Upload", message: "AirDrop 공유, 또는 서버 업로드 선택", preferredStyle: .alert)
-            let share = UIAlertAction(title: "Share", style: .default) { [weak self] _ in
-                DispatchQueue.global().async { [weak self] in
-                    if let file = shareFile(content: stringData, filename: fileName, folder: "") {
-                        self?.sharePLY(file: file)
-                    }
-                }
-            }
-            let upload = UIAlertAction(title: "Upload", style: .default) { [weak self] _ in
-                if let fileData = stringData.data(using: .utf8) {
-                    let apiService = MainApiService()
-                    apiService.uploadPlyData(fileName: fileName, fileData: fileData) { [weak self] result in
-//                        self?.showUploadResult(result: result)
-                    }
-                }
-            }
-            alert.addAction(share)
-            alert.addAction(upload)
-            self?.present(alert, animated: true)
-        }
-    }
-}
-
 // MARK: Location-related properties and delegate methods.
 extension MainVC: CLLocationManagerDelegate {
     /// 앱이 위치 관리자를 생성할 때와 권한 부여 상태가 변경될 때 delegate 에게 알립니다.
@@ -406,5 +359,11 @@ extension MainVC: SelectLocationDelegate {
     /// 측정된 데이터 서버 업로드 취소 함수
     func uploadCancel() {
         self.viewModel?.uploadCancel()
+    }
+    
+    /// 업로드 데이터들을 수신받아 업로드를 실행하는 함수
+    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingInfo, floor: Int) {
+        self.viewModel?.changeMode()
+        self.viewModel?.uploadMeasuredData(location: location, buildingInfo: buildingInfo, floor: floor)
     }
 }

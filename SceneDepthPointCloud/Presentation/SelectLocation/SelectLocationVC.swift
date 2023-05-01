@@ -39,6 +39,8 @@ final class SelectLocationVC: UIViewController {
     private var collectionViewHeight: NSLayoutConstraint!
     /// 실내위치 설정 view
     private let indoorSettingView = IndoorSettingView()
+    /// 업로드될 데이터 표시 view
+    private let settedInfoView = SettedInfoView()
     /// 선택 및 데이터 업로드 버튼
     private let bottomButton = SelectLocationLargeButton()
     /// 측정위치 선택화면 관련된 로직담당 객체
@@ -132,17 +134,6 @@ extension SelectLocationVC {
             pinShadow.centerYAnchor.constraint(equalTo: centerPin.bottomAnchor)
         ])
         
-        // bottomButton
-        self.bottomButton.addAction(UIAction(handler: { [weak self] _ in
-            self?.viewModel?.changeMode()
-        }), for: .touchUpInside)
-        self.view.addSubview(self.bottomButton)
-        NSLayoutConstraint.activate([
-            self.bottomButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
-            self.bottomButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            self.bottomButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
-        ])
-        
         // buildingListView
         self.buildingListView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(self.buildingListView)
@@ -164,6 +155,30 @@ extension SelectLocationVC {
             self.indoorSettingView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 76+52),
             self.indoorSettingView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.indoorSettingView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        ])
+        
+        // settedInfoView
+        self.view.addSubview(self.settedInfoView)
+        NSLayoutConstraint.activate([
+            self.settedInfoView.topAnchor.constraint(equalTo: self.indoorSettingView.bottomAnchor, constant: 52),
+            self.settedInfoView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.settedInfoView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        ])
+        self.settedInfoView.alpha = 0
+        
+        // bottomButton
+        self.bottomButton.addAction(UIAction(handler: { [weak self] _ in
+            if self?.viewModel?.mode == .done {
+                self?.passMeasuredData()
+            } else {
+                self?.viewModel?.changeMode()
+            }
+        }), for: .touchUpInside)
+        self.view.addSubview(self.bottomButton)
+        NSLayoutConstraint.activate([
+            self.bottomButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            self.bottomButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+            self.bottomButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
         ])
     }
     
@@ -210,6 +225,14 @@ extension SelectLocationVC {
         self.indoorSettingView.floorField.delegate = self
         self.indoorSettingView.alpha = 0
     }
+    
+    private func configureSettedInfoView() {
+        guard let buildingInfo = self.viewModel?.buildingList.first,
+              let floor = self.viewModel?.indoorFloor,
+              let lidarData = self.viewModel?.lidarData else { return }
+        
+        self.settedInfoView.configureInfos(buildingInfo: buildingInfo, floor: floor, lidarData: lidarData)
+    }
 }
 
 // MARK: INPUT from MainVC
@@ -246,6 +269,22 @@ extension SelectLocationVC {
             self.viewModel?.setIndoorValue(to: -floor)
         } else {
             self.viewModel?.setIndoorValue(to: floor)
+        }
+    }
+}
+
+// MARK: Action
+extension SelectLocationVC {
+    private func passMeasuredData() {
+        // lidarData의 경우 MainVM의 값을 사용하므로 패스
+        guard let locationData = self.viewModel?.locationData,
+              let buildingInfo = self.viewModel?.buildingList.first,
+              let indoorFloor = self.viewModel?.indoorFloor else {
+            return
+        }
+        // SelectLocationVC 화면 닫은 후 데이터 넘기기
+        self.dismiss(animated: true) { [weak self] in
+            self?.delegate?.uploadMeasuredData(location: locationData, buildingInfo: buildingInfo, floor: indoorFloor)
         }
     }
 }
@@ -310,8 +349,11 @@ extension SelectLocationVC {
                     self?.collectionViewBottom.isActive = false
                     self?.collectionViewHeight.isActive = true
                     self?.indoorSettingView.fadeIn()
+                    self?.settedInfoView.fadeOut()
                     self?.bottomButton.changeStatus(to: .beforeSetting)
                 case .done:
+                    self?.configureSettedInfoView()
+                    self?.settedInfoView.fadeIn()
                     self?.bottomButton.changeStatus(to: .uploadable)
                 }
             })
@@ -338,7 +380,7 @@ extension SelectLocationVC {
             .sink(receiveValue: { [weak self] floor in
                 guard self?.viewModel?.mode == .setIndoorInfo else { return }
                 
-                if let floor = floor {
+                if floor != nil {
                     self?.bottomButton.changeStatus(to: .settingChanged)
                 } else {
                     self?.bottomButton.changeStatus(to: .beforeSetting)

@@ -14,15 +14,7 @@ struct BuildingInfo: Hashable {
     let roadAddress: String // 도로명주소
     let placeName: String // 장소명(건물명)
     let distance: Int // 거리(m단위)
-    let addressName: String
-    let categoryGroupCode: String
-    let categoryGroupName: String
-    let categoryName: String
-    let id: String
-    let phone: String
-    let placeUrl: String
-    let longitude: String
-    let latitude: String
+    let dto: BuildingNearByGpsDocumentDTO
     
     static func == (lhs: BuildingInfo, rhs: BuildingInfo) -> Bool {
         return lhs.uuid == rhs.uuid

@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// 실내위치 설정 커스텀뷰
 final class IndoorSettingView: UIView {
     private let titleLabel: UILabel = {
         let label = UILabel()

@@ -30,8 +30,10 @@ final class MainVM {
     @Published private(set) var lidarData: LiDARData?
     /// 위치정보 데이터 값
     @Published private(set) var currentLocation: LocationData?
-    /// 전송 후 네트워킹 결과값
-    @Published private(set) var networkStatus: NetworkStatus?
+    /// 전송 후 네트워킹 성공
+    @Published private(set) var uploadSuccess: Bool = false
+    /// 전송 후 네트워킹 오류값
+    @Published private(set) var networkError: (title: String, text: String)?
     
     /// 실시간 LiDAR 측정 및 Point Cloud 표시관련 핵심로직 담당 객체
     private let renderer: Renderer
@@ -46,7 +48,6 @@ final class MainVM {
     
     init(session: ARSession, device: MTLDevice, view: MTKView) {
         self.mode = .ready
-        self.networkStatus = nil
         self.renderer = Renderer(session: session, metalDevice: device, renderDestination: view)
         self.renderer.drawRectResized(size: view.bounds.size)
         
@@ -71,6 +72,11 @@ extension MainVM {
             self.stopRecording()
             self.mode = .loading
         // 그 외의 경우는 무시된다
+        case.loading:
+            self.mode = .uploading
+        case.uploading:
+            // MARK: Renderer 초기화 필요
+            self.mode = .ready
         default:
             return
         }
@@ -89,7 +95,7 @@ extension MainVM {
     /// 메모리 부족으로 인한 LiDAR 측정 종료 함수
     func terminateRecording() {
         self.stopRecording()
-        self.mode = .loading
+        self.changeMode()
     }
     
     func readyForRecording() {
@@ -112,8 +118,29 @@ extension MainVM {
     
     func uploadCancel() {
         // MARK: renderer 초기화 필요
-        self.networkStatus = NetworkStatus.status(400)
+        self.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
         self.mode = .ready
+    }
+    
+    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingInfo, floor: Int) {
+        guard let lidarData = self.lidarData else { return }
+        
+        let location = IndoorData(latitude: location.latitude, longitude: location.longitude, altitude: location.altitude, floor: "\(floor)")
+        
+        self.apiService.upload(buildingInfo: buildingInfo, location: location, file: lidarData) { [weak self] result in
+            switch result {
+            case .success(let uploaded):
+                if uploaded {
+                    self?.uploadSuccess = true
+                } else {
+                    self?.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
+                }
+                
+            case .failure(let fetchError):
+                self?.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again\n\(fetchError.message)")
+                        
+            }
+        }
     }
 }
 

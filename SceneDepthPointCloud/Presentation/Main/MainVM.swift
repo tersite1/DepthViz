@@ -75,7 +75,7 @@ extension MainVM {
         case.loading:
             self.mode = .uploading
         case.uploading:
-            // MARK: Renderer 초기화 필요
+            self.resetRenderer()
             self.mode = .ready
         default:
             return
@@ -117,8 +117,8 @@ extension MainVM {
     }
     
     func uploadCancel() {
-        // MARK: renderer 초기화 필요
         self.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
+        self.resetRenderer()
         self.mode = .ready
     }
     
@@ -161,8 +161,6 @@ extension MainVM {
                       let pointCount = self?.renderer.currentPointCount else { return }
                 
                 self?.lidarData = LiDARData(rawStringData: rawStringData, pointCount: pointCount)
-                
-                // MARK: Renderer 초기화 부분 필요
             }
             .store(in: &self.cancellables)
     }
@@ -182,5 +180,10 @@ extension MainVM {
     /// locationUsecase 에서 위치정보 받아와 currentLocation 값을 반영하는 함수
     private func getLocationData() {
         self.currentLocation = self.locationUsecase.getSuitableLocation(from: self.locations)
+    }
+    
+    /// Renderer 초기화 및 재측정 설정 함수
+    private func resetRenderer() {
+        
     }
 }

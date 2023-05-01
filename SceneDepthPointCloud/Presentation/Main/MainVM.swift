@@ -117,9 +117,9 @@ extension MainVM {
     }
     
     func uploadCancel() {
-        self.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
         self.resetRenderer()
-        self.mode = .ready
+        self.mode = .uploading
+        self.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
     }
     
     func uploadMeasuredData(location: LocationData, buildingInfo: BuildingInfo, floor: Int) {
@@ -184,6 +184,6 @@ extension MainVM {
     
     /// Renderer 초기화 및 재측정 설정 함수
     private func resetRenderer() {
-        
+        self.renderer.clearParticles()
     }
 }

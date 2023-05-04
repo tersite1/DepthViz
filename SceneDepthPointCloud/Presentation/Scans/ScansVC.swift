@@ -11,7 +11,7 @@ import Combine
 
 final class ScansVC: UIViewController {
     static let identifier = "ScansVC"
-    let reloadButton = ReloadButton()
+    private let reloadButton = ReloadButton()
     private var viewModel: ScansVM?
     
     override func viewDidLoad() {
@@ -35,14 +35,14 @@ final class ScansVC: UIViewController {
 extension ScansVC {
     private func configureUI() {
         self.reloadButton.addAction(UIAction(handler: { [weak self] _ in
-            print("reload")
+            self?.viewModel?.reload()
         }), for: .touchUpInside)
         let rightItem = UIBarButtonItem(customView: self.reloadButton)
         self.navigationItem.setRightBarButton(rightItem, animated: true)
     }
     
     private func configureViewModel() {
-        // MARK: ScansVM 의존성주입 필요(ApiService, Repository 등)
-        self.viewModel = ScansVM()
+        let lidarRepository = LidarRepository()
+        self.viewModel = ScansVM(lidarRepository: lidarRepository)
     }
 }

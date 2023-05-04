@@ -14,16 +14,22 @@ final class ScansVM {
         case lidarList
         case buildingList
     }
+    @Published private(set) var mode: ListMode = .lidarList
     @Published private(set) var lidarList: [LidarInfo] = []
+    @Published private(set) var networkError: (title: String, text: String)?
     private(set) var isLastPage: Bool = false
     private(set) var fetching: Bool = false
     private var page: Int = 1
+    private let lidarRepository: LidarRepositoryInterface
     
-    init() {
-        // MARK: 의존성 받는 부분
+    init(lidarRepository: LidarRepositoryInterface) {
+        self.lidarRepository = lidarRepository
+        
+        self.reload()
     }
 }
 
+// MARK: INPUT
 extension ScansVM {
     func nextPageLidarListFetch() {
         guard self.isLastPage == false else { return }
@@ -31,10 +37,38 @@ extension ScansVM {
         self.page += 1
         self.fetchLidarList()
     }
+    
+    func reload() {
+        switch self.mode {
+        case .lidarList:
+            self.page = 1
+            self.lidarList = []
+            self.fetchLidarList()
+            
+        case .buildingList:
+            // MARK: BuildingList 수신 API 확인 필요
+            return
+        }
+    }
 }
 
 extension ScansVM {
     private func fetchLidarList() {
+        guard self.fetching == false,
+              self.isLastPage == false else { return }
         
+        self.fetching = true
+        
+        self.lidarRepository.fetchLidarList(page: self.page) { [weak self] result in
+            switch result {
+            case .success((let infos, let isLastPage)):
+                self?.lidarList += infos
+                self?.isLastPage = isLastPage
+                
+            case .failure(let fetchError):
+                self?.networkError = (title: "Fetch LidarList Error", text: fetchError.message)
+            }
+            self?.fetching = false
+        }
     }
 }

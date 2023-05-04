@@ -37,7 +37,7 @@ final class Renderer {
     private let renderDestination: RenderDestinationProvider
     private let relaxedStencilState: MTLDepthStencilState
     private let depthStencilState: MTLDepthStencilState
-    private let commandQueue: MTLCommandQueue
+    private var commandQueue: MTLCommandQueue
     private lazy var unprojectPipelineState = makeUnprojectionPipelineState()!
     private lazy var rgbPipelineState = makeRGBPipelineState()!
     private lazy var particlePipelineState = makeParticlePipelineState()!
@@ -448,5 +448,24 @@ extension Renderer {
                 self.lidarRawStringData = fileToWrite
             }
         }
+    }
+}
+
+extension Renderer {
+    /// 재측정을 위한 Renderer 초기화 함수
+    /// https://github.com/ryanphilly/IOS-PointCloud 코드 참고
+    func clearParticles() {
+        self.currentPointIndex = 0
+        self.currentPointCount = 0
+        
+        self.rgbUniformsBuffers = [MetalBuffer<RGBUniforms>]()
+        self.pointCloudUniformsBuffers = [MetalBuffer<PointCloudUniforms>]()
+        
+        self.commandQueue = device.makeCommandQueue()!
+        for _ in 0 ..< maxInFlightBuffers {
+            self.rgbUniformsBuffers.append(.init(device: device, count: 1, index: 0))
+            self.pointCloudUniformsBuffers.append(.init(device: device, count: 1, index: kPointCloudUniforms.rawValue))
+        }
+        self.particlesBuffer = .init(device: device, count: maxPoints, index: kParticleUniforms.rawValue)
     }
 }

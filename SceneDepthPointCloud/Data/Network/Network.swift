@@ -53,8 +53,8 @@ struct Network {
         }
         
         // check 용 출력
-        print("statusCode: \(statusCode)")
-        print("Data: \(String(data: data, encoding: .utf8)!)")
+//        print("statusCode: \(statusCode)")
+//        print("Data: \(String(data: data, encoding: .utf8)!)")
         
         return NetworkResult(data: data, status: status)
     }

@@ -19,6 +19,9 @@ final class ScansVM {
     @Published private(set) var networkError: (title: String, text: String)?
     private(set) var isLastPage: Bool = false
     private(set) var fetching: Bool = false
+    var listCount: Int {
+        return self.mode == .lidarList ? self.lidarList.count : 0
+    }
     private var page: Int = 1
     private let lidarRepository: LidarRepositoryInterface
     

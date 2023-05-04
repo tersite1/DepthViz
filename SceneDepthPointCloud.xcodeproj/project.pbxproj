@@ -15,6 +15,7 @@
 		87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C9D2A03ACF40067392D /* ScansVM.swift */; };
 		87295CA02A03AE8A0067392D /* LidarInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C9F2A03AE8A0067392D /* LidarInfo.swift */; };
 		87295CA42A03BC160067392D /* LidarRepositoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295CA32A03BC160067392D /* LidarRepositoryInterface.swift */; };
+		87295CA62A03C65E0067392D /* LidarRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295CA52A03C65E0067392D /* LidarRepository.swift */; };
 		872C7A9E29F1332B002D91D2 /* LocationUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872C7A9D29F1332B002D91D2 /* LocationUsecase.swift */; };
 		8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */; };
 		87673BD429F80E0500BD3DC3 /* IndoorSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */; };
@@ -73,6 +74,7 @@
 		87295C9D2A03ACF40067392D /* ScansVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansVM.swift; sourceTree = "<group>"; };
 		87295C9F2A03AE8A0067392D /* LidarInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarInfo.swift; sourceTree = "<group>"; };
 		87295CA32A03BC160067392D /* LidarRepositoryInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarRepositoryInterface.swift; sourceTree = "<group>"; };
+		87295CA52A03C65E0067392D /* LidarRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarRepository.swift; sourceTree = "<group>"; };
 		872C7A9D29F1332B002D91D2 /* LocationUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUsecase.swift; sourceTree = "<group>"; };
 		8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudCountView.swift; sourceTree = "<group>"; };
 		87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndoorSettingView.swift; sourceTree = "<group>"; };
@@ -327,6 +329,7 @@
 			children = (
 				87C8FB0929F23717000C37CE /* AddressRepository.swift */,
 				877F534429F643B600A0F931 /* BuildingRepository.swift */,
+				87295CA52A03C65E0067392D /* LidarRepository.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -468,6 +471,7 @@
 				877F534529F643B600A0F931 /* BuildingRepository.swift in Sources */,
 				87673BD829F8EC4800BD3DC3 /* IndoorData.swift in Sources */,
 				87C8FB0D29F2382C000C37CE /* AddressRepositoryInterface.swift in Sources */,
+				87295CA62A03C65E0067392D /* LidarRepository.swift in Sources */,
 				87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */,
 				87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */,
 				87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */,

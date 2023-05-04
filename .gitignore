@@ -6,7 +6,7 @@
 .DS_Store
 
 # Xcode - User files
-xcuserdata/
+# xcuserdata/
 
 **/*.xcodeproj/project.xcworkspace/*
 !**/*.xcodeproj/project.xcworkspace/xcshareddata

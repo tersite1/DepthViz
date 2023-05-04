@@ -19,6 +19,8 @@ final class MainVC: UIViewController, ARSessionDelegate {
     private let statusLabel = StatusIndicatorLabel()
     /// 현재 측정중인 Point Cloud 개수 표시 뷰
     private let pointCloudCountView = PointCloudCountView()
+    /// 측정이력창 표시 버튼
+    private let scansButton = ScansButton()
     /// Point Cloud 표시를 위한 Session
     private let session = ARSession()
     /// gps 측정을 위한 객체
@@ -67,6 +69,16 @@ extension MainVC {
         NSLayoutConstraint.activate([
             self.pointCloudCountView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             self.pointCloudCountView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 12)
+        ])
+        
+        // scansButton
+        self.scansButton.addAction(UIAction(handler: { [weak self] _ in
+            print("click")
+        }), for: .touchUpInside)
+        self.view.addSubview(self.scansButton)
+        NSLayoutConstraint.activate([
+            self.scansButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 32),
+            self.scansButton.centerYAnchor.constraint(equalTo: self.recordingButton.centerYAnchor)
         ])
     }
     
@@ -143,20 +155,25 @@ extension MainVC {
                 case .ready:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .ready)
+                    self?.scansButton.fadeIn()
                 case .recording:
                     self?.locationManager.startUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .recording)
+                    self?.scansButton.fadeOut()
                 case .loading:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .loading)
+                    self?.scansButton.disappear()
                 case .cantRecord:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
                     self?.configureCantRecording()
+                    self?.scansButton.fadeIn()
                 case .cantGetGPS:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
                     self?.configureCantGetGPS()
+                    self?.scansButton.fadeIn()
                 default:
                     self?.locationManager.stopUpdatingLocation()
                 }

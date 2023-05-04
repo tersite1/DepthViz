@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8711C71429D131A200F6D5CC /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 8711C71329D131A200F6D5CC /* Alamofire */; };
+		87295C942A0386B30067392D /* ScansButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C932A0386B30067392D /* ScansButton.swift */; };
 		872C7A9E29F1332B002D91D2 /* LocationUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872C7A9D29F1332B002D91D2 /* LocationUsecase.swift */; };
 		8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */; };
 		87673BD429F80E0500BD3DC3 /* IndoorSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */; };
@@ -59,6 +60,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		87295C932A0386B30067392D /* ScansButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansButton.swift; sourceTree = "<group>"; };
 		872C7A9D29F1332B002D91D2 /* LocationUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUsecase.swift; sourceTree = "<group>"; };
 		8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudCountView.swift; sourceTree = "<group>"; };
 		87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndoorSettingView.swift; sourceTree = "<group>"; };
@@ -190,6 +192,7 @@
 				87ABC86B29D290E900881FFB /* RecordingButton.swift */,
 				87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */,
 				8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */,
+				87295C932A0386B30067392D /* ScansButton.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -442,6 +445,7 @@
 				872C7A9E29F1332B002D91D2 /* LocationUsecase.swift in Sources */,
 				87C8FB1529F263C8000C37CE /* NetworkInterceptor.swift in Sources */,
 				877F533B29F62E2300A0F931 /* BackButton.swift in Sources */,
+				87295C942A0386B30067392D /* ScansButton.swift in Sources */,
 				87C8FAFE29F18DB3000C37CE /* SelectLocationTitleLabel.swift in Sources */,
 				87ABC86229D178BD00881FFB /* MainApiService.swift in Sources */,
 				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,

@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		8711C71429D131A200F6D5CC /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 8711C71329D131A200F6D5CC /* Alamofire */; };
 		87295C942A0386B30067392D /* ScansButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C932A0386B30067392D /* ScansButton.swift */; };
+		87295C962A038BAD0067392D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C952A038BAD0067392D /* SceneDelegate.swift */; };
+		87295C992A038DD50067392D /* ScansVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C982A038DD50067392D /* ScansVC.swift */; };
 		872C7A9E29F1332B002D91D2 /* LocationUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872C7A9D29F1332B002D91D2 /* LocationUsecase.swift */; };
 		8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */; };
 		87673BD429F80E0500BD3DC3 /* IndoorSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */; };
@@ -61,6 +63,8 @@
 
 /* Begin PBXFileReference section */
 		87295C932A0386B30067392D /* ScansButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansButton.swift; sourceTree = "<group>"; };
+		87295C952A038BAD0067392D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		87295C982A038DD50067392D /* ScansVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansVC.swift; sourceTree = "<group>"; };
 		872C7A9D29F1332B002D91D2 /* LocationUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUsecase.swift; sourceTree = "<group>"; };
 		8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudCountView.swift; sourceTree = "<group>"; };
 		87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndoorSettingView.swift; sourceTree = "<group>"; };
@@ -136,6 +140,7 @@
 				87ABC86529D1945200881FFB /* Extension */,
 				87ABC86829D2805300881FFB /* Main */,
 				87C8FAF729F171BB000C37CE /* SelectLocation */,
+				87295C972A038DBB0067392D /* Scans */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -184,6 +189,14 @@
 				87C8FB1429F263C8000C37CE /* NetworkInterceptor.swift */,
 			);
 			path = Network;
+			sourceTree = "<group>";
+		};
+		87295C972A038DBB0067392D /* Scans */ = {
+			isa = PBXGroup;
+			children = (
+				87295C982A038DD50067392D /* ScansVC.swift */,
+			);
+			path = Scans;
 			sourceTree = "<group>";
 		};
 		8749E16829EEE2720093F7A7 /* View */ = {
@@ -338,6 +351,7 @@
 				E73DD13924636FEF00D77039 /* Main.storyboard */,
 				E73DD13E24636FF100D77039 /* LaunchScreen.storyboard */,
 				E73DD13024636FEF00D77039 /* AppDelegate.swift */,
+				87295C952A038BAD0067392D /* SceneDelegate.swift */,
 				E73DD13C24636FF100D77039 /* Assets.xcassets */,
 				E73DD14124636FF100D77039 /* Info.plist */,
 			);
@@ -430,6 +444,7 @@
 				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,
 				87AE167829F124EF00B101A6 /* LocationData.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,
+				87295C992A038DD50067392D /* ScansVC.swift in Sources */,
 				877F534529F643B600A0F931 /* BuildingRepository.swift in Sources */,
 				87673BD829F8EC4800BD3DC3 /* IndoorData.swift in Sources */,
 				87C8FB0D29F2382C000C37CE /* AddressRepositoryInterface.swift in Sources */,
@@ -460,6 +475,7 @@
 				877F533D29F6328D00A0F931 /* BuildingNearByGpsDTO.swift in Sources */,
 				E73DD13824636FEF00D77039 /* MainVC.swift in Sources */,
 				877F534D29F7C46600A0F931 /* Collection+Extension.swift in Sources */,
+				87295C962A038BAD0067392D /* SceneDelegate.swift in Sources */,
 				877F534B29F69D1600A0F931 /* UIView+Extension.swift in Sources */,
 				87C8FAF929F171D1000C37CE /* SelectLocationVC.swift in Sources */,
 				87ABC85F29D176F700881FFB /* NetworkStatus.swift in Sources */,

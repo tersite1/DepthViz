@@ -73,7 +73,7 @@ extension MainVC {
         
         // scansButton
         self.scansButton.addAction(UIAction(handler: { [weak self] _ in
-            print("click")
+            self?.moveToScansVC()
         }), for: .touchUpInside)
         self.view.addSubview(self.scansButton)
         NSLayoutConstraint.activate([
@@ -237,6 +237,12 @@ extension MainVC {
     /// RecordingButton Tab 액션
     @objc private func tapRecordingButton(_ sender: UIButton) {
         self.viewModel?.changeMode()
+    }
+    
+    /// ScansButton Tab 액션
+    private func moveToScansVC() {
+        let scansVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: ScansVC.identifier)
+        self.navigationController?.pushViewController(scansVC, animated: true)
     }
 }
 

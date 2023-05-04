@@ -42,6 +42,7 @@ final class MainVC: UIViewController, ARSessionDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.configureARWorldTracking()
+        self.navigationController?.isNavigationBarHidden = true
     }
 }
 

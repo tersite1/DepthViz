@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         guard let rootVC = UIStoryboard(name: "Main", bundle: nil).instantiateInitialViewController() else { return }
         let navigationVC = UINavigationController(rootViewController: rootVC)
-        print("ok")
+        
         self.window?.rootViewController = navigationVC
     }
 }

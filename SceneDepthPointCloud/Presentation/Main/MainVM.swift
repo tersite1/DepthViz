@@ -38,7 +38,7 @@ final class MainVM {
     /// 실시간 LiDAR 측정 및 Point Cloud 표시관련 핵심로직 담당 객체
     private let renderer: Renderer
     /// 메인화면 관련 네트워킹 로직 담당 객체
-    private let apiService: MainApiService
+    private let apiService: LidarApiService
     /// GPS 정보와 관련된 로직담당 객체
     private let locationUsecase: LocationUsecase
     /// 메인화면에서 측정된 gps 값들
@@ -51,7 +51,7 @@ final class MainVM {
         self.renderer = Renderer(session: session, metalDevice: device, renderDestination: view)
         self.renderer.drawRectResized(size: view.bounds.size)
         
-        self.apiService = MainApiService()
+        self.apiService = LidarApiService()
         self.locationUsecase = LocationUsecase()
         
         self.bindRenderer()

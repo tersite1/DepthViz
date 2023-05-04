@@ -1,5 +1,5 @@
 //
-//  MainApiService.swift
+//  LidarApiService.swift
 //  SceneDepthPointCloud
 //
 //  Created by Kang Minsang on 2023/03/27.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-final class MainApiService {
+final class LidarApiService {
     /// ply 데이터를 서버로 전송
     func upload(buildingInfo: BuildingInfo, location: IndoorData, file: LiDARData, completion: @escaping (Result<Bool, FetchError>) -> Void) {
         guard let locationJsonData = try? JSONEncoder().encode(location) else {

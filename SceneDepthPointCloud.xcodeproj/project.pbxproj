@@ -14,6 +14,7 @@
 		87295C9C2A03AA550067392D /* ReloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C9B2A03AA550067392D /* ReloadButton.swift */; };
 		87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C9D2A03ACF40067392D /* ScansVM.swift */; };
 		87295CA02A03AE8A0067392D /* LidarInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C9F2A03AE8A0067392D /* LidarInfo.swift */; };
+		87295CA42A03BC160067392D /* LidarRepositoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295CA32A03BC160067392D /* LidarRepositoryInterface.swift */; };
 		872C7A9E29F1332B002D91D2 /* LocationUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872C7A9D29F1332B002D91D2 /* LocationUsecase.swift */; };
 		8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */; };
 		87673BD429F80E0500BD3DC3 /* IndoorSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */; };
@@ -32,7 +33,7 @@
 		87ABC85B29D175A700881FFB /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85A29D175A700881FFB /* Network.swift */; };
 		87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85C29D176C700881FFB /* NetworkResult.swift */; };
 		87ABC85F29D176F700881FFB /* NetworkStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC85E29D176F700881FFB /* NetworkStatus.swift */; };
-		87ABC86229D178BD00881FFB /* MainApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86129D178BD00881FFB /* MainApiService.swift */; };
+		87ABC86229D178BD00881FFB /* LidarApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86129D178BD00881FFB /* LidarApiService.swift */; };
 		87ABC86429D1924900881FFB /* NetworkURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86329D1924900881FFB /* NetworkURL.swift */; };
 		87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86629D1946400881FFB /* UIViewController+Extension.swift */; };
 		87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86B29D290E900881FFB /* RecordingButton.swift */; };
@@ -71,6 +72,7 @@
 		87295C9B2A03AA550067392D /* ReloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReloadButton.swift; sourceTree = "<group>"; };
 		87295C9D2A03ACF40067392D /* ScansVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansVM.swift; sourceTree = "<group>"; };
 		87295C9F2A03AE8A0067392D /* LidarInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarInfo.swift; sourceTree = "<group>"; };
+		87295CA32A03BC160067392D /* LidarRepositoryInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarRepositoryInterface.swift; sourceTree = "<group>"; };
 		872C7A9D29F1332B002D91D2 /* LocationUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationUsecase.swift; sourceTree = "<group>"; };
 		8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudCountView.swift; sourceTree = "<group>"; };
 		87673BD329F80E0500BD3DC3 /* IndoorSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndoorSettingView.swift; sourceTree = "<group>"; };
@@ -90,7 +92,7 @@
 		87ABC85A29D175A700881FFB /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		87ABC85C29D176C700881FFB /* NetworkResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkResult.swift; sourceTree = "<group>"; };
 		87ABC85E29D176F700881FFB /* NetworkStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkStatus.swift; sourceTree = "<group>"; };
-		87ABC86129D178BD00881FFB /* MainApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainApiService.swift; sourceTree = "<group>"; };
+		87ABC86129D178BD00881FFB /* LidarApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarApiService.swift; sourceTree = "<group>"; };
 		87ABC86329D1924900881FFB /* NetworkURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkURL.swift; sourceTree = "<group>"; };
 		87ABC86629D1946400881FFB /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
 		87ABC86B29D290E900881FFB /* RecordingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingButton.swift; sourceTree = "<group>"; };
@@ -143,6 +145,7 @@
 		8711C71529D1322A00F6D5CC /* Presentation */ = {
 			isa = PBXGroup;
 			children = (
+				87295CA12A03BB6D0067392D /* Interface */,
 				87ABC86529D1945200881FFB /* Extension */,
 				87ABC86829D2805300881FFB /* Main */,
 				87C8FAF729F171BB000C37CE /* SelectLocation */,
@@ -215,6 +218,24 @@
 			path = View;
 			sourceTree = "<group>";
 		};
+		87295CA12A03BB6D0067392D /* Interface */ = {
+			isa = PBXGroup;
+			children = (
+				87C8FB0C29F2382C000C37CE /* AddressRepositoryInterface.swift */,
+				877F534229F642EC00A0F931 /* BuildingRepositoryInterface.swift */,
+				87295CA32A03BC160067392D /* LidarRepositoryInterface.swift */,
+			);
+			path = Interface;
+			sourceTree = "<group>";
+		};
+		87295CA22A03BBE50067392D /* Delegate */ = {
+			isa = PBXGroup;
+			children = (
+				87C8FB0229F1933B000C37CE /* SelectLocationDelegate.swift */,
+			);
+			path = Delegate;
+			sourceTree = "<group>";
+		};
 		8749E16829EEE2720093F7A7 /* View */ = {
 			isa = PBXGroup;
 			children = (
@@ -239,7 +260,7 @@
 		87ABC86029D178AB00881FFB /* ApiService */ = {
 			isa = PBXGroup;
 			children = (
-				87ABC86129D178BD00881FFB /* MainApiService.swift */,
+				87ABC86129D178BD00881FFB /* LidarApiService.swift */,
 				87C8FB0E29F238DA000C37CE /* AddressApiService.swift */,
 				877F534029F6400900A0F931 /* BuildingApiService.swift */,
 			);
@@ -262,7 +283,7 @@
 				E73DD13724636FEF00D77039 /* MainVC.swift */,
 				87FDBC1A29EE270A00D90D02 /* MainVM.swift */,
 				8749E16829EEE2720093F7A7 /* View */,
-				87C8FB0129F19302000C37CE /* Protocol */,
+				87295CA22A03BBE50067392D /* Delegate */,
 			);
 			path = Main;
 			sourceTree = "<group>";
@@ -282,7 +303,6 @@
 				87C8FAF829F171D1000C37CE /* SelectLocationVC.swift */,
 				87C8FAFA29F1867E000C37CE /* SelectLocationVM.swift */,
 				87C8FAFC29F18DA2000C37CE /* View */,
-				87C8FB0B29F2380B000C37CE /* Protocol */,
 			);
 			path = SelectLocation;
 			sourceTree = "<group>";
@@ -302,14 +322,6 @@
 			path = View;
 			sourceTree = "<group>";
 		};
-		87C8FB0129F19302000C37CE /* Protocol */ = {
-			isa = PBXGroup;
-			children = (
-				87C8FB0229F1933B000C37CE /* SelectLocationDelegate.swift */,
-			);
-			path = Protocol;
-			sourceTree = "<group>";
-		};
 		87C8FB0829F236EE000C37CE /* Repository */ = {
 			isa = PBXGroup;
 			children = (
@@ -317,15 +329,6 @@
 				877F534429F643B600A0F931 /* BuildingRepository.swift */,
 			);
 			path = Repository;
-			sourceTree = "<group>";
-		};
-		87C8FB0B29F2380B000C37CE /* Protocol */ = {
-			isa = PBXGroup;
-			children = (
-				87C8FB0C29F2382C000C37CE /* AddressRepositoryInterface.swift */,
-				877F534229F642EC00A0F931 /* BuildingRepositoryInterface.swift */,
-			);
-			path = Protocol;
 			sourceTree = "<group>";
 		};
 		87FDBC1C29EEA52100D90D02 /* Entity */ = {
@@ -481,7 +484,7 @@
 				87295C942A0386B30067392D /* ScansButton.swift in Sources */,
 				87C8FAFE29F18DB3000C37CE /* SelectLocationTitleLabel.swift in Sources */,
 				87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */,
-				87ABC86229D178BD00881FFB /* MainApiService.swift in Sources */,
+				87ABC86229D178BD00881FFB /* LidarApiService.swift in Sources */,
 				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,
 				87C8FB0F29F238DA000C37CE /* AddressApiService.swift in Sources */,
 				8793524F29B9D8F200D6A079 /* Utils.swift in Sources */,
@@ -502,6 +505,7 @@
 				877F534929F666AF00A0F931 /* BuildingListCollectionViewCell.swift in Sources */,
 				E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */,
 				87C8FB1329F24EDF000C37CE /* FetchError.swift in Sources */,
+				87295CA42A03BC160067392D /* LidarRepositoryInterface.swift in Sources */,
 				87673BD629F8BC8700BD3DC3 /* SettedInfoView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -7,15 +7,18 @@
 //
 
 import UIKit
+import Combine
 
 final class ScansVC: UIViewController {
     static let identifier = "ScansVC"
     let reloadButton = ReloadButton()
+    private var viewModel: ScansVM?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "SCANS"
         self.configureUI()
+        self.configureViewModel()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -36,5 +39,10 @@ extension ScansVC {
         }), for: .touchUpInside)
         let rightItem = UIBarButtonItem(customView: self.reloadButton)
         self.navigationItem.setRightBarButton(rightItem, animated: true)
+    }
+    
+    private func configureViewModel() {
+        // MARK: ScansVM 의존성주입 필요(ApiService, Repository 등)
+        self.viewModel = ScansVM()
     }
 }

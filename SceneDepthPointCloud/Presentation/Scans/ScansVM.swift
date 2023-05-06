@@ -34,11 +34,14 @@ final class ScansVM {
 
 // MARK: INPUT
 extension ScansVM {
-    func nextPageLidarListFetch() {
-        guard self.isLastPage == false else { return }
-        
-        self.page += 1
-        self.fetchLidarList()
+    func nextPageListFetch() {
+        switch self.mode {
+        case .lidarList:
+            self.nextPageLidarListFetch()
+        case .buildingList:
+            // MARK: BuildingList 함수 작성
+            return
+        }
     }
     
     func reload() {
@@ -57,6 +60,13 @@ extension ScansVM {
 }
 
 extension ScansVM {
+    private func nextPageLidarListFetch() {
+        guard self.isLastPage == false else { return }
+
+        self.page += 1
+        self.fetchLidarList()
+    }
+    
     private func fetchLidarList() {
         guard self.fetching == false,
               self.isLastPage == false else { return }

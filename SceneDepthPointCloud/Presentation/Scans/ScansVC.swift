@@ -91,7 +91,16 @@ extension ScansVC {
 
 extension ScansVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("select")
+        // MARK: detail 창 이동 로직
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if self.listView.contentOffset.y > (self.listView.contentSize.height - self.listView.bounds.size.height) {
+            guard self.viewModel?.fetching == false,
+                  self.viewModel?.isLastPage == false else { return }
+            
+            self.viewModel?.nextPageListFetch()
+        }
     }
 }
 

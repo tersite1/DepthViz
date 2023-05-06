@@ -66,11 +66,6 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
         
         return icon
     }()
-    private let dateFormatter: DateFormatter = {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-        return dateFormatter
-    }()
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -125,11 +120,10 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
     
     func updateCell(info: LidarInfo) {
         let floor = info.floor >= 0 ? "F\(info.floor)" : "B\(-info.floor)"
-        let createdDateString = self.dateFormatter.string(from: info.createdAt)
         
         self.titleLabel.text = info.buildingName
         self.floorLabel.text = floor
         self.subTitleLabel.text = info.roadAddres
-        self.textLabel.text = "\(createdDateString) / \(info.fileSize)"
+        self.textLabel.text = "\(info.createdAt) / \(info.fileSize)"
     }
 }

@@ -13,7 +13,7 @@ struct LidarInfo: Hashable {
     let buildingName: String
     let floor: Int
     let roadAddres: String
-    let createdAt: Date
+    let createdAt: String
     let fileSize: String
     
     static func == (lhs: LidarInfo, rhs: LidarInfo) -> Bool {

@@ -45,6 +45,7 @@ extension ScansVM {
         switch self.mode {
         case .lidarList:
             self.page = 1
+            self.isLastPage = false
             self.lidarList = []
             self.fetchLidarList()
             

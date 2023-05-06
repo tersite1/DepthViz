@@ -68,7 +68,9 @@ extension ScansVC {
     }
     
     private func configureListView() {
+        self.listView.register(LidarInfoCollectionViewCell.self, forCellWithReuseIdentifier: LidarInfoCollectionViewCell.identifier)
         self.listView.delegate = self
+        self.listView.dataSource = self
     }
 }
 
@@ -99,10 +101,18 @@ extension ScansVC: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        return .init()
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: LidarInfoCollectionViewCell.identifier, for: indexPath) as? LidarInfoCollectionViewCell else {
+            return .init()
+        }
+        guard let info = self.viewModel?.lidarList[safe: indexPath.item] else { return cell }
+        
+        cell.updateCell(info: info)
+        return cell
     }
 }
 
 extension ScansVC: UICollectionViewDelegateFlowLayout {
-    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.frame.width - (16*2), height: 75)
+    }
 }

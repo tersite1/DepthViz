@@ -19,7 +19,7 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = .white
-        label.font = UIFont.systemFont(ofSize: 15, weight: .semibold)
+        label.font = UIFont.systemFont(ofSize: 15, weight: .bold)
         label.textAlignment = .left
         label.numberOfLines = 1
         return label
@@ -57,6 +57,13 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
         icon.image = UIImage(systemName: "chevron.right")
         icon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 15, weight: .medium, scale: .default)
         icon.tintColor = .white
+        icon.contentMode = .scaleAspectFit
+        
+        NSLayoutConstraint.activate([
+            icon.widthAnchor.constraint(equalToConstant: 18),
+            icon.heightAnchor.constraint(equalToConstant: 18)
+        ])
+        
         return icon
     }()
     private let dateFormatter: DateFormatter = {
@@ -95,20 +102,22 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
         
         self.addSubview(self.floorLabel)
         NSLayoutConstraint.activate([
+            self.floorLabel.widthAnchor.constraint(equalToConstant: 40),
             self.floorLabel.centerYAnchor.constraint(equalTo: self.titleLabel.centerYAnchor),
             self.floorLabel.leadingAnchor.constraint(equalTo: self.titleLabel.trailingAnchor, constant: 8),
-            self.floorLabel.trailingAnchor.constraint(greaterThanOrEqualTo: self.rightIcon.leadingAnchor, constant: -8)
+//            self.floorLabel.trailingAnchor.constraint(greaterThanOrEqualTo: self.rightIcon.leadingAnchor)
         ])
+        self.floorLabel.trailingAnchor.constraint(greaterThanOrEqualTo: self.rightIcon.leadingAnchor).priority = UILayoutPriority(500)
         
         let stackView = UIStackView(arrangedSubviews: [self.subTitleLabel, self.textLabel])
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
-        stackView.spacing = 0
+        stackView.spacing = 2
         stackView.alignment = .leading
         
         self.addSubview(stackView)
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 4),
+            stackView.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 8),
             stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 12),
             stackView.trailingAnchor.constraint(equalTo: self.rightIcon.leadingAnchor, constant: -8)
         ])

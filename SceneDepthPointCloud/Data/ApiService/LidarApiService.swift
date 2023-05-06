@@ -49,4 +49,30 @@ final class LidarApiService {
             }
         }
     }
+    
+    func getLidarList(page: Int, completion: @escaping (Result<LidarInfoDTO, FetchError>) -> Void) {
+        var parameters: [String: Any] = ["page": page]
+        // 추가 parameter들 (고정값들)
+        parameters["size"] = 25
+        
+        Network.request(url: NetworkURL.Server.lidars, method: .get) { result in
+            switch result.status {
+            case .SUCCESS:
+                guard let data = result.data else {
+                    completion(.failure(.empty))
+                    return
+                }
+                
+                guard let dto = try? JSONDecoder().decode(LidarInfoDTO.self, from: data) else {
+                    completion(.failure(.decode))
+                    return
+                }
+                
+                completion(.success(dto))
+                
+            case .ERROR(let statusCode):
+                completion(.failure(.server(statusCode)))
+            }
+        }
+    }
 }

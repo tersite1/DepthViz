@@ -31,7 +31,7 @@ struct PaginationInfoDTO: Decodable {
 
 extension LidarInfoResultDTO {
     func toDomain() -> LidarInfo {
-        let fileSize = Double(fileSize)/Double(1024*1024)
+        let fileSize = Double(fileSize)/Double(1000000)
         return LidarInfo(collectId: collectId, buildingName: placeName, floor: floor, roadAddres: roadAddressName, createdAt: createdDate, fileSize: String(format: "%.1f MB", fileSize))
     }
 }

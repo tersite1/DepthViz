@@ -14,7 +14,7 @@ final class ScansVC: UIViewController {
     private let reloadButton = ReloadButton()
     private let listView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
-        layout.minimumLineSpacing = 10
+        layout.minimumLineSpacing = 14
         layout.scrollDirection = .vertical
         layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         return UICollectionView(frame: .zero, collectionViewLayout: layout)

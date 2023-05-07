@@ -1,5 +1,5 @@
 //
-//  MainApiService.swift
+//  LidarApiService.swift
 //  SceneDepthPointCloud
 //
 //  Created by Kang Minsang on 2023/03/27.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-final class MainApiService {
+final class LidarApiService {
     /// ply 데이터를 서버로 전송
     func upload(buildingInfo: BuildingInfo, location: IndoorData, file: LiDARData, completion: @escaping (Result<Bool, FetchError>) -> Void) {
         guard let locationJsonData = try? JSONEncoder().encode(location) else {
@@ -43,6 +43,32 @@ final class MainApiService {
                 
                 print(String(data: data, encoding: .utf8)!)
                 completion(.success(true))
+                
+            case .ERROR(let statusCode):
+                completion(.failure(.server(statusCode)))
+            }
+        }
+    }
+    
+    func getLidarList(page: Int, completion: @escaping (Result<LidarInfoDTO, FetchError>) -> Void) {
+        var parameters: [String: Any] = ["page": page]
+        // 추가 parameter들 (고정값들)
+        parameters["size"] = 25
+        
+        Network.request(url: NetworkURL.Server.lidars, method: .get) { result in
+            switch result.status {
+            case .SUCCESS:
+                guard let data = result.data else {
+                    completion(.failure(.empty))
+                    return
+                }
+                
+                guard let dto = try? JSONDecoder().decode(LidarInfoDTO.self, from: data) else {
+                    completion(.failure(.decode))
+                    return
+                }
+                
+                completion(.success(dto))
                 
             case .ERROR(let statusCode):
                 completion(.failure(.server(statusCode)))

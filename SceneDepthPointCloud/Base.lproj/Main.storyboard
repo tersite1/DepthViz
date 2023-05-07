@@ -76,6 +76,21 @@
             </objects>
             <point key="canvasLocation" x="866" y="138"/>
         </scene>
+        <!--ScansVC-->
+        <scene sceneID="1U3-qR-5Kg">
+            <objects>
+                <viewController storyboardIdentifier="ScansVC" id="akL-2y-TQG" customClass="ScansVC" customModule="Point_Cloud" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="gsJ-g2-0HL">
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="kpm-pJ-5vQ"/>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="te8-Sj-wMX" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1603" y="138"/>
+        </scene>
     </scenes>
     <resources>
         <namedColor name="selectLocationBackground">

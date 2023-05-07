@@ -35,11 +35,6 @@ final class ScansVC: UIViewController {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        self.navigationController?.setNavigationBarHidden(true, animated: true)
-    }
 }
 
 extension ScansVC {
@@ -91,7 +86,16 @@ extension ScansVC {
 
 extension ScansVC: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // MARK: detail 창 이동 로직
+        guard let viewModel = self.viewModel else { return }
+        switch viewModel.mode {
+        case .lidarList:
+            if let lidarInfo = viewModel.lidarList[safe: indexPath.item] {
+                self.moveToLidarDetailVC(info: lidarInfo)
+            }
+        case .buildingList:
+            // MARK: buildingInfo 구현 필요
+            return
+        }
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -123,5 +127,13 @@ extension ScansVC: UICollectionViewDataSource {
 extension ScansVC: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width - (16*2), height: 75)
+    }
+}
+
+extension ScansVC {
+    func moveToLidarDetailVC(info: LidarInfo) {
+        guard let lidarDetailVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: LidarDetailVC.identifier) as? LidarDetailVC else { return }
+        lidarDetailVC.configureViewModel(to: LidarDetailVM(lidarInfo: info))
+        self.navigationController?.pushViewController(lidarDetailVC, animated: true)
     }
 }

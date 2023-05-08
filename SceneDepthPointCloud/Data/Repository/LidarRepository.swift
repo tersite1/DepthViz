@@ -25,7 +25,7 @@ final class LidarRepository: LidarRepositoryInterface {
         }
     }
     
-    func getchLidarDetailInfo(collectId: String, completion: @escaping (Result<LidarDetailInfo, FetchError>) -> Void) {
+    func fetchLidarDetailInfo(collectId: String, completion: @escaping (Result<LidarDetailInfo, FetchError>) -> Void) {
         let endpoint = LidarApiService()
         
         endpoint.getLidarDetailInfo(collectId: collectId) { result in

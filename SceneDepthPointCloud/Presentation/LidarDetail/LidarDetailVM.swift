@@ -15,14 +15,21 @@ final class LidarDetailVM {
     private let gpsId: String
     private let addressId: String
     private(set) var buildingInfo: BuildingInfo?
+    private(set) var lidarDetailInfo: LidarDetailInfo? {
+        didSet {
+            dump(lidarDetailInfo)
+        }
+    }
     private let buildingRepository: BuildingRepositoryInterface
+    private let lidarRepository: LidarRepositoryInterface
     
-    init(lidarInfo: LidarInfo, buildingRepository: BuildingRepositoryInterface) {
+    init(lidarInfo: LidarInfo, buildingRepository: BuildingRepositoryInterface, lidarRepository: LidarRepositoryInterface) {
         self.collectId = lidarInfo.collectId
         self.gpsId = lidarInfo.gpsId
         self.addressId = lidarInfo.addressId
         
         self.buildingRepository = buildingRepository
+        self.lidarRepository = lidarRepository
     }
 }
 
@@ -30,12 +37,20 @@ final class LidarDetailVM {
 extension LidarDetailVM {
     func fetchDetailInfos() {
         self.getAddressInfo()
+        self.getLidarDetailInfo()
     }
 }
 
 extension LidarDetailVM {
     private func getLidarDetailInfo() {
-        
+        self.lidarRepository.fetchLidarDetailInfo(collectId: self.collectId) { [weak self] result in
+            switch result {
+            case .success(let lidarDetailInfo):
+                self?.lidarDetailInfo = lidarDetailInfo
+            case .failure(let fetchError):
+                self?.networkError = (title: "Fetch LidarDetailInfo Error", text: fetchError.message)
+            }
+        }
     }
     
     private func getGpsInfo() {

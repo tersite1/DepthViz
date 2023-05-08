@@ -26,7 +26,7 @@ struct Network {
         multipartFormData.append(address.data(using: .utf8)!, withName: "address", mimeType: "application/json")
         multipartFormData.append(location.data(using: .utf8)!, withName: "location", mimeType: "application/json")
         multipartFormData.append(file.lidarData, withName: "file", fileName: file.lidarFileName, mimeType: "application/octet-stream")
-//        multipartFormData.append("\(file.pointCount)".data(using: .utf8)!, withName: "totalPoints")
+        multipartFormData.append("\(file.pointCount)".data(using: .utf8)!, withName: "totalPoints")
         
         // 파일 업로드
         AF.upload(multipartFormData: multipartFormData, to: url)
@@ -54,8 +54,8 @@ struct Network {
         }
         
         // check 용 출력
-//        print("statusCode: \(statusCode)")
-//        print("Data: \(String(data: data, encoding: .utf8)!)")
+        print("statusCode: \(statusCode)")
+        print("Data: \(String(data: data, encoding: .utf8)!)")
         
         return NetworkResult(data: data, status: status)
     }

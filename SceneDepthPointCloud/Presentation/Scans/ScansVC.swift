@@ -72,6 +72,7 @@ extension ScansVC {
 extension ScansVC {
     private func bindViewModel() {
         self.bindLidarList()
+        self.bindNetworkError()
     }
     
     private func bindLidarList() {
@@ -79,6 +80,16 @@ extension ScansVC {
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] list in
                 self?.listView.reloadData()
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindNetworkError() {
+        self.viewModel?.$networkError
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] error in
+                guard let error = error else { return }
+                self?.showAlert(title: error.title, text: error.text)
             })
             .store(in: &self.cancellables)
     }
@@ -136,7 +147,8 @@ extension ScansVC {
     func moveToLidarDetailVC(info: LidarInfo) {
         guard let lidarDetailVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: LidarDetailVC.identifier) as? LidarDetailVC else { return }
         let buildingRepository = BuildingRepository()
-        lidarDetailVC.configureViewModel(to: LidarDetailVM(lidarInfo: info, buildingRepository: buildingRepository))
+        let lidarRepository = LidarRepository()
+        lidarDetailVC.configureViewModel(to: LidarDetailVM(lidarInfo: info, buildingRepository: buildingRepository, lidarRepository: lidarRepository))
         self.navigationController?.pushViewController(lidarDetailVC, animated: true)
     }
 }

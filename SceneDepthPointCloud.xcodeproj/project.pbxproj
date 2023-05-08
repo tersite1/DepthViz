@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8711C71429D131A200F6D5CC /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 8711C71329D131A200F6D5CC /* Alamofire */; };
+		871356C02A095EFD0005DE8C /* BuildingInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356BF2A095EFD0005DE8C /* BuildingInfoView.swift */; };
 		87295C942A0386B30067392D /* ScansButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C932A0386B30067392D /* ScansButton.swift */; };
 		87295C962A038BAD0067392D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C952A038BAD0067392D /* SceneDelegate.swift */; };
 		87295C992A038DD50067392D /* ScansVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C982A038DD50067392D /* ScansVC.swift */; };
@@ -78,6 +79,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		871356BF2A095EFD0005DE8C /* BuildingInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingInfoView.swift; sourceTree = "<group>"; };
 		87295C932A0386B30067392D /* ScansButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansButton.swift; sourceTree = "<group>"; };
 		87295C952A038BAD0067392D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		87295C982A038DD50067392D /* ScansVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansVC.swift; sourceTree = "<group>"; };
@@ -225,6 +227,14 @@
 			path = Network;
 			sourceTree = "<group>";
 		};
+		871356BE2A095EEF0005DE8C /* View */ = {
+			isa = PBXGroup;
+			children = (
+				871356BF2A095EFD0005DE8C /* BuildingInfoView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
 		87295C972A038DBB0067392D /* Scans */ = {
 			isa = PBXGroup;
 			children = (
@@ -280,6 +290,7 @@
 			children = (
 				87A315542A076D080074BB1B /* LidarDetailVC.swift */,
 				87A315562A076D5F0074BB1B /* LidarDetailVM.swift */,
+				871356BE2A095EEF0005DE8C /* View */,
 			);
 			path = LidarDetail;
 			sourceTree = "<group>";
@@ -504,6 +515,7 @@
 				87E9B5222A08A9D200FF4A8D /* LidarProcessStatusLabel.swift in Sources */,
 				87C8FB0329F1933B000C37CE /* SelectLocationDelegate.swift in Sources */,
 				87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */,
+				871356C02A095EFD0005DE8C /* BuildingInfoView.swift in Sources */,
 				87295CAC2A060D520067392D /* LidarInfoDTO.swift in Sources */,
 				877F533F29F63E1F00A0F931 /* BuildingOfMapInfo.swift in Sources */,
 				E73DD13324636FEF00D77039 /* Shaders.metal in Sources */,

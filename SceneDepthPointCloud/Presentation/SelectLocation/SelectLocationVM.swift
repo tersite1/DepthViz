@@ -37,9 +37,9 @@ final class SelectLocationVM {
     /// Address 데이터를 담당하는 객체
     private let addressRepository: AddressRepositoryInterface
     /// BuildingInfo 데이터를 담당하는 객체
-    private let buildingRepository: BuildingRepositoryInterface
+    private let buildingRepository: BuildingInMapRepositoryInterface
     
-    init(lidarData: LiDARData, locationData: LocationData, addressRepository: AddressRepositoryInterface, buildingRepository: BuildingRepositoryInterface) {
+    init(lidarData: LiDARData, locationData: LocationData, addressRepository: AddressRepositoryInterface, buildingRepository: BuildingInMapRepositoryInterface) {
         self.lidarData = lidarData
         self.locationData = locationData
         self.addressRepository = addressRepository

@@ -9,7 +9,7 @@
 import Foundation
 
 /// 건물 정보 Repository
-final class BuildingInMapRepository: BuildingRepositoryInterface {
+final class BuildingInMapRepository: BuildingInMapRepositoryInterface {
     /// BuildingApiService로부터 BuildingNearByGpsDTO를 받아 [BuildingInfo]를 반환하는 함수
     func fetchBuildingInfo(from location: LocationData, page: Int, completion: @escaping (Result<(infos: [BuildingOfMapInfo], isLastPage: Bool), FetchError>) -> Void) {
         let endpoint = KakaoApiService()

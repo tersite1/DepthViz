@@ -28,4 +28,8 @@ struct BuildingInfoResultDTO: Decodable {
         case roadAddressName = "road_address_name"
         case placeURL = "place_url"
     }
+    
+    func toDomain() -> BuildingInfo {
+        return BuildingInfo(id: id, placeName: placeName, categoryName: categoryName, roadAddressName: roadAddressName, placeURL: placeURL)
+    }
 }

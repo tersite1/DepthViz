@@ -10,7 +10,7 @@ import Foundation
 
 final class LidarApiService {
     /// ply 데이터를 서버로 전송
-    func upload(buildingInfo: BuildingInfo, location: IndoorData, file: LiDARData, completion: @escaping (Result<Bool, FetchError>) -> Void) {
+    func upload(buildingInfo: BuildingOfMapInfo, location: IndoorData, file: LiDARData, completion: @escaping (Result<Bool, FetchError>) -> Void) {
         guard let locationJsonData = try? JSONEncoder().encode(location) else {
             print("Error: encode location")
             completion(.failure(.client))

@@ -364,7 +364,7 @@ extension MainVC {
         
         if let vc = storyboard.instantiateViewController(identifier: SelectLocationVC.identifier) as? SelectLocationVC {
             let AddressRepository = AddressRepository()
-            let buildingRepository = BuildingRepository()
+            let buildingRepository = BuildingInMapRepository()
             let viewModel = SelectLocationVM(lidarData: lidarData, locationData: locationData, addressRepository: AddressRepository, buildingRepository: buildingRepository)
             // delegate 로 MainVC 전달
             vc.configureDelegate(self)
@@ -386,7 +386,7 @@ extension MainVC: SelectLocationDelegate {
     }
     
     /// 업로드 데이터들을 수신받아 업로드를 실행하는 함수
-    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingInfo, floor: Int) {
+    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
         self.viewModel?.changeMode()
         self.viewModel?.uploadMeasuredData(location: location, buildingInfo: buildingInfo, floor: floor)
     }

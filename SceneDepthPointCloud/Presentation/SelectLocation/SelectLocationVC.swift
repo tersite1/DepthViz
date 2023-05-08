@@ -47,7 +47,7 @@ final class SelectLocationVC: UIViewController {
     private var viewModel: SelectLocationVM?
     private var cancellables: Set<AnyCancellable> = []
     /// buildingListView에 표시될 dataSource 담당 프로퍼티
-    private var buildingListDataSource: UICollectionViewDiffableDataSource<BuildingListCollectionViewCell.Section, BuildingInfo>!
+    private var buildingListDataSource: UICollectionViewDiffableDataSource<BuildingListCollectionViewCell.Section, BuildingOfMapInfo>!
     
     /// SelectLocationVC 최초 접근시 configure
     override func viewDidLoad() {
@@ -209,12 +209,12 @@ extension SelectLocationVC {
     
     /// buildingListView 화면에 표시될 dataSource를 초기화하는 함수
     private func configureBuildingListDataSource() {
-        let cellRegistration = UICollectionView.CellRegistration<BuildingListCollectionViewCell, BuildingInfo> { (cell, indexPath, info) in
+        let cellRegistration = UICollectionView.CellRegistration<BuildingListCollectionViewCell, BuildingOfMapInfo> { (cell, indexPath, info) in
             let isSelected = self.viewModel?.mode == .setIndoorInfo
             cell.updateCell(info: info, isSelected: isSelected)
         }
         
-        self.buildingListDataSource = UICollectionViewDiffableDataSource<BuildingListCollectionViewCell.Section, BuildingInfo>(collectionView: self.buildingListView) { (collectionView: UICollectionView, indexPath: IndexPath, identifier: BuildingInfo) -> UICollectionViewCell? in
+        self.buildingListDataSource = UICollectionViewDiffableDataSource<BuildingListCollectionViewCell.Section, BuildingOfMapInfo>(collectionView: self.buildingListView) { (collectionView: UICollectionView, indexPath: IndexPath, identifier: BuildingOfMapInfo) -> UICollectionViewCell? in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: identifier)
         }
     }
@@ -365,7 +365,7 @@ extension SelectLocationVC {
         self.viewModel?.$buildingList
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] buildingList in
-                var snapshot = NSDiffableDataSourceSnapshot<BuildingListCollectionViewCell.Section, BuildingInfo>()
+                var snapshot = NSDiffableDataSourceSnapshot<BuildingListCollectionViewCell.Section, BuildingOfMapInfo>()
                 snapshot.appendSections([.main])
                 snapshot.appendItems(buildingList)
                 self?.buildingListDataSource.apply(snapshot, animatingDifferences: true)

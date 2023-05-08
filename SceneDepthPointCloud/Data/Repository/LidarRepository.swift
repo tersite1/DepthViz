@@ -16,7 +16,7 @@ final class LidarRepository: LidarRepositoryInterface {
             switch result {
             case.success(let lidarInfoDTO):
                 let infos = lidarInfoDTO.resultList.map { $0.toDomain() }
-                let isLastPage = page == lidarInfoDTO.totalMap.totalCount
+                let isLastPage = page == lidarInfoDTO.totalMap.totalPage
                 completion(.success((infos: infos, isLastPage: isLastPage)))
                 
             case .failure(let error):

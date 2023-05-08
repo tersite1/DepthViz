@@ -1,5 +1,5 @@
 //
-//  BuildingRepository.swift
+//  BuildingInMapRepository.swift
 //  SceneDepthPointCloud
 //
 //  Created by Kang Minsang on 2023/04/24.
@@ -9,10 +9,10 @@
 import Foundation
 
 /// 건물 정보 Repository
-final class BuildingRepository: BuildingRepositoryInterface {
+final class BuildingInMapRepository: BuildingRepositoryInterface {
     /// BuildingApiService로부터 BuildingNearByGpsDTO를 받아 [BuildingInfo]를 반환하는 함수
-    func fetchBuildingInfo(from location: LocationData, page: Int, completion: @escaping (Result<(infos: [BuildingInfo], isLastPage: Bool), FetchError>) -> Void) {
-        let endpoint = BuildingApiService()
+    func fetchBuildingInfo(from location: LocationData, page: Int, completion: @escaping (Result<(infos: [BuildingOfMapInfo], isLastPage: Bool), FetchError>) -> Void) {
+        let endpoint = KakaoApiService()
         
         let x = Double(location.longitude)
         let y = Double(location.latitude)

@@ -58,7 +58,7 @@ final class SettedInfoView: UIView {
     }
     
     /// SettedInfoView 표시될 내용 설정 함수
-    func configureInfos(buildingInfo: BuildingInfo, floor: Int, lidarData: LiDARData) {
+    func configureInfos(buildingInfo: BuildingOfMapInfo, floor: Int, lidarData: LiDARData) {
         let placeFloor = floor >= 0 ? "F\(floor)" : "B\(-floor)"
         let placeTitle = "\(buildingInfo.placeName) floor \(placeFloor)"
         self.placeCell.setText(title: placeTitle, text: buildingInfo.roadAddress)

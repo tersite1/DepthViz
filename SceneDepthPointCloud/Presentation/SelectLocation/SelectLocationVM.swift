@@ -23,7 +23,7 @@ final class SelectLocationVM {
     /// MainVM 에서 생성된 locationData 값 및 사용자설정 위치값
     @Published private(set) var locationData: LocationData
     /// 주변 건물리스트
-    @Published private(set) var buildingList: [BuildingInfo] = []
+    @Published private(set) var buildingList: [BuildingOfMapInfo] = []
     /// 위치선택, 건물선택, 건물선택 완료 상태값
     @Published private(set) var mode: Mode = .selectLocation
     /// 네트워크 통신으로 인한 Error 발생값

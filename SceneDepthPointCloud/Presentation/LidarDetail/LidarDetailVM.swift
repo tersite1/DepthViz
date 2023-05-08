@@ -24,3 +24,17 @@ final class LidarDetailVM {
         print(addressId)
     }
 }
+
+extension LidarDetailVM {
+    private func getLidarDetailInfo() {
+        
+    }
+    
+    private func getGpsInfo() {
+        
+    }
+    
+    private func getAddressInfo() {
+        
+    }
+}

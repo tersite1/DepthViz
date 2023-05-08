@@ -25,10 +25,10 @@
 		87673BD829F8EC4800BD3DC3 /* IndoorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87673BD729F8EC4800BD3DC3 /* IndoorData.swift */; };
 		877F533B29F62E2300A0F931 /* BackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533A29F62E2300A0F931 /* BackButton.swift */; };
 		877F533D29F6328D00A0F931 /* BuildingNearByGpsDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533C29F6328D00A0F931 /* BuildingNearByGpsDTO.swift */; };
-		877F533F29F63E1F00A0F931 /* BuildingInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533E29F63E1F00A0F931 /* BuildingInfo.swift */; };
-		877F534129F6400900A0F931 /* BuildingApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534029F6400900A0F931 /* BuildingApiService.swift */; };
+		877F533F29F63E1F00A0F931 /* BuildingOfMapInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F533E29F63E1F00A0F931 /* BuildingOfMapInfo.swift */; };
+		877F534129F6400900A0F931 /* KakaoApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534029F6400900A0F931 /* KakaoApiService.swift */; };
 		877F534329F642EC00A0F931 /* BuildingRepositoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534229F642EC00A0F931 /* BuildingRepositoryInterface.swift */; };
-		877F534529F643B600A0F931 /* BuildingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534429F643B600A0F931 /* BuildingRepository.swift */; };
+		877F534529F643B600A0F931 /* BuildingInMapRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534429F643B600A0F931 /* BuildingInMapRepository.swift */; };
 		877F534929F666AF00A0F931 /* BuildingListCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534829F666AF00A0F931 /* BuildingListCollectionViewCell.swift */; };
 		877F534B29F69D1600A0F931 /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534A29F69D1600A0F931 /* UIView+Extension.swift */; };
 		877F534D29F7C46600A0F931 /* Collection+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534C29F7C46600A0F931 /* Collection+Extension.swift */; };
@@ -52,7 +52,6 @@
 		87C8FB0529F22E1B000C37CE /* RoadAddressLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0429F22E1B000C37CE /* RoadAddressLabel.swift */; };
 		87C8FB0A29F23717000C37CE /* AddressRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0929F23717000C37CE /* AddressRepository.swift */; };
 		87C8FB0D29F2382C000C37CE /* AddressRepositoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0C29F2382C000C37CE /* AddressRepositoryInterface.swift */; };
-		87C8FB0F29F238DA000C37CE /* AddressApiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB0E29F238DA000C37CE /* AddressApiService.swift */; };
 		87C8FB1129F23ADE000C37CE /* AddressFromGpsDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB1029F23ADE000C37CE /* AddressFromGpsDTO.swift */; };
 		87C8FB1329F24EDF000C37CE /* FetchError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB1229F24EDF000C37CE /* FetchError.swift */; };
 		87C8FB1529F263C8000C37CE /* NetworkInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8FB1429F263C8000C37CE /* NetworkInterceptor.swift */; };
@@ -89,10 +88,10 @@
 		87673BD729F8EC4800BD3DC3 /* IndoorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndoorData.swift; sourceTree = "<group>"; };
 		877F533A29F62E2300A0F931 /* BackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackButton.swift; sourceTree = "<group>"; };
 		877F533C29F6328D00A0F931 /* BuildingNearByGpsDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingNearByGpsDTO.swift; sourceTree = "<group>"; };
-		877F533E29F63E1F00A0F931 /* BuildingInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingInfo.swift; sourceTree = "<group>"; };
-		877F534029F6400900A0F931 /* BuildingApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingApiService.swift; sourceTree = "<group>"; };
+		877F533E29F63E1F00A0F931 /* BuildingOfMapInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingOfMapInfo.swift; sourceTree = "<group>"; };
+		877F534029F6400900A0F931 /* KakaoApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KakaoApiService.swift; sourceTree = "<group>"; };
 		877F534229F642EC00A0F931 /* BuildingRepositoryInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingRepositoryInterface.swift; sourceTree = "<group>"; };
-		877F534429F643B600A0F931 /* BuildingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingRepository.swift; sourceTree = "<group>"; };
+		877F534429F643B600A0F931 /* BuildingInMapRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingInMapRepository.swift; sourceTree = "<group>"; };
 		877F534829F666AF00A0F931 /* BuildingListCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingListCollectionViewCell.swift; sourceTree = "<group>"; };
 		877F534A29F69D1600A0F931 /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
 		877F534C29F7C46600A0F931 /* Collection+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+Extension.swift"; sourceTree = "<group>"; };
@@ -117,7 +116,6 @@
 		87C8FB0429F22E1B000C37CE /* RoadAddressLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoadAddressLabel.swift; sourceTree = "<group>"; };
 		87C8FB0929F23717000C37CE /* AddressRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressRepository.swift; sourceTree = "<group>"; };
 		87C8FB0C29F2382C000C37CE /* AddressRepositoryInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressRepositoryInterface.swift; sourceTree = "<group>"; };
-		87C8FB0E29F238DA000C37CE /* AddressApiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressApiService.swift; sourceTree = "<group>"; };
 		87C8FB1029F23ADE000C37CE /* AddressFromGpsDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressFromGpsDTO.swift; sourceTree = "<group>"; };
 		87C8FB1229F24EDF000C37CE /* FetchError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchError.swift; sourceTree = "<group>"; };
 		87C8FB1429F263C8000C37CE /* NetworkInterceptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkInterceptor.swift; sourceTree = "<group>"; };
@@ -285,8 +283,7 @@
 			isa = PBXGroup;
 			children = (
 				87ABC86129D178BD00881FFB /* LidarApiService.swift */,
-				87C8FB0E29F238DA000C37CE /* AddressApiService.swift */,
-				877F534029F6400900A0F931 /* BuildingApiService.swift */,
+				877F534029F6400900A0F931 /* KakaoApiService.swift */,
 			);
 			path = ApiService;
 			sourceTree = "<group>";
@@ -351,7 +348,7 @@
 			isa = PBXGroup;
 			children = (
 				87C8FB0929F23717000C37CE /* AddressRepository.swift */,
-				877F534429F643B600A0F931 /* BuildingRepository.swift */,
+				877F534429F643B600A0F931 /* BuildingInMapRepository.swift */,
 				87295CA52A03C65E0067392D /* LidarRepository.swift */,
 			);
 			path = Repository;
@@ -363,7 +360,7 @@
 				87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */,
 				87AE167729F124EF00B101A6 /* LocationData.swift */,
 				87C8FB1229F24EDF000C37CE /* FetchError.swift */,
-				877F533E29F63E1F00A0F931 /* BuildingInfo.swift */,
+				877F533E29F63E1F00A0F931 /* BuildingOfMapInfo.swift */,
 				87673BD729F8EC4800BD3DC3 /* IndoorData.swift */,
 				87295C9F2A03AE8A0067392D /* LidarInfo.swift */,
 			);
@@ -486,7 +483,7 @@
 				87C8FB0329F1933B000C37CE /* SelectLocationDelegate.swift in Sources */,
 				87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */,
 				87295CAC2A060D520067392D /* LidarInfoDTO.swift in Sources */,
-				877F533F29F63E1F00A0F931 /* BuildingInfo.swift in Sources */,
+				877F533F29F63E1F00A0F931 /* BuildingOfMapInfo.swift in Sources */,
 				E73DD13324636FEF00D77039 /* Shaders.metal in Sources */,
 				87295CAA2A03D5CD0067392D /* LidarInfoCollectionViewCell.swift in Sources */,
 				87C8FB1129F23ADE000C37CE /* AddressFromGpsDTO.swift in Sources */,
@@ -494,7 +491,7 @@
 				87AE167829F124EF00B101A6 /* LocationData.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,
 				87295C992A038DD50067392D /* ScansVC.swift in Sources */,
-				877F534529F643B600A0F931 /* BuildingRepository.swift in Sources */,
+				877F534529F643B600A0F931 /* BuildingInMapRepository.swift in Sources */,
 				87673BD829F8EC4800BD3DC3 /* IndoorData.swift in Sources */,
 				87A315552A076D080074BB1B /* LidarDetailVC.swift in Sources */,
 				87C8FB0D29F2382C000C37CE /* AddressRepositoryInterface.swift in Sources */,
@@ -505,7 +502,7 @@
 				87C8FB0529F22E1B000C37CE /* RoadAddressLabel.swift in Sources */,
 				87C8FB0029F1911B000C37CE /* CancelButton.swift in Sources */,
 				87C8FB1729F28F8A000C37CE /* SelectLocationLargeButton.swift in Sources */,
-				877F534129F6400900A0F931 /* BuildingApiService.swift in Sources */,
+				877F534129F6400900A0F931 /* KakaoApiService.swift in Sources */,
 				87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */,
 				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,
 				872C7A9E29F1332B002D91D2 /* LocationUsecase.swift in Sources */,
@@ -518,7 +515,6 @@
 				87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */,
 				87ABC86229D178BD00881FFB /* LidarApiService.swift in Sources */,
 				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,
-				87C8FB0F29F238DA000C37CE /* AddressApiService.swift in Sources */,
 				8793524F29B9D8F200D6A079 /* Utils.swift in Sources */,
 				87295C9C2A03AA550067392D /* ReloadButton.swift in Sources */,
 				87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */,

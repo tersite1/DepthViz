@@ -55,7 +55,7 @@ struct BuildingNearByGpsDocumentDTO: Codable, Hashable {
         case y = "y"
     }
     
-    func toDomain() -> BuildingInfo {
+    func toDomain() -> BuildingOfMapInfo {
         return .init(roadAddress: self.road_address_name,
                      placeName: self.place_name,
                      distance: Int(self.distance) ?? 0,

@@ -1,5 +1,5 @@
 //
-//  BuildingApiService.swift
+//  KakaoApiService.swift
 //  SceneDepthPointCloud
 //
 //  Created by Kang Minsang on 2023/04/24.
@@ -9,7 +9,7 @@
 import Foundation
 
 /// Building 정보를 수신받기 위한 Network Service 담당
-struct BuildingApiService {
+struct KakaoApiService {
     /// KakaoAPI를 통해 BuildingNearByGpsDTO를 반환하는 함수
     func getSearchByCategory(x: Double, y: Double, page: Int, completion: @escaping (Result<BuildingNearByGpsDTO, FetchError>) -> Void) {
         var parameters: [String: Any] = ["x": x, "y": y, "page": page]
@@ -27,6 +27,31 @@ struct BuildingApiService {
                 }
                 
                 guard let dto = try? JSONDecoder().decode(BuildingNearByGpsDTO.self, from: data) else {
+                    completion(.failure(.decode))
+                    return
+                }
+                
+                completion(.success(dto))
+                
+            case .ERROR(let statusCode):
+                completion(.failure(.server(statusCode)))
+            }
+        }
+    }
+    
+    /// KakaoAPI를 통해 AddressFromGpsDTO를 반환하는 함수
+    func getCoordToAddress(x: Double, y: Double, completion: @escaping (Result<AddressFromGpsDTO, FetchError>) -> Void) {
+        let parameters = ["x": x, "y": y]
+        
+        Network.request(url: NetworkURL.Kakao.coordToAddress, method: .get, parameters: parameters) { result in
+            switch result.status {
+            case .SUCCESS:
+                guard let data = result.data else {
+                    completion(.failure(.empty))
+                    return
+                }
+                
+                guard let dto = try? JSONDecoder().decode(AddressFromGpsDTO.self, from: data) else {
                     completion(.failure(.decode))
                     return
                 }

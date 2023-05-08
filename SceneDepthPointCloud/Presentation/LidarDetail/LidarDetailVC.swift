@@ -60,6 +60,9 @@ extension LidarDetailVC {
 
 extension LidarDetailVC {
     private func showBuildingInfoView() {
+        guard let buildingInfo = self.viewModel?.buildingInfo else { return }
+        
+        self.buildingInfoView.configure(info: buildingInfo)
         self.buildingInfoView.fadeIn()
     }
 }

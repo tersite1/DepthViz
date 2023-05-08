@@ -16,15 +16,21 @@ struct LidarDetailInfoResultDTO: Decodable {
     let collectId: String
     let generalFileId: String
     let fileSize: Int
-    let originalFileName: String
+    let originFileName: String
     let floor: Int
     let createdDate: String
     let totalPoints: Int?
+    let latitude: String
+    let longitude: String
+    let altitude: String?
     
     func toDomain() -> LidarDetailInfo {
-        let fileSize = String(format: "%.1f MB", fileSize)
+        let fileSize = String(format: "%.1f MB", Double(fileSize)/Double(1000000))
         let totalPoints = self.totalPoints != nil ? self.totalPoints! : 0
+        let latitude = Double(latitude)!
+        let longitude = Double(longitude)!
+        let altitude = self.altitude != nil ? Double(altitude!) : nil
         
-        return LidarDetailInfo(collectId: collectId, generalFileId: generalFileId, fileSize: fileSize, originalFileName: originalFileName, floor: floor, createdDate: createdDate, totalPoints: totalPoints)
+        return LidarDetailInfo(collectId: collectId, generalFileId: generalFileId, fileSize: fileSize, originFileName: originFileName, floor: floor, createdDate: createdDate, totalPoints: totalPoints, latitude: latitude, longitude: longitude, altitude: altitude)
     }
 }

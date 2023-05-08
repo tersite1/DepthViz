@@ -12,8 +12,11 @@ struct LidarDetailInfo {
     let collectId: String
     let generalFileId: String
     let fileSize: String
-    let originalFileName: String
+    let originFileName: String
     let floor: Int
     let createdDate: String
     let totalPoints: Int
+    let latitude: Double
+    let longitude: Double
+    let altitude: Double?
 }

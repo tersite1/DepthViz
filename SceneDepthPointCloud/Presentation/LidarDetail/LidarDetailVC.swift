@@ -16,6 +16,11 @@ final class LidarDetailVC: UIViewController {
         super.viewDidLoad()
         self.title = "Lidar Detail"
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.viewModel?.fetchDetailInfos()
+    }
 }
 
 extension LidarDetailVC {

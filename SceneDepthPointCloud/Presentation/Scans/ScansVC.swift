@@ -135,7 +135,8 @@ extension ScansVC: UICollectionViewDelegateFlowLayout {
 extension ScansVC {
     func moveToLidarDetailVC(info: LidarInfo) {
         guard let lidarDetailVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: LidarDetailVC.identifier) as? LidarDetailVC else { return }
-        lidarDetailVC.configureViewModel(to: LidarDetailVM(lidarInfo: info))
+        let buildingRepository = BuildingRepository()
+        lidarDetailVC.configureViewModel(to: LidarDetailVM(lidarInfo: info, buildingRepository: buildingRepository))
         self.navigationController?.pushViewController(lidarDetailVC, animated: true)
     }
 }

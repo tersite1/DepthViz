@@ -12,6 +12,7 @@ struct BuildingInfo {
     let id: String
     let placeName: String
     let categoryName: String
+    let addressName: String
     let roadAddressName: String
     let placeURL: String
 }

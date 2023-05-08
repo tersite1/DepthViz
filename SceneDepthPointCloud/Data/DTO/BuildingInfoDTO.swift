@@ -30,6 +30,6 @@ struct BuildingInfoResultDTO: Decodable {
     }
     
     func toDomain() -> BuildingInfo {
-        return BuildingInfo(id: id, placeName: placeName, categoryName: categoryName, roadAddressName: roadAddressName, placeURL: placeURL)
+        return BuildingInfo(id: id, placeName: placeName, categoryName: categoryName, addressName: addressName, roadAddressName: roadAddressName, placeURL: placeURL)
     }
 }

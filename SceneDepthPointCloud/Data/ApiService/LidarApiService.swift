@@ -75,4 +75,26 @@ final class LidarApiService {
             }
         }
     }
+    
+    func getLidarDetailInfo(collectId: String, completion: @escaping (Result<LidarDetailInfoDTO, FetchError>) -> Void)  {
+        Network.request(url: NetworkURL.Server.lidars + "/\(collectId)/detail", method: .get) { result in
+            switch result.status {
+            case .SUCCESS:
+                guard let data = result.data else {
+                    completion(.failure(.empty))
+                    return
+                }
+                
+                guard let dto = try? JSONDecoder().decode(LidarDetailInfoDTO.self, from: data) else {
+                    completion(.failure(.decode))
+                    return
+                }
+                
+                completion(.success(dto))
+                
+            case .ERROR(let statusCode):
+                completion(.failure(.server(statusCode)))
+            }
+        }
+    }
 }

@@ -16,8 +16,22 @@ final class LidarRepository: LidarRepositoryInterface {
             switch result {
             case.success(let lidarInfoDTO):
                 let infos = lidarInfoDTO.resultList.map { $0.toDomain() }
-                let isLastPage = page == lidarInfoDTO.totalMap.totalCount
+                let isLastPage = page == lidarInfoDTO.totalMap.totalPage
                 completion(.success((infos: infos, isLastPage: isLastPage)))
+                
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    func fetchLidarDetailInfo(collectId: String, completion: @escaping (Result<LidarDetailInfo, FetchError>) -> Void) {
+        let endpoint = LidarApiService()
+        
+        endpoint.getLidarDetailInfo(collectId: collectId) { result in
+            switch result {
+            case .success(let lidarDetailDTO):
+                completion(.success(lidarDetailDTO.resultObject.toDomain()))
                 
             case .failure(let error):
                 completion(.failure(error))

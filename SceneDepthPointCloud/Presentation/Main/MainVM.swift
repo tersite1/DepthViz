@@ -122,7 +122,7 @@ extension MainVM {
         self.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
     }
     
-    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingInfo, floor: Int) {
+    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
         guard let lidarData = self.lidarData else { return }
         
         let location = IndoorData(latitude: location.latitude, longitude: location.longitude, altitude: location.altitude, floor: "\(floor)")

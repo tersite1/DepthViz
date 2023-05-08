@@ -87,7 +87,7 @@ final class BuildingListCollectionViewCell: UICollectionViewCell {
 // MARK: INPUT
 extension BuildingListCollectionViewCell {
     /// cell 내용설정 함수
-    func updateCell(info: BuildingInfo, isSelected: Bool) {
+    func updateCell(info: BuildingOfMapInfo, isSelected: Bool) {
         self.buildingNameLabel.text = info.placeName
         self.roadAddressLabel.text = info.roadAddress
         self.distanceLabel.text = "\(info.distance) M"

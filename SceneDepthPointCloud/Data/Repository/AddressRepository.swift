@@ -12,7 +12,7 @@ import Foundation
 final class AddressRepository: AddressRepositoryInterface {
     /// AddressApiService로부터 AddressFromGpsDTO를 받아 String 값만 반환하는 함수
     func fetchAddress(from location: LocationData, completion: @escaping (Result<String, FetchError>) -> Void) {
-        let endpoint = AddressApiService()
+        let endpoint = KakaoApiService()
         
         let x = Double(location.longitude)
         let y = Double(location.latitude)

@@ -2,33 +2,24 @@
 //  BuildingRepository.swift
 //  SceneDepthPointCloud
 //
-//  Created by Kang Minsang on 2023/04/24.
+//  Created by Kang Minsang on 2023/05/08.
 //  Copyright © 2023 Apple. All rights reserved.
 //
 
 import Foundation
 
-/// 건물 정보 Repository
 final class BuildingRepository: BuildingRepositoryInterface {
-    /// BuildingApiService로부터 BuildingNearByGpsDTO를 받아 [BuildingInfo]를 반환하는 함수
-    func fetchBuildingInfo(from location: LocationData, page: Int, completion: @escaping (Result<(infos: [BuildingInfo], isLastPage: Bool), FetchError>) -> Void) {
+    func fetchBuildingInfo(addressId: String, completion: @escaping (Result<BuildingInfo, FetchError>) -> Void) {
         let endpoint = BuildingApiService()
         
-        let x = Double(location.longitude)
-        let y = Double(location.latitude)
-        let page = page
-        
-        endpoint.getSearchByCategory(x: x, y: y, page: page) { result in
+        endpoint.getBuildingInfo(addressId: addressId) { result in
             switch result {
-            case .success(let buildingDTO):
-                let infos = buildingDTO.documents.map { $0.toDomain() }
-                let isLastPage = buildingDTO.meta.isEnd
-                completion(.success((infos: infos, isLastPage: isLastPage)))
+            case.success(let buildingDTO):
+                completion(.success(buildingDTO.resultObject.toDomain()))
                 
             case .failure(let error):
                 completion(.failure(error))
             }
         }
-        
     }
 }

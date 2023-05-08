@@ -22,6 +22,7 @@ struct LidarInfoResultDTO: Decodable {
     let placeName: String
     let floor: Int
     let createdDate: String
+    let isProgramCompleted: Bool
 }
 
 struct PaginationInfoDTO: Decodable {
@@ -32,6 +33,6 @@ struct PaginationInfoDTO: Decodable {
 extension LidarInfoResultDTO {
     func toDomain() -> LidarInfo {
         let fileSize = Double(fileSize)/Double(1000000)
-        return LidarInfo(collectId: collectId, buildingName: placeName, floor: floor, roadAddres: roadAddressName, createdAt: createdDate, fileSize: String(format: "%.1f MB", fileSize))
+        return LidarInfo(collectId: collectId, buildingName: placeName, floor: floor, roadAddres: roadAddressName, createdAt: createdDate, fileSize: String(format: "%.1f MB", fileSize), gpsId: gpsId, addressId: addressId, isProgramCompleted: isProgramCompleted)
     }
 }

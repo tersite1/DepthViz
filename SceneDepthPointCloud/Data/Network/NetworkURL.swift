@@ -18,6 +18,7 @@ struct NetworkURL {
     
     enum Server {
         static let lidars: String = Domain.server + "/lidars"
+        static let buildings: String = Domain.server + "/buildings"
     }
     
     enum Kakao {

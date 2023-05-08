@@ -10,4 +10,5 @@ import Foundation
 
 protocol LidarRepositoryInterface: AnyObject {
     func fetchLidarList(page: Int, completion: @escaping(Result<(infos: [LidarInfo], isLastPage: Bool), FetchError>) -> Void)
+    func fetchLidarDetailInfo(collectId: String, completion: @escaping (Result<LidarDetailInfo, FetchError>) -> Void)
 }

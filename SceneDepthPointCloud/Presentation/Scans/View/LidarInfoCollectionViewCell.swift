@@ -51,21 +51,22 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
         label.numberOfLines = 1
         return label
     }()
-    private var rightIcon: UIImageView = {
-        let icon = UIImageView()
-        icon.translatesAutoresizingMaskIntoConstraints = false
-        icon.image = UIImage(systemName: "chevron.right")
-        icon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 15, weight: .medium, scale: .default)
-        icon.tintColor = .white
-        icon.contentMode = .scaleAspectFit
-        
-        NSLayoutConstraint.activate([
-            icon.widthAnchor.constraint(equalToConstant: 18),
-            icon.heightAnchor.constraint(equalToConstant: 18)
-        ])
-        
-        return icon
-    }()
+//    private var rightIcon: UIImageView = {
+//        let icon = UIImageView()
+//        icon.translatesAutoresizingMaskIntoConstraints = false
+//        icon.image = UIImage(systemName: "chevron.right")
+//        icon.preferredSymbolConfiguration = UIImage.SymbolConfiguration(pointSize: 15, weight: .medium, scale: .default)
+//        icon.tintColor = .white
+//        icon.contentMode = .scaleAspectFit
+//
+//        NSLayoutConstraint.activate([
+//            icon.widthAnchor.constraint(equalToConstant: 18),
+//            icon.heightAnchor.constraint(equalToConstant: 18)
+//        ])
+//
+//        return icon
+//    }()
+    private let statusLabel = LidarProcessStatusLabel()
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -83,11 +84,11 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
         self.layer.cornerRadius = 8
         self.layer.cornerCurve = .continuous
         
-        self.addSubview(self.rightIcon)
-        NSLayoutConstraint.activate([
-            self.rightIcon.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            self.rightIcon.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -12)
-        ])
+//        self.addSubview(self.rightIcon)
+//        NSLayoutConstraint.activate([
+//            self.rightIcon.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+//            self.rightIcon.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -12)
+//        ])
         
         self.addSubview(self.titleLabel)
         NSLayoutConstraint.activate([
@@ -97,12 +98,12 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
         
         self.addSubview(self.floorLabel)
         NSLayoutConstraint.activate([
-            self.floorLabel.widthAnchor.constraint(equalToConstant: 40),
+//            self.floorLabel.widthAnchor.constraint(equalToConstant: 40),
             self.floorLabel.centerYAnchor.constraint(equalTo: self.titleLabel.centerYAnchor),
             self.floorLabel.leadingAnchor.constraint(equalTo: self.titleLabel.trailingAnchor, constant: 8),
 //            self.floorLabel.trailingAnchor.constraint(greaterThanOrEqualTo: self.rightIcon.leadingAnchor)
         ])
-        self.floorLabel.trailingAnchor.constraint(greaterThanOrEqualTo: self.rightIcon.leadingAnchor).priority = UILayoutPriority(500)
+//        self.floorLabel.trailingAnchor.constraint(greaterThanOrEqualTo: self.rightIcon.leadingAnchor).priority = UILayoutPriority(500)
         
         let stackView = UIStackView(arrangedSubviews: [self.subTitleLabel, self.textLabel])
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -114,7 +115,14 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
         NSLayoutConstraint.activate([
             stackView.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: 8),
             stackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 12),
-            stackView.trailingAnchor.constraint(equalTo: self.rightIcon.leadingAnchor, constant: -8)
+            stackView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -12)
+//            stackView.trailingAnchor.constraint(equalTo: self.rightIcon.leadingAnchor, constant: -8)
+        ])
+        
+        self.addSubview(self.statusLabel)
+        NSLayoutConstraint.activate([
+            self.statusLabel.centerYAnchor.constraint(equalTo: self.titleLabel.centerYAnchor),
+            self.statusLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -12)
         ])
     }
     
@@ -125,5 +133,6 @@ final class LidarInfoCollectionViewCell: UICollectionViewCell {
         self.floorLabel.text = floor
         self.subTitleLabel.text = info.roadAddres
         self.textLabel.text = "\(info.createdAt) / \(info.fileSize)"
+        self.statusLabel.updateStatus(to: info.isProgramCompleted ? .completed : .processing)
     }
 }

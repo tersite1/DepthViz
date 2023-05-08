@@ -17,6 +17,7 @@ struct LidarInfo: Hashable {
     let fileSize: String
     let gpsId: String
     let addressId: String
+    let isProgramCompleted: Bool
     
     static func == (lhs: LidarInfo, rhs: LidarInfo) -> Bool {
         return lhs.collectId == rhs.collectId

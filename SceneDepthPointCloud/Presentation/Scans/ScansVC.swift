@@ -90,7 +90,9 @@ extension ScansVC: UICollectionViewDelegate {
         switch viewModel.mode {
         case .lidarList:
             if let lidarInfo = viewModel.lidarList[safe: indexPath.item] {
-                self.moveToLidarDetailVC(info: lidarInfo)
+                if lidarInfo.isProgramCompleted {
+                    self.moveToLidarDetailVC(info: lidarInfo)
+                }
             }
         case .buildingList:
             // MARK: buildingInfo 구현 필요

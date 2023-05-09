@@ -82,12 +82,12 @@ final class GPSInfoView: UIView {
     let centerPinIcon: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.image = UIImage(named: "pin")
+        imageView.image = UIImage(named: "largePin")
         imageView.contentMode = .scaleAspectFit
         
         NSLayoutConstraint.activate([
-            imageView.widthAnchor.constraint(equalToConstant: 14),
-            imageView.heightAnchor.constraint(equalToConstant: 14)
+            imageView.widthAnchor.constraint(equalToConstant: 20),
+            imageView.heightAnchor.constraint(equalToConstant: 20)
         ])
         
         return imageView
@@ -157,7 +157,7 @@ final class GPSInfoView: UIView {
         self.mapView.addSubview(self.centerPinIcon)
         NSLayoutConstraint.activate([
             self.centerPinIcon.centerXAnchor.constraint(equalTo: self.mapView.centerXAnchor),
-            self.centerPinIcon.centerYAnchor.constraint(equalTo: self.mapView.centerYAnchor, constant: -7)
+            self.centerPinIcon.centerYAnchor.constraint(equalTo: self.mapView.centerYAnchor, constant: -10)
         ])
     }
     

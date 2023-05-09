@@ -12,6 +12,7 @@
 		871356C22A0966460005DE8C /* LidarDetailTagView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C12A0966460005DE8C /* LidarDetailTagView.swift */; };
 		871356C42A0A124C0005DE8C /* GPSInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C32A0A124C0005DE8C /* GPSInfoView.swift */; };
 		871356C62A0AA5C50005DE8C /* Double+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C52A0AA5C50005DE8C /* Double+Extension.swift */; };
+		871356C82A0AAE830005DE8C /* LidarInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C72A0AAE830005DE8C /* LidarInfoView.swift */; };
 		87295C942A0386B30067392D /* ScansButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C932A0386B30067392D /* ScansButton.swift */; };
 		87295C962A038BAD0067392D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C952A038BAD0067392D /* SceneDelegate.swift */; };
 		87295C992A038DD50067392D /* ScansVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C982A038DD50067392D /* ScansVC.swift */; };
@@ -86,6 +87,7 @@
 		871356C12A0966460005DE8C /* LidarDetailTagView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarDetailTagView.swift; sourceTree = "<group>"; };
 		871356C32A0A124C0005DE8C /* GPSInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPSInfoView.swift; sourceTree = "<group>"; };
 		871356C52A0AA5C50005DE8C /* Double+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+Extension.swift"; sourceTree = "<group>"; };
+		871356C72A0AAE830005DE8C /* LidarInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarInfoView.swift; sourceTree = "<group>"; };
 		87295C932A0386B30067392D /* ScansButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansButton.swift; sourceTree = "<group>"; };
 		87295C952A038BAD0067392D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		87295C982A038DD50067392D /* ScansVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansVC.swift; sourceTree = "<group>"; };
@@ -236,9 +238,10 @@
 		871356BE2A095EEF0005DE8C /* View */ = {
 			isa = PBXGroup;
 			children = (
-				871356BF2A095EFD0005DE8C /* BuildingInfoView.swift */,
 				871356C12A0966460005DE8C /* LidarDetailTagView.swift */,
+				871356BF2A095EFD0005DE8C /* BuildingInfoView.swift */,
 				871356C32A0A124C0005DE8C /* GPSInfoView.swift */,
+				871356C72A0AAE830005DE8C /* LidarInfoView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -548,6 +551,7 @@
 				87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */,
 				87ABC85D29D176C700881FFB /* NetworkResult.swift in Sources */,
 				87C8FB0529F22E1B000C37CE /* RoadAddressLabel.swift in Sources */,
+				871356C82A0AAE830005DE8C /* LidarInfoView.swift in Sources */,
 				87C8FB0029F1911B000C37CE /* CancelButton.swift in Sources */,
 				87C8FB1729F28F8A000C37CE /* SelectLocationLargeButton.swift in Sources */,
 				877F534129F6400900A0F931 /* KakaoApiService.swift in Sources */,

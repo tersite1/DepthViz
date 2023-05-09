@@ -13,6 +13,7 @@ final class LidarDetailVC: UIViewController {
     static let identifier = "LidarDetailVC"
     private let buildingInfoView = BuildingInfoView()
     private let gpsInfoView = GPSInfoView()
+    private let lidarInfoView = LidarInfoView()
     private var viewModel: LidarDetailVM?
     private var cancellables: Set<AnyCancellable> = []
     
@@ -50,6 +51,16 @@ extension LidarDetailVC {
         ])
         
         self.gpsInfoView.disappear()
+        
+        // lidarInfoView
+        self.view.addSubview(self.lidarInfoView)
+        NSLayoutConstraint.activate([
+            self.lidarInfoView.topAnchor.constraint(equalTo: self.gpsInfoView.bottomAnchor, constant: 32),
+            self.lidarInfoView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+            self.lidarInfoView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+        ])
+        
+        self.lidarInfoView.disappear()
     }
 }
 
@@ -66,6 +77,7 @@ extension LidarDetailVC {
                 
                 self?.showBuildingInfoView()
                 self?.showGpsInfoView()
+                self?.showLidarInfoView()
             })
             .store(in: &self.cancellables)
     }
@@ -84,6 +96,13 @@ extension LidarDetailVC {
         
         self.gpsInfoView.configure(info: gpsInfo)
         self.gpsInfoView.fadeIn()
+    }
+    
+    private func showLidarInfoView() {
+        guard let lidarInfo = self.viewModel?.lidarDetailInfo else { return }
+        
+        self.lidarInfoView.configure(info: lidarInfo)
+        self.lidarInfoView.fadeIn()
     }
 }
 

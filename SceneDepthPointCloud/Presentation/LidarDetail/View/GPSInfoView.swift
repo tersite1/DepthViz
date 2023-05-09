@@ -26,6 +26,45 @@ final class GPSInfoView: UIView {
         view.backgroundColor = UIColor(named: "cellBackgroundColor")
         return view
     }()
+    private let gpsIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.image = UIImage(named: "locationCircleIcon")
+        imageView.contentMode = .scaleAspectFit
+        NSLayoutConstraint.activate([
+            imageView.widthAnchor.constraint(equalToConstant: 36),
+            imageView.heightAnchor.constraint(equalToConstant: 36)
+        ])
+        return imageView
+    }()
+    private let floorLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont.systemFont(ofSize: 18, weight: .bold)
+        label.textColor = .white
+        label.textAlignment = .left
+        label.numberOfLines = 1
+        return label
+    }()
+    private let latitudeLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        label.textColor = .white
+        label.textAlignment = .left
+        label.numberOfLines = 1
+        return label
+    }()
+    private let longitudeLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        label.textColor = .white
+        label.textAlignment = .left
+        label.numberOfLines = 1
+        return label
+    }()
+    private let tagView = LidarDetailTagView(tag: .apple)
     
     convenience init() {
         self.init(frame: CGRect())
@@ -48,5 +87,46 @@ final class GPSInfoView: UIView {
             self.backgroundView.heightAnchor.constraint(equalToConstant: 300),
             self.backgroundView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ])
+        
+        self.backgroundView.addSubview(self.gpsIcon)
+        NSLayoutConstraint.activate([
+            self.gpsIcon.topAnchor.constraint(equalTo: self.backgroundView.topAnchor, constant: 12),
+            self.gpsIcon.leadingAnchor.constraint(equalTo: self.backgroundView.leadingAnchor, constant: 16)
+        ])
+        
+        self.backgroundView.addSubview(self.floorLabel)
+        NSLayoutConstraint.activate([
+            self.floorLabel.topAnchor.constraint(equalTo: self.backgroundView.topAnchor, constant: 12),
+            self.floorLabel.leadingAnchor.constraint(equalTo: self.gpsIcon.trailingAnchor, constant: 16),
+            self.floorLabel.trailingAnchor.constraint(equalTo: self.backgroundView.trailingAnchor, constant: -16)
+        ])
+        
+        let stackView = UIStackView(arrangedSubviews: [self.latitudeLabel, self.longitudeLabel])
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .horizontal
+        stackView.spacing = 12
+        stackView.alignment = .center
+        
+        self.backgroundView.addSubview(stackView)
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: self.floorLabel.bottomAnchor, constant: 4),
+            stackView.leadingAnchor.constraint(equalTo: self.floorLabel.leadingAnchor)
+        ])
+        
+        self.backgroundView.addSubview(self.tagView)
+        NSLayoutConstraint.activate([
+            self.tagView.centerYAnchor.constraint(equalTo: stackView.centerYAnchor),
+            self.tagView.trailingAnchor.constraint(equalTo: self.backgroundView.trailingAnchor, constant: -16)
+        ])
+    }
+    
+    func configure(info: LidarDetailInfo) {
+        let floor = info.floor >= 0 ? "F\(info.floor)" : "B\(-info.floor)"
+        self.floorLabel.text = floor
+        if let altitude = info.altitude {
+            self.floorLabel.text = floor + " [ \(String(format: "%.1f m", altitude)) ]"
+        }
+        self.latitudeLabel.text = info.latitude.latitudeToDMS
+        self.longitudeLabel.text = info.longitude.longitudeToDMS
     }
 }

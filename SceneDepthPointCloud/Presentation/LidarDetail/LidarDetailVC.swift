@@ -14,6 +14,7 @@ final class LidarDetailVC: UIViewController {
     private let buildingInfoView = BuildingInfoView()
     private let gpsInfoView = GPSInfoView()
     private let lidarInfoView = LidarInfoView()
+    private let openWebButton = OpenWebButton()
     private var viewModel: LidarDetailVM?
     private var cancellables: Set<AnyCancellable> = []
     
@@ -61,6 +62,15 @@ extension LidarDetailVC {
         ])
         
         self.lidarInfoView.disappear()
+        
+        // openWebButton
+        self.view.addSubview(self.openWebButton)
+        NSLayoutConstraint.activate([
+            self.openWebButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
+            self.openWebButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
+            self.openWebButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
+            self.openWebButton.topAnchor.constraint(equalTo: self.lidarInfoView.bottomAnchor, constant: 32)
+        ])
     }
 }
 

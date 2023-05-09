@@ -13,6 +13,7 @@
 		871356C42A0A124C0005DE8C /* GPSInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C32A0A124C0005DE8C /* GPSInfoView.swift */; };
 		871356C62A0AA5C50005DE8C /* Double+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C52A0AA5C50005DE8C /* Double+Extension.swift */; };
 		871356C82A0AAE830005DE8C /* LidarInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C72A0AAE830005DE8C /* LidarInfoView.swift */; };
+		871356CA2A0AB3340005DE8C /* OpenWebButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C92A0AB3340005DE8C /* OpenWebButton.swift */; };
 		87295C942A0386B30067392D /* ScansButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C932A0386B30067392D /* ScansButton.swift */; };
 		87295C962A038BAD0067392D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C952A038BAD0067392D /* SceneDelegate.swift */; };
 		87295C992A038DD50067392D /* ScansVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C982A038DD50067392D /* ScansVC.swift */; };
@@ -88,6 +89,7 @@
 		871356C32A0A124C0005DE8C /* GPSInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPSInfoView.swift; sourceTree = "<group>"; };
 		871356C52A0AA5C50005DE8C /* Double+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+Extension.swift"; sourceTree = "<group>"; };
 		871356C72A0AAE830005DE8C /* LidarInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarInfoView.swift; sourceTree = "<group>"; };
+		871356C92A0AB3340005DE8C /* OpenWebButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenWebButton.swift; sourceTree = "<group>"; };
 		87295C932A0386B30067392D /* ScansButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansButton.swift; sourceTree = "<group>"; };
 		87295C952A038BAD0067392D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		87295C982A038DD50067392D /* ScansVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansVC.swift; sourceTree = "<group>"; };
@@ -242,6 +244,7 @@
 				871356BF2A095EFD0005DE8C /* BuildingInfoView.swift */,
 				871356C32A0A124C0005DE8C /* GPSInfoView.swift */,
 				871356C72A0AAE830005DE8C /* LidarInfoView.swift */,
+				871356C92A0AB3340005DE8C /* OpenWebButton.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -538,6 +541,7 @@
 				87AE167829F124EF00B101A6 /* LocationData.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,
 				87295C992A038DD50067392D /* ScansVC.swift in Sources */,
+				871356CA2A0AB3340005DE8C /* OpenWebButton.swift in Sources */,
 				877F534529F643B600A0F931 /* BuildingInMapRepository.swift in Sources */,
 				87E9B5322A08CF1900FF4A8D /* BuildingRepository.swift in Sources */,
 				87673BD829F8EC4800BD3DC3 /* IndoorData.swift in Sources */,

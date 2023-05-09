@@ -22,6 +22,7 @@ final class LidarDetailVC: UIViewController {
         super.viewDidLoad()
         self.title = "Lidar Detail"
         self.configureUI()
+        self.configureBuildingInfo()
         self.bindViewModel()
     }
     
@@ -71,6 +72,19 @@ extension LidarDetailVC {
             self.openWebButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
             self.openWebButton.topAnchor.constraint(equalTo: self.lidarInfoView.bottomAnchor, constant: 32)
         ])
+    }
+    
+    private func configureBuildingInfo() {
+        let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapBuildingInfo(_:)))
+        self.buildingInfoView.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func tapBuildingInfo(_ gesture: UITapGestureRecognizer) {
+        guard let url = self.viewModel?.buildingInfo?.placeURL else { return }
+        guard let webViewVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: WebViewVC.identifier) as? WebViewVC else { return }
+        
+        webViewVC.setUrl(to: url)
+        self.navigationController?.pushViewController(webViewVC, animated: true)
     }
 }
 

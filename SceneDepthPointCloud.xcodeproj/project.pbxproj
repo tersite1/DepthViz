@@ -14,6 +14,7 @@
 		871356C62A0AA5C50005DE8C /* Double+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C52A0AA5C50005DE8C /* Double+Extension.swift */; };
 		871356C82A0AAE830005DE8C /* LidarInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C72A0AAE830005DE8C /* LidarInfoView.swift */; };
 		871356CA2A0AB3340005DE8C /* OpenWebButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C92A0AB3340005DE8C /* OpenWebButton.swift */; };
+		871356CD2A0AB80E0005DE8C /* WebViewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356CC2A0AB80E0005DE8C /* WebViewVC.swift */; };
 		87295C942A0386B30067392D /* ScansButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C932A0386B30067392D /* ScansButton.swift */; };
 		87295C962A038BAD0067392D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C952A038BAD0067392D /* SceneDelegate.swift */; };
 		87295C992A038DD50067392D /* ScansVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C982A038DD50067392D /* ScansVC.swift */; };
@@ -90,6 +91,7 @@
 		871356C52A0AA5C50005DE8C /* Double+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+Extension.swift"; sourceTree = "<group>"; };
 		871356C72A0AAE830005DE8C /* LidarInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarInfoView.swift; sourceTree = "<group>"; };
 		871356C92A0AB3340005DE8C /* OpenWebButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenWebButton.swift; sourceTree = "<group>"; };
+		871356CC2A0AB80E0005DE8C /* WebViewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewVC.swift; sourceTree = "<group>"; };
 		87295C932A0386B30067392D /* ScansButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansButton.swift; sourceTree = "<group>"; };
 		87295C952A038BAD0067392D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		87295C982A038DD50067392D /* ScansVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansVC.swift; sourceTree = "<group>"; };
@@ -187,6 +189,7 @@
 				87C8FAF729F171BB000C37CE /* SelectLocation */,
 				87295C972A038DBB0067392D /* Scans */,
 				87A315532A076CEA0074BB1B /* LidarDetail */,
+				871356CB2A0AB7D90005DE8C /* WebView */,
 			);
 			path = Presentation;
 			sourceTree = "<group>";
@@ -247,6 +250,14 @@
 				871356C92A0AB3340005DE8C /* OpenWebButton.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		871356CB2A0AB7D90005DE8C /* WebView */ = {
+			isa = PBXGroup;
+			children = (
+				871356CC2A0AB80E0005DE8C /* WebViewVC.swift */,
+			);
+			path = WebView;
 			sourceTree = "<group>";
 		};
 		87295C972A038DBB0067392D /* Scans */ = {
@@ -562,6 +573,7 @@
 				87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */,
 				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,
 				872C7A9E29F1332B002D91D2 /* LocationUsecase.swift in Sources */,
+				871356CD2A0AB80E0005DE8C /* WebViewVC.swift in Sources */,
 				87C8FB1529F263C8000C37CE /* NetworkInterceptor.swift in Sources */,
 				877F533B29F62E2300A0F931 /* BackButton.swift in Sources */,
 				87295CA02A03AE8A0067392D /* LidarInfo.swift in Sources */,
@@ -746,7 +758,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";
@@ -774,7 +786,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";

@@ -84,6 +84,7 @@ final class BuildingInfoView: UIView {
             self.backgroundView.topAnchor.constraint(equalTo: self.sectionLabel.bottomAnchor, constant: 4),
             self.backgroundView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             self.backgroundView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            self.backgroundView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
         ])
         
         self.backgroundView.addSubview(self.buildingIcon)

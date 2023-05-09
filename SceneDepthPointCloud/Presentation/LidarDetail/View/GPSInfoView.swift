@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MapKit
 
 final class GPSInfoView: UIView {
     private let sectionLabel: UILabel = {
@@ -65,6 +66,32 @@ final class GPSInfoView: UIView {
         return label
     }()
     private let tagView = LidarDetailTagView(tag: .apple)
+    private let mapView: MKMapView = {
+        let mapView = MKMapView()
+        mapView.translatesAutoresizingMaskIntoConstraints = false
+        mapView.layer.cornerRadius = 8
+        mapView.layer.cornerCurve = .continuous
+        
+        mapView.isScrollEnabled = false
+        mapView.isZoomEnabled = false
+        mapView.isPitchEnabled = false
+        mapView.isRotateEnabled = false
+        
+        return mapView
+    }()
+    let centerPinIcon: UIImageView = {
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.image = UIImage(named: "pin")
+        imageView.contentMode = .scaleAspectFit
+        
+        NSLayoutConstraint.activate([
+            imageView.widthAnchor.constraint(equalToConstant: 14),
+            imageView.heightAnchor.constraint(equalToConstant: 14)
+        ])
+        
+        return imageView
+    }()
     
     convenience init() {
         self.init(frame: CGRect())
@@ -118,9 +145,26 @@ final class GPSInfoView: UIView {
             self.tagView.centerYAnchor.constraint(equalTo: stackView.centerYAnchor),
             self.tagView.trailingAnchor.constraint(equalTo: self.backgroundView.trailingAnchor, constant: -16)
         ])
+        
+        self.backgroundView.addSubview(self.mapView)
+        NSLayoutConstraint.activate([
+            self.mapView.topAnchor.constraint(equalTo: stackView.bottomAnchor, constant: 12),
+            self.mapView.leadingAnchor.constraint(equalTo: self.backgroundView.leadingAnchor, constant: 16),
+            self.mapView.trailingAnchor.constraint(equalTo: self.backgroundView.trailingAnchor, constant: -16),
+            self.mapView.bottomAnchor.constraint(equalTo: self.backgroundView.bottomAnchor, constant: -16)
+        ])
+        
+        self.mapView.addSubview(self.centerPinIcon)
+        NSLayoutConstraint.activate([
+            self.centerPinIcon.centerXAnchor.constraint(equalTo: self.mapView.centerXAnchor),
+            self.centerPinIcon.centerYAnchor.constraint(equalTo: self.mapView.centerYAnchor, constant: -7)
+        ])
     }
     
     func configure(info: LidarDetailInfo) {
+        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: info.latitude, longitude: info.longitude), span: .init(latitudeDelta: 0.002, longitudeDelta: 0.002))
+        self.mapView.setRegion(region, animated: false)
+        
         let floor = info.floor >= 0 ? "F\(info.floor)" : "B\(-info.floor)"
         self.floorLabel.text = floor
         if let altitude = info.altitude {

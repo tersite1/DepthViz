@@ -30,7 +30,6 @@ final class SelectLocationVC: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 10
         layout.scrollDirection = .vertical
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         return UICollectionView(frame: .zero, collectionViewLayout: layout)
     }()
     /// buildingListView의 bottomAnchor 값
@@ -412,16 +411,6 @@ extension SelectLocationVC: UICollectionViewDelegate {
     /// BuildingListCollectionViewCell 선택시 액션연결 함수
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         self.viewModel?.selectBuilding(to: indexPath.item)
-    }
-    
-    /// buildingListView의 스크롤위치 수신함수를 통해 pagination 구현한 함수
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if self.buildingListView.contentOffset.y > (self.buildingListView.contentSize.height - self.buildingListView.bounds.size.height) {
-            guard self.viewModel?.fetching == false,
-                  self.viewModel?.isLastPage == false else { return }
-            
-            self.viewModel?.nextPageBuildingListFetch()
-        }
     }
 }
 

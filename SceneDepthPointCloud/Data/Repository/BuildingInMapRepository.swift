@@ -11,7 +11,7 @@ import Foundation
 /// 건물 정보 Repository
 final class BuildingInMapRepository: BuildingInMapRepositoryInterface {
     /// BuildingApiService로부터 BuildingNearByGpsDTO를 받아 [BuildingInfo]를 반환하는 함수
-    func fetchBuildingInfo(from location: LocationData, page: Int, completion: @escaping (Result<(infos: [BuildingOfMapInfo], isLastPage: Bool), FetchError>) -> Void) {
+    func fetchBuildingInfo(from location: LocationData, page: Int, completion: @escaping (Result<(infos: [BuildingOfMapInfo], totalCount: Int), FetchError>) -> Void) {
         let endpoint = KakaoApiService()
         
         let x = Double(location.longitude)
@@ -22,8 +22,7 @@ final class BuildingInMapRepository: BuildingInMapRepositoryInterface {
             switch result {
             case .success(let buildingDTO):
                 let infos = buildingDTO.documents.map { $0.toDomain() }
-                let isLastPage = buildingDTO.meta.isEnd
-                completion(.success((infos: infos, isLastPage: isLastPage)))
+                completion(.success((infos: infos, totalCount: buildingDTO.meta.pageableCount)))
                 
             case .failure(let error):
                 completion(.failure(error))

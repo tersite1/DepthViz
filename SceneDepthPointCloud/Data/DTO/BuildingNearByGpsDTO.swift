@@ -15,9 +15,9 @@ struct BuildingNearByGpsDTO: Decodable {
 }
 
 struct BuildingNearByGpsMetaDTO: Decodable {
-    let isEnd: Bool
-    let pageableCount: Int
-    let totalCount: Int
+    let isEnd: Bool // 현재 페이지가 마지막 페이지인지 여부
+    let pageableCount: Int // total_count 중 노출 가능한 문서 수 (최댓값: 45)
+    let totalCount: Int // 검색된 문서 수
     
     enum CodingKeys: String, CodingKey {
         case isEnd = "is_end"

@@ -123,7 +123,9 @@ extension MainVM {
     }
     
     func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
-        guard let lidarData = self.lidarData else { return }
+        guard var lidarData = self.lidarData else { return }
+        
+//        lidarData.rename(roadAddress: buildingInfo.roadAddress, floor: floor)
         
         let location = IndoorData(latitude: location.latitude, longitude: location.longitude, altitude: location.altitude, floor: "\(floor)")
         

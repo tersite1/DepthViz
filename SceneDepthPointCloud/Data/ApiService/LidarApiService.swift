@@ -55,7 +55,7 @@ final class LidarApiService {
         // 추가 parameter들 (고정값들)
         parameters["size"] = 25
         
-        Network.request(url: NetworkURL.Server.lidars, method: .get) { result in
+        Network.request(url: NetworkURL.Server.lidars, method: .get, parameters: parameters) { result in
             switch result.status {
             case .SUCCESS:
                 guard let data = result.data else {

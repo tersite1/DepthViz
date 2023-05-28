@@ -11,7 +11,7 @@ import Foundation
 /// LiDAR 데이터 구조체
 struct LiDARData {
     // LiDAR 데이터 파일명
-    let lidarFileName: String
+    var lidarFileName: String
     // LiDAR 데이터
     let lidarData: Data
     // LiDAR 데이터 파일크기
@@ -35,5 +35,12 @@ struct LiDARData {
         }
         
         self.pointCount = pointCount
+    }
+    
+    // MARK: Filename 변경
+    // 도로명주소_floor_F1.ply
+    mutating func rename(roadAddress: String, floor: Int) {
+        let floor = floor > 0 ? "F\(floor)" : "B\(-floor)"
+        self.lidarFileName = "\(roadAddress)_Floor_\(floor).ply"
     }
 }

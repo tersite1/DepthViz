@@ -1,5 +1,5 @@
 //
-//  LidarStorage.swift
+//  LocationStorage.swift
 //  SceneDepthPointCloud
 //
 //  Created by Kang Minsang on 2023/05/29.
@@ -8,12 +8,12 @@
 
 import Foundation
 
-final class LidarStorage {
+final class LocationStorage {
     private init() { }
     
-    static let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("lidarData", isDirectory: false)
+    static let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("locationData", isDirectory: false)
     
-    static func save(_ obj: LiDARData) -> Bool {
+    static func save(_ obj: LocationData) -> Bool {
         print("---> save to here: \(url)")
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
@@ -34,7 +34,7 @@ final class LidarStorage {
         }
     }
     
-    static func get() -> LiDARData? {
+    static func get() -> LocationData? {
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
         guard let data = FileManager.default.contents(atPath: url.path) else { return nil }
         
@@ -42,8 +42,8 @@ final class LidarStorage {
         decoder.dateDecodingStrategy = .iso8601
         
         do {
-            let lidarData = try decoder.decode(LiDARData.self, from: data)
-            return lidarData
+            let locationData = try decoder.decode(LocationData.self, from: data)
+            return locationData
         } catch let error {
             print("---> Failed to decode msg: \(error.localizedDescription)")
             return nil

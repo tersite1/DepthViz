@@ -20,6 +20,8 @@ final class MainVM {
         case recording // LiDAR 측정중 상태
         case loading // LiDAR 측정종료 및 데이터생성중 상태
         case uploading // 데이터 업로드중 상태
+        case recordingTerminate
+        case uploadingTerminate
     }
     // MARK: OUTPUT
     /// 측정전, 측정중, 로딩중, 업로드중 상태값
@@ -31,11 +33,22 @@ final class MainVM {
     /// 위치정보 데이터 값
     @Published private(set) var currentLocation: LocationData?
     /// 전송 후 네트워킹 성공
-    @Published private(set) var uploadSuccess: Bool = false
-    /// 전송 후 네트워킹 오류값
-    @Published private(set) var networkError: (title: String, text: String)?
+    @Published private(set) var uploadSuccess: Bool = false {
+        didSet {
+            if uploadSuccess {
+                self.locationRepository.clearStorage()
+                self.lidarRepository.clearStorage()
+                UserDefaults.standard.setValue(false, forKey: "lidarData")
+            }
+        }
+    }
     /// 업로드 진행률
     @Published private(set) var uploadProgress: Double = 0
+    /// 앱 내부 데이터 로딩여부
+    @Published private(set) var processWithStorageData: Bool = false
+    /// 앱 내부 저장 성공여부
+    @Published private(set) var saveToStorageSuccess: Bool?
+    private(set) var networkErrorMessage: String = ""
     
     /// 실시간 LiDAR 측정 및 Point Cloud 표시관련 핵심로직 담당 객체
     private let renderer: Renderer
@@ -43,6 +56,7 @@ final class MainVM {
     private let apiService: LidarApiService
     /// GPS 정보와 관련된 로직담당 객체
     private let lidarRepository: LidarRepositoryInterface
+    private let locationRepository: LocationRepositoryInterface
     private let locationUsecase: LocationUsecase
     /// 메인화면에서 측정된 gps 값들
     private var locations: [LocationData] = []
@@ -55,19 +69,13 @@ final class MainVM {
         self.apiService = LidarApiService()
         self.locationUsecase = LocationUsecase()
         self.lidarRepository = LidarRepository()
+        self.locationRepository = LocationRepository()
         self.bindRenderer()
         
         // storage에 저장된 lidar가 있는지 확인
         if UserDefaults.standard.bool(forKey: "lidarData") == true {
-            print("lidarData is exist")
             self.mode = .loading
-            
-            if let lidarData = self.lidarRepository.fetchFromStorage() {
-                self.lidarData = lidarData
-            } else {
-                print("get lidar file failed")
-                self.mode = .ready
-            }
+            self.processWithStorageData = true
         } else {
             self.mode = .ready
         }
@@ -110,9 +118,8 @@ extension MainVM {
     
     /// 메모리 부족으로 인한 LiDAR 측정 종료 함수
     func terminateRecording() {
-        // MARK: lidar 파일 저장로직 필요
+        self.mode = .recordingTerminate
         self.stopRecording()
-        self.changeMode()
     }
     
     func readyForRecording() {
@@ -136,7 +143,6 @@ extension MainVM {
     func uploadCancel() {
         self.resetRenderer()
         self.mode = .uploading
-        self.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
     }
     
     func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
@@ -153,14 +159,18 @@ extension MainVM {
             case .success(let uploaded):
                 if uploaded {
                     self?.uploadSuccess = true
+                    self?.uploadProgress = 0
                 } else {
-                    self?.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
-                    // MARK: lidar 파일 저장로직 필요
+                    // MARK: location, lidar 파일 저장로직
+                    self?.mode = .uploadingTerminate
+                    self?.saveCurrentFilesToStorage()
                 }
                 
             case .failure(let fetchError):
-                self?.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again\n\(fetchError.message)")
-                        
+                self?.networkErrorMessage = fetchError.message
+                // MARK: location, lidar 파일 저장로직
+                self?.mode = .uploadingTerminate
+                self?.saveCurrentFilesToStorage()
             }
         }
     }
@@ -183,6 +193,11 @@ extension MainVM {
                       let pointCount = self?.renderer.currentPointCount else { return }
                 
                 self?.lidarData = LiDARData(rawStringData: rawStringData, pointCount: pointCount)
+                
+                // MARK: location, lidar 파일 저장로직
+                if self?.mode == .recordingTerminate {
+                    self?.saveCurrentFilesToStorage()
+                }
             }
             .store(in: &self.cancellables)
     }
@@ -207,5 +222,41 @@ extension MainVM {
     /// Renderer 초기화 및 재측정 설정 함수
     private func resetRenderer() {
         self.renderer.clearParticles()
+    }
+}
+
+extension MainVM {
+    func resetStorageAndStart() {
+        self.locationRepository.clearStorage()
+        self.lidarRepository.clearStorage()
+        UserDefaults.standard.setValue(false, forKey: "lidarData")
+        self.mode = .ready
+    }
+    
+    func loadFromStorage() {
+        if let locationData = self.locationRepository.getFromStorage(),
+           let lidarData = self.lidarRepository.getFromStorage() {
+            self.currentLocation = locationData
+            self.lidarData = lidarData
+        } else {
+            print("get location file, lidar file failed")
+            self.mode = .ready
+        }
+    }
+    
+    private func saveCurrentFilesToStorage() {
+        guard self.currentLocation != nil, self.lidarData != nil else {
+            self.saveToStorageSuccess = false
+            return
+        }
+        
+        guard self.locationRepository.saveToStorage(locationData: self.currentLocation!),
+              self.lidarRepository.saveToStorage(lidarData: self.lidarData!) else {
+            self.saveToStorageSuccess = false
+            return
+        }
+        
+        UserDefaults.standard.setValue(true, forKey: "lidarData")
+        self.saveToStorageSuccess = true
     }
 }

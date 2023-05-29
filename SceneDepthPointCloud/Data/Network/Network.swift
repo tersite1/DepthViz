@@ -20,7 +20,7 @@ struct Network {
             .resume()
     }
     // MARK: Content-Type=multipart/form-data 형식으로 upload하는 함수
-    static func uploadData(url: String, address: String, location: String, file: LiDARData, completion: @escaping (NetworkResult) -> Void) {
+    static func uploadData(url: String, address: String, location: String, file: LiDARData, handler: @escaping ((Double) -> Void), completion: @escaping (NetworkResult) -> Void) {
         // multipart/form-data 인코딩
         let multipartFormData = MultipartFormData()
         multipartFormData.append(address.data(using: .utf8)!, withName: "address", mimeType: "application/json")
@@ -29,12 +29,15 @@ struct Network {
         multipartFormData.append("\(file.pointCount)".data(using: .utf8)!, withName: "totalPoints")
         
         // 파일 업로드
-        AF.upload(multipartFormData: multipartFormData, to: url)
-        .validate()
-        .response { response in
-            completion(Network.configurationNetworkResult(response))
-        }
-        .resume()
+        AF.upload(multipartFormData: multipartFormData, to: url) { $0.timeoutInterval = .infinity }
+            .uploadProgress(closure: { progress in
+                handler(progress.fractionCompleted)
+            })
+            .validate()
+            .response { response in
+                completion(Network.configurationNetworkResult(response))
+            }
+            .resume()
     }
     
     /// statusCode 값과 Data 값으로 NetworkResult 반환

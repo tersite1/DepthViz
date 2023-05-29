@@ -34,6 +34,8 @@ final class MainVM {
     @Published private(set) var uploadSuccess: Bool = false
     /// 전송 후 네트워킹 오류값
     @Published private(set) var networkError: (title: String, text: String)?
+    /// 업로드 진행률
+    @Published private(set) var uploadProgress: Double = 0
     
     /// 실시간 LiDAR 측정 및 Point Cloud 표시관련 핵심로직 담당 객체
     private let renderer: Renderer
@@ -125,11 +127,13 @@ extension MainVM {
     func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
         guard var lidarData = self.lidarData else { return }
         
-//        lidarData.rename(roadAddress: buildingInfo.roadAddress, floor: floor)
+        lidarData.rename(roadAddress: buildingInfo.roadAddress)
         
         let location = IndoorData(latitude: location.latitude, longitude: location.longitude, altitude: location.altitude, floor: "\(floor)")
         
-        self.apiService.upload(buildingInfo: buildingInfo, location: location, file: lidarData) { [weak self] result in
+        self.apiService.upload(buildingInfo: buildingInfo, location: location, file: lidarData, handler: { [weak self] progress in
+            self?.uploadProgress = progress
+        }) { [weak self] result in
             switch result {
             case .success(let uploaded):
                 if uploaded {

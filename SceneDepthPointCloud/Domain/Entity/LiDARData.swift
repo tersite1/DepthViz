@@ -39,8 +39,7 @@ struct LiDARData {
     
     // MARK: Filename 변경
     // 도로명주소_floor_F1.ply
-    mutating func rename(roadAddress: String, floor: Int) {
-        let floor = floor > 0 ? "F\(floor)" : "B\(-floor)"
-        self.lidarFileName = "\(roadAddress)_Floor_\(floor).ply"
+    mutating func rename(roadAddress: String) {
+        self.lidarFileName = "\(roadAddress)_\(MMddHHmm()).ply"
     }
 }

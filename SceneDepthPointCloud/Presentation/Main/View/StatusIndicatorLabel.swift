@@ -34,4 +34,8 @@ final class StatusIndicatorLabel: UILabel {
     func changeText(to type: TextType) {
         self.text = type.rawValue
     }
+    
+    func uploadProgress(to progress: Double) {
+        self.text = "Uploading\n\(String(format: "%.1f", progress*100))%"
+    }
 }

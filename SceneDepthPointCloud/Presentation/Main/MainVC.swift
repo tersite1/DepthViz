@@ -145,6 +145,7 @@ extension MainVC {
         self.bindLidarData()
         self.bindNetworkError()
         self.bindUploadSuccess()
+        self.bindUploadProgress()
     }
     
     /// viewModel 의 mode 값 변화를 수신하기 위한 함수
@@ -228,6 +229,16 @@ extension MainVC {
                 
                 self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
                 self?.viewModel?.changeMode()
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindUploadProgress() {
+        self.viewModel?.$uploadProgress
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] progress in
+                guard progress != 0 else { return }
+                self?.statusLabel.uploadProgress(to: progress)
             })
             .store(in: &self.cancellables)
     }

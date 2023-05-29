@@ -42,6 +42,7 @@ final class MainVM {
     /// 메인화면 관련 네트워킹 로직 담당 객체
     private let apiService: LidarApiService
     /// GPS 정보와 관련된 로직담당 객체
+    private let lidarRepository: LidarRepositoryInterface
     private let locationUsecase: LocationUsecase
     /// 메인화면에서 측정된 gps 값들
     private var locations: [LocationData] = []
@@ -49,14 +50,27 @@ final class MainVM {
     private var cancellables: Set<AnyCancellable> = []
     
     init(session: ARSession, device: MTLDevice, view: MTKView) {
-        self.mode = .ready
         self.renderer = Renderer(session: session, metalDevice: device, renderDestination: view)
         self.renderer.drawRectResized(size: view.bounds.size)
-        
         self.apiService = LidarApiService()
         self.locationUsecase = LocationUsecase()
-        
+        self.lidarRepository = LidarRepository()
         self.bindRenderer()
+        
+        // storage에 저장된 lidar가 있는지 확인
+        if UserDefaults.standard.bool(forKey: "lidarData") == true {
+            print("lidarData is exist")
+            self.mode = .loading
+            
+            if let lidarData = self.lidarRepository.fetchFromStorage() {
+                self.lidarData = lidarData
+            } else {
+                print("get lidar file failed")
+                self.mode = .ready
+            }
+        } else {
+            self.mode = .ready
+        }
     }
 }
 
@@ -96,6 +110,7 @@ extension MainVM {
     
     /// 메모리 부족으로 인한 LiDAR 측정 종료 함수
     func terminateRecording() {
+        // MARK: lidar 파일 저장로직 필요
         self.stopRecording()
         self.changeMode()
     }
@@ -140,6 +155,7 @@ extension MainVM {
                     self?.uploadSuccess = true
                 } else {
                     self?.networkError = (title: "Upload Fail", text: "Can’t Upload LiDAR Data\nPlease Try again")
+                    // MARK: lidar 파일 저장로직 필요
                 }
                 
             case .failure(let fetchError):

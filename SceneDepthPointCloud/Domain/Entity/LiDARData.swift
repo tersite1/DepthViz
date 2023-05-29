@@ -9,7 +9,7 @@
 import Foundation
 
 /// LiDAR 데이터 구조체
-struct LiDARData {
+struct LiDARData: Codable {
     // LiDAR 데이터 파일명
     var lidarFileName: String
     // LiDAR 데이터
@@ -38,7 +38,6 @@ struct LiDARData {
     }
     
     // MARK: Filename 변경
-    // 도로명주소_floor_F1.ply
     mutating func rename(roadAddress: String) {
         self.lidarFileName = "\(roadAddress)_\(MMddHHmm()).ply"
     }

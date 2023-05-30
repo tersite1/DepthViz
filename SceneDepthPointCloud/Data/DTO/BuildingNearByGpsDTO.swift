@@ -27,7 +27,7 @@ struct BuildingNearByGpsMetaDTO: Decodable {
 }
 
 struct BuildingNearByGpsDocumentDTO: Codable, Hashable {
-    let road_address_name: String // 도로명주소
+    var road_address_name: String // 도로명주소
     let place_name: String // 건물명
     let distance: String // 거리(미터)
     let address_name: String
@@ -60,5 +60,9 @@ struct BuildingNearByGpsDocumentDTO: Codable, Hashable {
                      placeName: self.place_name,
                      distance: Int(self.distance) ?? 0,
                      dto: self)
+    }
+    
+    mutating func fillRoadAddressName(to address: String) {
+        self.road_address_name = address
     }
 }

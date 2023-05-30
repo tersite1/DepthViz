@@ -21,11 +21,13 @@ struct Network {
     }
     // MARK: Content-Type=multipart/form-data 형식으로 upload하는 함수
     static func uploadData(url: String, address: String, location: String, file: LiDARData, handler: @escaping ((Double) -> Void), completion: @escaping (NetworkResult) -> Void) {
+        let fileNameData = file.lidarFileName.data(using: .nonLossyASCII)
+        let fileName = String(data: fileNameData!, encoding: .utf8)
         // multipart/form-data 인코딩
         let multipartFormData = MultipartFormData()
         multipartFormData.append(address.data(using: .utf8)!, withName: "address", mimeType: "application/json")
         multipartFormData.append(location.data(using: .utf8)!, withName: "location", mimeType: "application/json")
-        multipartFormData.append(file.lidarData, withName: "file", fileName: file.lidarFileName, mimeType: "application/octet-stream")
+        multipartFormData.append(file.lidarData, withName: "file", fileName: fileName, mimeType: "application/octet-stream")
         multipartFormData.append("\(file.pointCount)".data(using: .utf8)!, withName: "totalPoints")
         
         // 파일 업로드

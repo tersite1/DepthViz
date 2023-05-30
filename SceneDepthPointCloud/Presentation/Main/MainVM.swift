@@ -146,13 +146,15 @@ extension MainVM {
     }
     
     func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
-        guard var lidarData = self.lidarData else { return }
-        
-        lidarData.rename(roadAddress: buildingInfo.roadAddress)
-        
+        self.lidarData?.rename(roadAddress: buildingInfo.roadAddress)
+        // roadAddress 확인
+        var buildingInfo = buildingInfo
+        if buildingInfo.dto.road_address_name == "" {
+            buildingInfo.dto.fillRoadAddressName(to: location.roadAddressName)
+        }
         let location = IndoorData(latitude: location.latitude, longitude: location.longitude, altitude: location.altitude, floor: "\(floor)")
         
-        self.apiService.upload(buildingInfo: buildingInfo, location: location, file: lidarData, handler: { [weak self] progress in
+        self.apiService.upload(buildingInfo: buildingInfo, location: location, file: lidarData!, handler: { [weak self] progress in
             self?.uploadProgress = progress
         }) { [weak self] result in
             switch result {

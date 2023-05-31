@@ -77,6 +77,10 @@ extension SelectLocationVM {
     func changeMode() {
         switch self.mode {
         case .selectLocation:
+            guard self.locationData.roadAddressName != "Get current address..." else {
+                self.networkError = (title: "도로명주소값이 올바르지 않습니다.", text: "도로명주소가 유효한 다른위치로 이동해주세요")
+                return
+            }
             self.mode = .selectBuilding
             self.fetchBuildingList()
         case .selectBuilding:

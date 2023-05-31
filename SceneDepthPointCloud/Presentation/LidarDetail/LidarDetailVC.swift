@@ -80,10 +80,17 @@ extension LidarDetailVC {
         ])
         
         self.openWebButton.addAction(UIAction(handler: { [weak self] _ in
-            guard let addressId = self?.viewModel?.addressId else { return }
+            guard let self = self,
+                  let addressId = self.viewModel?.addressId else { return }
             
             if let url = URL(string: NetworkURL.Web.addressURL(addressId: addressId)) {
-                UIApplication.shared.open(url, options: [:])
+                let activityViewController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    activityViewController.popoverPresentationController?.sourceView = self.openWebButton
+                }
+                
+                self.present(activityViewController, animated: true)
             }
         }), for: .touchUpInside)
     }

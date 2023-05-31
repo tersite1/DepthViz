@@ -141,9 +141,10 @@ extension LidarDetailVC {
     }
     
     private func showGpsInfoView() {
-        guard let gpsInfo = self.viewModel?.lidarDetailInfo else { return }
+        guard let gpsInfo = self.viewModel?.lidarDetailInfo,
+              let buildingInfo = self.viewModel?.buildingInfo else { return }
         
-        self.gpsInfoView.configure(info: gpsInfo)
+        self.gpsInfoView.configure(info: gpsInfo, buildingInfo: buildingInfo)
         self.gpsInfoView.fadeIn()
     }
     

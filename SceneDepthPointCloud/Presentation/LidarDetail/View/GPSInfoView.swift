@@ -72,25 +72,12 @@ final class GPSInfoView: UIView {
         mapView.layer.cornerRadius = 8
         mapView.layer.cornerCurve = .continuous
         
-        mapView.isScrollEnabled = false
-        mapView.isZoomEnabled = false
-        mapView.isPitchEnabled = false
-        mapView.isRotateEnabled = false
+        mapView.isScrollEnabled = true
+        mapView.isZoomEnabled = true
+        mapView.isPitchEnabled = true
+        mapView.isRotateEnabled = true
         
         return mapView
-    }()
-    let centerPinIcon: UIImageView = {
-        let imageView = UIImageView()
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.image = UIImage(named: "largePin")
-        imageView.contentMode = .scaleAspectFit
-        
-        NSLayoutConstraint.activate([
-            imageView.widthAnchor.constraint(equalToConstant: 20),
-            imageView.heightAnchor.constraint(equalToConstant: 20)
-        ])
-        
-        return imageView
     }()
     
     convenience init() {
@@ -153,17 +140,17 @@ final class GPSInfoView: UIView {
             self.mapView.trailingAnchor.constraint(equalTo: self.backgroundView.trailingAnchor, constant: -16),
             self.mapView.bottomAnchor.constraint(equalTo: self.backgroundView.bottomAnchor, constant: -16)
         ])
-        
-        self.mapView.addSubview(self.centerPinIcon)
-        NSLayoutConstraint.activate([
-            self.centerPinIcon.centerXAnchor.constraint(equalTo: self.mapView.centerXAnchor),
-            self.centerPinIcon.centerYAnchor.constraint(equalTo: self.mapView.centerYAnchor, constant: -10)
-        ])
     }
     
-    func configure(info: LidarDetailInfo) {
-        let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: info.latitude, longitude: info.longitude), span: .init(latitudeDelta: 0.002, longitudeDelta: 0.002))
+    func configure(info: LidarDetailInfo, buildingInfo: BuildingInfo) {
+        let location = CLLocationCoordinate2D(latitude: info.latitude, longitude: info.longitude)
+        let region = MKCoordinateRegion(center: location, span: .init(latitudeDelta: 0.002, longitudeDelta: 0.002))
         self.mapView.setRegion(region, animated: false)
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = location
+        annotation.title = buildingInfo.placeName
+        annotation.subtitle = buildingInfo.roadAddressName
+        self.mapView.addAnnotation(annotation)
         
         let floor = info.floor >= 0 ? "F\(info.floor)" : "B\(-info.floor)"
         self.floorLabel.text = floor

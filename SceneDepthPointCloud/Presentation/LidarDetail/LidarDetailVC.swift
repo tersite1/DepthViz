@@ -29,6 +29,12 @@ final class LidarDetailVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.viewModel?.fetchDetailInfos()
+        AppDelegate.shared.shouldSupportAllOrientation = true
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        AppDelegate.shared.shouldSupportAllOrientation = false
     }
 }
 
@@ -38,8 +44,8 @@ extension LidarDetailVC {
         self.view.addSubview(self.buildingInfoView)
         NSLayoutConstraint.activate([
             self.buildingInfoView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            self.buildingInfoView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            self.buildingInfoView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+            self.buildingInfoView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            self.buildingInfoView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
         ])
         
         self.buildingInfoView.disappear()
@@ -48,8 +54,8 @@ extension LidarDetailVC {
         self.view.addSubview(self.gpsInfoView)
         NSLayoutConstraint.activate([
             self.gpsInfoView.topAnchor.constraint(equalTo: self.buildingInfoView.bottomAnchor, constant: 32),
-            self.gpsInfoView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            self.gpsInfoView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+            self.gpsInfoView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            self.gpsInfoView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
         ])
         
         self.gpsInfoView.disappear()
@@ -58,8 +64,8 @@ extension LidarDetailVC {
         self.view.addSubview(self.lidarInfoView)
         NSLayoutConstraint.activate([
             self.lidarInfoView.topAnchor.constraint(equalTo: self.gpsInfoView.bottomAnchor, constant: 32),
-            self.lidarInfoView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            self.lidarInfoView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16)
+            self.lidarInfoView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            self.lidarInfoView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
         ])
         
         self.lidarInfoView.disappear()
@@ -68,8 +74,8 @@ extension LidarDetailVC {
         self.view.addSubview(self.openWebButton)
         NSLayoutConstraint.activate([
             self.openWebButton.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
-            self.openWebButton.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            self.openWebButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
+            self.openWebButton.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            self.openWebButton.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             self.openWebButton.topAnchor.constraint(equalTo: self.lidarInfoView.bottomAnchor, constant: 32)
         ])
         

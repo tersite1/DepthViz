@@ -18,6 +18,12 @@ func getTimeStr() -> String {
     return df.string(from: Date())
 }
 
+func MMddHHmm() -> String {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "MM-dd-HH-mm"
+    return dateFormatter.string(from: Date())
+}
+
 /// Save file to a directory.
 func saveFile(content: String, filename: String, folder: String) async throws -> () {
     print("Save file to \(folder)/\(filename)")

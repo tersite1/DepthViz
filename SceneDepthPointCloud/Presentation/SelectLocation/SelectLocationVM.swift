@@ -30,9 +30,7 @@ final class SelectLocationVM {
     @Published private(set) var networkError: (title: String, text: String)?
     /// 건물리스트 api 사용시 pagenation 을 위한 현재 page 값
     @Published private(set) var indoorFloor: Int?
-    private var page: Int = 1
-    /// pagenation 불가능 여부값
-    private(set) var isLastPage: Bool = false
+    private(set) var fetchedList: [BuildingOfMapInfo] = []
     private(set) var fetching: Bool = false
     /// Address 데이터를 담당하는 객체
     private let addressRepository: AddressRepositoryInterface
@@ -75,21 +73,15 @@ extension SelectLocationVM {
         }
     }
     
-    /// page 값 증가 후 fetchBuildingList() 함수 호출하는 함수
-    func nextPageBuildingListFetch() {
-        guard self.isLastPage == false else { return }
-        
-        self.page += 1
-        self.fetchBuildingList()
-    }
-    
     /// 현재 mode 값에 따라 다음 mode 값으로 변경하는 함수
     func changeMode() {
         switch self.mode {
         case .selectLocation:
+            guard self.locationData.roadAddressName != "Get current address..." else {
+                self.networkError = (title: "도로명주소값이 올바르지 않습니다.", text: "도로명주소가 유효한 다른위치로 이동해주세요")
+                return
+            }
             self.mode = .selectBuilding
-            self.page = 1
-            self.isLastPage = false
             self.fetchBuildingList()
         case .selectBuilding:
             self.mode = .setIndoorInfo
@@ -106,11 +98,11 @@ extension SelectLocationVM {
         case .selectLocation:
             return
         case .selectBuilding:
+            self.fetchedList = []
             self.buildingList = []
             self.mode = .selectLocation
         case .setIndoorInfo:
-            self.page = 1
-            self.isLastPage = false
+            self.fetchedList = []
             self.buildingList = []
             self.fetchBuildingList()
             self.mode = .selectBuilding
@@ -138,25 +130,60 @@ extension SelectLocationVM {
 extension SelectLocationVM {
     /// locationData 값을 토대로 getBuildingList() 함수호출을 통해 buildingList 배열에 추가하는 함수
     private func fetchBuildingList() {
-        guard self.fetching == false,
-              self.isLastPage == false else { return }
+        guard self.fetching == false else { return }
         
         self.fetching = true
         let locationData = self.locationData
-        let page = self.page
         
         DispatchQueue.global().async { [weak self] in
-            self?.buildingRepository.fetchBuildingInfo(from: locationData, page: page, completion: { [weak self] result in
+            self?.buildingRepository.fetchBuildingInfo(from: locationData, page: 1, completion: { [weak self] result in
                 switch result {
-                case .success((let infos, let isLastPage)):
-                    self?.buildingList += infos
-                    self?.isLastPage = isLastPage
+                case .success((let infos, let totalCount)):
+                    self?.fetchedList += infos
+                    // MARK: SearchBar 추가를 위한 다음페이지 자동수신
+                    self?.fetchAllPages(totalCount: totalCount)
                     
                 case .failure(let fetchError):
                     self?.networkError = (title: "Fetch BuildingList Error", text: fetchError.message)
+                    self?.fetching = false
                 }
-                self?.fetching = false
             })
+        }
+    }
+    
+    private func fetchAllPages(totalCount: Int) {
+        // page 1이 마지막인지 확인
+        if totalCount < 15 {
+            self.buildingList = fetchedList.sorted { $0.distance < $1.distance }
+            self.fetching = false
+        } else {
+            // 총 페이지수 계산 (2~3 사이값)
+            let pageCount = totalCount%15 != 0 ? Int(totalCount/15) + 1 : Int(totalCount/15)
+            let locationData = self.locationData
+            
+            // page 2 ~ pageCount 까지 비동기 fetch
+            let dispatchGroup = DispatchGroup()
+            let queue = DispatchQueue.global()
+            for page in 2...pageCount {
+                dispatchGroup.enter()
+                queue.async { [weak self] in
+                    self?.buildingRepository.fetchBuildingInfo(from: locationData, page: page, completion: { [weak self] result in
+                        switch result {
+                        case .success((let infos, _)):
+                            self?.fetchedList += infos
+                            
+                        case .failure(let fetchError):
+                            self?.networkError = (title: "Fetch BuildingList Error", text: fetchError.message)
+                        }
+                        dispatchGroup.leave()
+                    })
+                }
+            }
+            
+            dispatchGroup.notify(queue: queue) {
+                self.buildingList = self.fetchedList.sorted { $0.distance < $1.distance }
+                self.fetching = false
+            }
         }
     }
 }

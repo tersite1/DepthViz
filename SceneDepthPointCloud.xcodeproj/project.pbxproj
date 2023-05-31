@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		870959442A24573700021125 /* LidarStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870959432A24573700021125 /* LidarStorage.swift */; };
+		870959462A245A7200021125 /* LocationStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870959452A245A7200021125 /* LocationStorage.swift */; };
+		870959482A245AEF00021125 /* LocationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870959472A245AEF00021125 /* LocationRepository.swift */; };
+		8709594A2A245B4300021125 /* LocationRepositoryInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870959492A245B4300021125 /* LocationRepositoryInterface.swift */; };
 		8711C71429D131A200F6D5CC /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 8711C71329D131A200F6D5CC /* Alamofire */; };
 		871356C02A095EFD0005DE8C /* BuildingInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356BF2A095EFD0005DE8C /* BuildingInfoView.swift */; };
 		871356C22A0966460005DE8C /* LidarDetailTagView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C12A0966460005DE8C /* LidarDetailTagView.swift */; };
@@ -85,6 +89,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		870959432A24573700021125 /* LidarStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarStorage.swift; sourceTree = "<group>"; };
+		870959452A245A7200021125 /* LocationStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationStorage.swift; sourceTree = "<group>"; };
+		870959472A245AEF00021125 /* LocationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRepository.swift; sourceTree = "<group>"; };
+		870959492A245B4300021125 /* LocationRepositoryInterface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationRepositoryInterface.swift; sourceTree = "<group>"; };
 		871356BF2A095EFD0005DE8C /* BuildingInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingInfoView.swift; sourceTree = "<group>"; };
 		871356C12A0966460005DE8C /* LidarDetailTagView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarDetailTagView.swift; sourceTree = "<group>"; };
 		871356C32A0A124C0005DE8C /* GPSInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPSInfoView.swift; sourceTree = "<group>"; };
@@ -180,6 +188,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		870959422A24572400021125 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				870959432A24573700021125 /* LidarStorage.swift */,
+				870959452A245A7200021125 /* LocationStorage.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
 		8711C71529D1322A00F6D5CC /* Presentation */ = {
 			isa = PBXGroup;
 			children = (
@@ -210,6 +227,7 @@
 		8711C71729D1324000F6D5CC /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				870959422A24572400021125 /* Storage */,
 				87C8FB0829F236EE000C37CE /* Repository */,
 				87ABC86F29D30D7600881FFB /* DTO */,
 				87ABC86029D178AB00881FFB /* ApiService */,
@@ -287,6 +305,7 @@
 				877F534229F642EC00A0F931 /* BuildingInMapRepositoryInterface.swift */,
 				87295CA32A03BC160067392D /* LidarRepositoryInterface.swift */,
 				87E9B52F2A08CEBD00FF4A8D /* BuildingRepositoryInterface.swift */,
+				870959492A245B4300021125 /* LocationRepositoryInterface.swift */,
 			);
 			path = Interface;
 			sourceTree = "<group>";
@@ -406,6 +425,7 @@
 				877F534429F643B600A0F931 /* BuildingInMapRepository.swift */,
 				87295CA52A03C65E0067392D /* LidarRepository.swift */,
 				87E9B5312A08CF1900FF4A8D /* BuildingRepository.swift */,
+				870959472A245AEF00021125 /* LocationRepository.swift */,
 			);
 			path = Repository;
 			sourceTree = "<group>";
@@ -549,6 +569,7 @@
 				87295CAA2A03D5CD0067392D /* LidarInfoCollectionViewCell.swift in Sources */,
 				87C8FB1129F23ADE000C37CE /* AddressFromGpsDTO.swift in Sources */,
 				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,
+				8709594A2A245B4300021125 /* LocationRepositoryInterface.swift in Sources */,
 				87AE167829F124EF00B101A6 /* LocationData.swift in Sources */,
 				87ABC85B29D175A700881FFB /* Network.swift in Sources */,
 				87295C992A038DD50067392D /* ScansVC.swift in Sources */,
@@ -556,6 +577,7 @@
 				877F534529F643B600A0F931 /* BuildingInMapRepository.swift in Sources */,
 				87E9B5322A08CF1900FF4A8D /* BuildingRepository.swift in Sources */,
 				87673BD829F8EC4800BD3DC3 /* IndoorData.swift in Sources */,
+				870959482A245AEF00021125 /* LocationRepository.swift in Sources */,
 				871356C42A0A124C0005DE8C /* GPSInfoView.swift in Sources */,
 				87A315552A076D080074BB1B /* LidarDetailVC.swift in Sources */,
 				87C8FB0D29F2382C000C37CE /* AddressRepositoryInterface.swift in Sources */,
@@ -582,6 +604,7 @@
 				87A315572A076D5F0074BB1B /* LidarDetailVM.swift in Sources */,
 				87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */,
 				87ABC86229D178BD00881FFB /* LidarApiService.swift in Sources */,
+				870959442A24573700021125 /* LidarStorage.swift in Sources */,
 				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,
 				8793524F29B9D8F200D6A079 /* Utils.swift in Sources */,
 				87295C9C2A03AA550067392D /* ReloadButton.swift in Sources */,
@@ -597,6 +620,7 @@
 				E73DD13824636FEF00D77039 /* MainVC.swift in Sources */,
 				877F534D29F7C46600A0F931 /* Collection+Extension.swift in Sources */,
 				87295C962A038BAD0067392D /* SceneDelegate.swift in Sources */,
+				870959462A245A7200021125 /* LocationStorage.swift in Sources */,
 				877F534B29F69D1600A0F931 /* UIView+Extension.swift in Sources */,
 				87C8FAF929F171D1000C37CE /* SelectLocationVC.swift in Sources */,
 				87E9B5342A08DDDE00FF4A8D /* LidarDetailInfoDTO.swift in Sources */,
@@ -758,7 +782,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";
@@ -789,7 +813,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 16;
+				CURRENT_PROJECT_VERSION = 18;
 				DEVELOPMENT_TEAM = 2C96RNDN63;
 				INFOPLIST_FILE = SceneDepthPointCloud/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Point Cloud";

@@ -10,7 +10,7 @@ import Foundation
 import CoreLocation
 
 /// 위치정보 데이터 구조체
-struct LocationData {
+struct LocationData: Codable {
     /// 위도
     let latitude: CLLocationDegrees
     /// 경도

@@ -129,7 +129,8 @@ final class LidarInfoView: UIView {
         self.backgroundView.addSubview(self.fileNameLabel)
         NSLayoutConstraint.activate([
             self.fileNameLabel.topAnchor.constraint(equalTo: stackView.bottomAnchor),
-            self.fileNameLabel.leadingAnchor.constraint(equalTo: self.pointsLabel.leadingAnchor)
+            self.fileNameLabel.leadingAnchor.constraint(equalTo: self.pointsLabel.leadingAnchor),
+            self.fileNameLabel.trailingAnchor.constraint(equalTo: self.backgroundView.trailingAnchor, constant: -54)
         ])
         
         self.backgroundView.addSubview(self.tagView)
@@ -144,6 +145,11 @@ final class LidarInfoView: UIView {
         self.pointsLabel.text = "\(self.numberFormatter.string(for: info.totalPoints)!) Points"
         self.fileSizeLabel.text = info.fileSize
         self.createdDateLabel.text = info.createdDate
-        self.fileNameLabel.text = info.originFileName
+        if info.originFileName.hasSuffix(".pcd") {
+            let index = info.originFileName.firstIndex(of: ".") ?? info.originFileName.endIndex
+            self.fileNameLabel.text = String(info.originFileName[..<index])
+        } else {
+            self.fileNameLabel.text = info.originFileName
+        }
     }
 }

@@ -33,8 +33,8 @@ final class MainVC: UIViewController, ARSessionDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureUI()
-        self.configureViewModel()
         self.configureLocationManager()
+        self.configureViewModel()
         self.bindViewModel()
     }
     
@@ -108,6 +108,7 @@ extension MainVC {
     /// gps 값 수신을 위한 설정 함수
     private func configureLocationManager() {
         self.locationManager.delegate = self
+        self.locationManager.requestWhenInUseAuthorization()
     }
     
     /// session 설정 및 화면꺼짐방지
@@ -143,8 +144,10 @@ extension MainVC {
         self.bindMode()
         self.bindPointCount()
         self.bindLidarData()
-        self.bindNetworkError()
         self.bindUploadSuccess()
+        self.bindUploadProgress()
+        self.bindProcessWithStorageData()
+        self.bindSaveToStorageSuccess()
     }
     
     /// viewModel 의 mode 값 변화를 수신하기 위한 함수
@@ -199,23 +202,11 @@ extension MainVC {
         self.viewModel?.$lidarData
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] lidarData in
-                guard let lidarData = lidarData,
+                guard self?.viewModel?.mode == .loading,
+                      let lidarData = lidarData,
                       let locationData = self?.viewModel?.currentLocation else { return }
                 
                 self?.popupSelectLocationVC(lidarData, locationData)
-            })
-            .store(in: &self.cancellables)
-    }
-    
-    /// viewModel 의 networkError 값 변화를 수신하여 실패를 표시하기 위한 함수
-    private func bindNetworkError() {
-        self.viewModel?.$networkError
-            .receive(on: DispatchQueue.main)
-            .sink(receiveValue: { [weak self] error in
-                guard let error = error else { return }
-                
-                self?.showAlert(title: error.title, text: error.text)
-                self?.viewModel?.changeMode()
             })
             .store(in: &self.cancellables)
     }
@@ -228,6 +219,42 @@ extension MainVC {
                 
                 self?.showAlert(title: "Upload Success", text: "You can see the record historys in the SCANS page")
                 self?.viewModel?.changeMode()
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindUploadProgress() {
+        self.viewModel?.$uploadProgress
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] progress in
+                guard progress != 0 else { return }
+                self?.statusLabel.uploadProgress(to: progress)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindProcessWithStorageData() {
+        self.viewModel?.$processWithStorageData
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] isStorage in
+                if isStorage {
+                    self?.showAlertWithStorageStart()
+                }
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindSaveToStorageSuccess() {
+        self.viewModel?.$saveToStorageSuccess
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] success in
+                guard let success = success else { return }
+                
+                if success == false {
+                    self?.showAlert(title: "임시데이터 저장 실패", text: "")
+                } else {
+                    self?.showAlertAndTerminate()
+                }
             })
             .store(in: &self.cancellables)
     }
@@ -255,10 +282,14 @@ extension MainVC {
             self.statusLabel.changeText(to: .readyForRecording)
         case .recording:
             self.statusLabel.changeText(to: .recording)
+        case .recordingTerminate:
+            self.statusLabel.changeText(to: .loading)
         case .loading:
             self.statusLabel.changeText(to: .loading)
         case .uploading:
             self.statusLabel.changeText(to: .uploading)
+        case .uploadingTerminate:
+            self.statusLabel.changeText(to: .loading)
         case .cantRecord, .cantGetGPS:
             self.statusLabel.changeText(to: .removed)
         }
@@ -309,16 +340,7 @@ extension MainVC {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         
-        self.memoryAlert()
         self.viewModel?.terminateRecording()
-    }
-    
-    private func memoryAlert() {
-        let alert = UIAlertController(title: "Low Memory Warning", message: "The recording has been paused. Do not quit the app until all files have been saved.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
-            NSLog("The \"OK\" alert occured.")
-        }))
-        self.present(alert, animated: true, completion: nil)
     }
 }
 
@@ -383,11 +405,45 @@ extension MainVC: SelectLocationDelegate {
     /// 측정된 데이터 서버 업로드 취소 함수
     func uploadCancel() {
         self.viewModel?.uploadCancel()
+        self.showAlert(title: "Upload Canceled", text: "")
+        self.viewModel?.changeMode()
     }
     
     /// 업로드 데이터들을 수신받아 업로드를 실행하는 함수
     func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
         self.viewModel?.changeMode()
         self.viewModel?.uploadMeasuredData(location: location, buildingInfo: buildingInfo, floor: floor)
+    }
+}
+
+extension MainVC {
+    private func showAlertWithStorageStart() {
+        let alert = UIAlertController(title: "임시저장된 데이터가 존재합니다. 복구하시겠습니까?", message: "복구하지 않는 경우 해당데이터는 제거됩니다.", preferredStyle: .alert)
+        let remove = UIAlertAction(title: "제거", style: .destructive) { [weak self] _ in
+            self?.viewModel?.resetStorageAndStart()
+        }
+        let load = UIAlertAction(title: "복구", style: .default) { [weak self] _ in
+            self?.viewModel?.loadFromStorage()
+        }
+        
+        alert.addAction(remove)
+        alert.addAction(load)
+        
+        self.present(alert, animated: true)
+    }
+    
+    private func showAlertAndTerminate() {
+        self.statusLabel.changeText(to: .removed)
+        let title = self.viewModel?.mode == .recordingTerminate ? "Low Memory Warning" : "Upload Failed (\(self.viewModel?.networkErrorMessage ?? ""))"
+        let alert = UIAlertController(title: title, message: "앱을 재 실행 하시기 바랍니다.", preferredStyle: .alert)
+        let ok = UIAlertAction(title: "확인", style: .default) { _ in
+            UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                exit(0)
+            }
+        }
+        
+        alert.addAction(ok)
+        self.present(alert, animated: true)
     }
 }

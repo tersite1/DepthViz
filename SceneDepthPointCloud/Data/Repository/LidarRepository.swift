@@ -38,4 +38,17 @@ final class LidarRepository: LidarRepositoryInterface {
             }
         }
     }
+    
+    // MARK: 메모리 문제 및 업로드 문제로 인해 앱 내부에 저장하는 기능 추가
+    func saveToStorage(lidarData: LiDARData) -> Bool {
+        return LidarStorage.save(lidarData)
+    }
+    
+    func getFromStorage() -> LiDARData? {
+        return LidarStorage.get()
+    }
+    
+    func clearStorage() {
+        LidarStorage.remove()
+    }
 }

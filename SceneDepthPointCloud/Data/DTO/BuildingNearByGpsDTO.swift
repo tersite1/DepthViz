@@ -15,9 +15,9 @@ struct BuildingNearByGpsDTO: Decodable {
 }
 
 struct BuildingNearByGpsMetaDTO: Decodable {
-    let isEnd: Bool
-    let pageableCount: Int
-    let totalCount: Int
+    let isEnd: Bool // 현재 페이지가 마지막 페이지인지 여부
+    let pageableCount: Int // total_count 중 노출 가능한 문서 수 (최댓값: 45)
+    let totalCount: Int // 검색된 문서 수
     
     enum CodingKeys: String, CodingKey {
         case isEnd = "is_end"
@@ -27,7 +27,7 @@ struct BuildingNearByGpsMetaDTO: Decodable {
 }
 
 struct BuildingNearByGpsDocumentDTO: Codable, Hashable {
-    let road_address_name: String // 도로명주소
+    var road_address_name: String // 도로명주소
     let place_name: String // 건물명
     let distance: String // 거리(미터)
     let address_name: String
@@ -60,5 +60,9 @@ struct BuildingNearByGpsDocumentDTO: Codable, Hashable {
                      placeName: self.place_name,
                      distance: Int(self.distance) ?? 0,
                      dto: self)
+    }
+    
+    mutating func fillRoadAddressName(to address: String) {
+        self.road_address_name = address
     }
 }

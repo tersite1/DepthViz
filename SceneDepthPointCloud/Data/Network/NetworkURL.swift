@@ -25,4 +25,11 @@ struct NetworkURL {
         static let coordToAddress: String = Domain.kakao + "/v2/local/geo/coord2address.JSON"
         static let searchByCategory: String = Domain.kakao + "/v2/local/search/category.JSON"
     }
+    
+    enum Web {
+        static let domain: String = Bundle.main.infoDictionary!["WEB_URL"] as! String
+        static func addressURL(addressId: String) -> String {
+            return domain + "?addressId=\(addressId)"
+        }
+    }
 }

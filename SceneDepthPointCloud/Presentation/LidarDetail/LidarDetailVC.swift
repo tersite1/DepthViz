@@ -74,9 +74,11 @@ extension LidarDetailVC {
         ])
         
         self.openWebButton.addAction(UIAction(handler: { [weak self] _ in
-            // MARK: test url
-            let url = "http://121.172.188.145:9000/"
-            self?.showWebView(url: url)
+            guard let addressId = self?.viewModel?.addressId else { return }
+            
+            if let url = URL(string: NetworkURL.Web.addressURL(addressId: addressId)) {
+                UIApplication.shared.open(url, options: [:])
+            }
         }), for: .touchUpInside)
     }
     

@@ -42,8 +42,17 @@ final class MainVC: UIViewController, ARSessionDelegate {
     /// MainVC 화면 진입시 configure
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.configureARWorldTracking()
+        
+        if self.viewModel?.mode == .ready {
+            self.session.pause()
+        }
+        
         self.navigationController?.setNavigationBarHidden(true, animated: true)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.session.pause()
     }
 }
 
@@ -86,19 +95,24 @@ extension MainVC {
     
     /// View를 나타내기 위한 데이터 처리담당 설정 함수
     private func configureViewModel() {
+        // Metal 디바이스 생성
         guard let device = MTLCreateSystemDefaultDevice() else {
             print("Metal is not supported on this device")
             return
         }
         
-        // Set the view to use the default device
+        // Metal Object를 표시하기 위한 MetalKitView로 설정
         if let view = view as? MTKView {
+            // MetalKitView에 표시하기 위한 Metal 디바이스 설정
             view.device = device
             
             view.backgroundColor = UIColor.clear
-            // we need this to enable depth test
+            // MetalKitView의 depth 크기 설정
             view.depthStencilPixelFormat = .depth32Float
+            // 논리적 좌표공간(logical coordinate)(단위: points)과 장치 좌표공간(device coordinate)(단위: pixels)간의 스케일링 값
+            // 1로 설정한 경우 실제좌표계와 MTKView에서 표시되는 좌표계와 동일하게 설정한다 (실제를 그대로 아이폰에서 표시하는 경우)
             view.contentScaleFactor = 1
+            // MetalKitView의 내용을 업데이트하고자 하는 경우 호출하기 위한 delegate 설정
             view.delegate = self
             
             // Configure the ViewModel, Renderer to draw to the view
@@ -115,7 +129,7 @@ extension MainVC {
     
     /// LiDAR 센서 사용가능여부 확인 함수
     private func checkLidarSensor() {
-        if !ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
+        if !ARWorldTrackingConfiguration.supportsFrameSemantics([.sceneDepth, .smoothedSceneDepth]) {
             self.viewModel?.cantRecording()
         }
     }
@@ -123,9 +137,10 @@ extension MainVC {
     /// session 설정 및 화면꺼짐방지
     private func configureARWorldTracking() {
         guard self.viewModel?.mode != .cantRecord else { return }
-        // Create a world-tracking configuration, and
-        // enable the scene depth frame-semantic.
+        // Create a world-tracking configuration, and enable the scene depth frame-semantic.
+        // 디바이스(iPhone)의 움직임을 추적하기 위한 Configuration 값 (움직이는대로 그대로 AR로 표시하기 위함)
         let configuration = ARWorldTrackingConfiguration()
+        // 카메라를 통해 보이는 실제 객체까지의 거리, 여러 프레임의 평균 거리값을 제공하도록 설정
         configuration.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
 
         // Run the view's session
@@ -167,10 +182,12 @@ extension MainVC {
             .sink(receiveValue: { [weak self] mode in
                 switch mode {
                 case .ready:
+                    self?.session.pause()
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .ready)
                     self?.scansButton.fadeIn()
                 case .recording:
+                    self?.configureARWorldTracking()
                     self?.locationManager.startUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .recording)
                     self?.scansButton.fadeOut()

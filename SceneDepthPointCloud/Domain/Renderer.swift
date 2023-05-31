@@ -59,14 +59,6 @@ final class Renderer {
                                                             array: makeGridPoints(),
                                                             index: kGridPoints.rawValue, options: [])
     
-    // RGB buffer
-    private lazy var rgbUniforms: RGBUniforms = {
-        var uniforms = RGBUniforms()
-        uniforms.radius = rgbRadius
-        uniforms.viewToCamera.copy(from: viewToCamera)
-        uniforms.viewRatio = Float(viewportSize.width / viewportSize.height)
-        return uniforms
-    }()
     private var rgbUniformsBuffers = [MetalBuffer<RGBUniforms>]()
     // Point Cloud buffer
     // This is not the point cloud data, but some parameters
@@ -88,21 +80,13 @@ final class Renderer {
     // Camera data
     private var sampleFrame: ARFrame { session.currentFrame! }
     private lazy var cameraResolution = Float2(Float(sampleFrame.camera.imageResolution.width), Float(sampleFrame.camera.imageResolution.height))
-    private lazy var viewToCamera = sampleFrame.displayTransform(for: orientation, viewportSize: viewportSize).inverted()
     private lazy var lastCameraTransform = sampleFrame.camera.transform
     
     // interfaces
-    var confidenceThreshold = 0 {
+    var confidenceThreshold = 2 {
         didSet {
             // apply the change for the shader
             pointCloudUniforms.confidenceThreshold = Int32(confidenceThreshold)
-        }
-    }
-    
-    var rgbRadius: Float = 0 {
-        didSet {
-            // apply the change for the shader
-            rgbUniforms.radius = rgbRadius
         }
     }
     
@@ -148,7 +132,7 @@ final class Renderer {
     }
     
     func drawRectResized(size: CGSize) {
-        viewportSize = size
+        self.viewportSize = size
     }
    
     private func updateCapturedImageTextures(frame: ARFrame) {
@@ -211,23 +195,6 @@ final class Renderer {
         
         if shouldAccumulate(frame: currentFrame), updateDepthTextures(frame: currentFrame) {
             accumulatePoints(frame: currentFrame, commandBuffer: commandBuffer, renderEncoder: renderEncoder)
-        }
-        
-        // check and render rgb camera image
-        if rgbUniforms.radius > 0 {
-            var retainingTextures = [capturedImageTextureY, capturedImageTextureCbCr]
-            commandBuffer.addCompletedHandler { buffer in
-                retainingTextures.removeAll()
-            }
-            rgbUniformsBuffers[currentBufferIndex][0] = rgbUniforms
-            
-            renderEncoder.setDepthStencilState(relaxedStencilState)
-            renderEncoder.setRenderPipelineState(rgbPipelineState)
-            renderEncoder.setVertexBuffer(rgbUniformsBuffers[currentBufferIndex])
-            renderEncoder.setFragmentBuffer(rgbUniformsBuffers[currentBufferIndex])
-            renderEncoder.setFragmentTexture(CVMetalTextureGetTexture(capturedImageTextureY!), index: Int(kTextureY.rawValue))
-            renderEncoder.setFragmentTexture(CVMetalTextureGetTexture(capturedImageTextureCbCr!), index: Int(kTextureCbCr.rawValue))
-            renderEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
         }
        
         // render particles

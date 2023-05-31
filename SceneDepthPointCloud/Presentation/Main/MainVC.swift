@@ -136,6 +136,10 @@ extension MainVC: MTKViewDelegate {
     
     // MetalKitView가 업데이트되어야 할 때 불린다. 이때 새롭게 다시 그린다.
     func draw(in view: MTKView) {
+        guard self.viewModel?.mode != .ready else {
+            return
+        }
+        
         self.viewModel?.rendererDraw()
     }
 }
@@ -222,6 +226,7 @@ extension MainVC {
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .ready)
                     self?.scansButton.fadeIn()
+                    self?.viewModel?.rendererDraw()
                 case .recording:
                     self?.configureARWorldTracking()
                     self?.locationManager.startUpdatingLocation()

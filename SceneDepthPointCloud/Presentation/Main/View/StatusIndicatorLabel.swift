@@ -15,6 +15,8 @@ final class StatusIndicatorLabel: UILabel {
         case loading = "Loading..."
         case uploading = "Uploading..."
         case removed = ""
+        case needGPS = "Inactivate GPS"
+        case cantRecord = "Unsupported Device"
     }
     
     convenience init() {

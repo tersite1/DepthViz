@@ -33,8 +33,9 @@ final class MainVC: UIViewController, ARSessionDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureUI()
-        self.configureLocationManager()
         self.configureViewModel()
+        self.checkLidarSensor()
+        self.configureLocationManager()
         self.bindViewModel()
     }
     
@@ -107,8 +108,16 @@ extension MainVC {
     
     /// gps 값 수신을 위한 설정 함수
     private func configureLocationManager() {
+        guard self.viewModel?.mode != .cantRecord else { return }
         self.locationManager.delegate = self
         self.locationManager.requestWhenInUseAuthorization()
+    }
+    
+    /// LiDAR 센서 사용가능여부 확인 함수
+    private func checkLidarSensor() {
+        if !ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
+            self.viewModel?.cantRecording()
+        }
     }
     
     /// session 설정 및 화면꺼짐방지
@@ -290,8 +299,10 @@ extension MainVC {
             self.statusLabel.changeText(to: .uploading)
         case .uploadingTerminate:
             self.statusLabel.changeText(to: .loading)
-        case .cantRecord, .cantGetGPS:
-            self.statusLabel.changeText(to: .removed)
+        case .cantGetGPS:
+            self.statusLabel.changeText(to: .needGPS)
+        case .cantRecord:
+            self.statusLabel.changeText(to: .cantRecord)
         }
     }
 }
@@ -351,7 +362,10 @@ extension MainVC: CLLocationManagerDelegate {
         switch manager.authorizationStatus {
         case .authorizedWhenInUse:
             // Location services are available.
-            self.viewModel?.readyForRecording()
+            self.checkLidarSensor()
+            if self.viewModel?.mode != .cantRecord {
+                self.viewModel?.readyForRecording()
+            }
             break
             
         case .restricted, .denied:

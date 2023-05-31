@@ -53,7 +53,6 @@
 		<string>armv7</string>
 		<string>arkit</string>
 		<string>metal</string>
-		<string>gps</string>
 		<string>location-services</string>
 		<string>magnetometer</string>
 	</array>

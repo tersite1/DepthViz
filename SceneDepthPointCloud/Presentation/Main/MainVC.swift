@@ -149,17 +149,6 @@ extension MainVC {
         // The screen shouldn't dim during AR experiences.
         UIApplication.shared.isIdleTimerDisabled = true
     }
-    
-    /// 기록측정 불가 상태의 UI 표시 함수
-    private func configureCantRecording() {
-        // MARK: 기록측정불가 UI 구현 필요
-        print("cant Recording")
-    }
-    
-    private func configureCantGetGPS() {
-        // MARK: GPS 수신불가 UI 구현 필요
-        print("cant get gps")
-    }
 }
 
 // MARK: INPUT
@@ -198,12 +187,10 @@ extension MainVC {
                 case .cantRecord:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
-                    self?.configureCantRecording()
                     self?.scansButton.fadeIn()
                 case .cantGetGPS:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
-                    self?.configureCantGetGPS()
                     self?.scansButton.fadeIn()
                 default:
                     self?.locationManager.stopUpdatingLocation()

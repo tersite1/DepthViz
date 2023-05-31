@@ -122,6 +122,7 @@ extension MainVC {
     
     /// session 설정 및 화면꺼짐방지
     private func configureARWorldTracking() {
+        guard self.viewModel?.mode != .cantRecord else { return }
         // Create a world-tracking configuration, and
         // enable the scene depth frame-semantic.
         let configuration = ARWorldTrackingConfiguration()

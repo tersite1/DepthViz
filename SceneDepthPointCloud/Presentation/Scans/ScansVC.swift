@@ -34,6 +34,17 @@ final class ScansVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(false, animated: true)
+        AppDelegate.shared.shouldSupportAllOrientation = true
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        AppDelegate.shared.shouldSupportAllOrientation = false
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        self.listView.collectionViewLayout.invalidateLayout()
     }
 }
 
@@ -51,8 +62,8 @@ extension ScansVC {
         self.view.addSubview(self.listView)
         NSLayoutConstraint.activate([
             self.listView.topAnchor.constraint(equalTo: self.view.topAnchor),
-            self.listView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            self.listView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            self.listView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor),
+            self.listView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor),
             self.listView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ])
     }

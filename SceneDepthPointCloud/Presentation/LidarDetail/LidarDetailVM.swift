@@ -13,7 +13,7 @@ final class LidarDetailVM {
     @Published private(set) var networkError: (title: String, text: String)?
     @Published private(set) var infosDownloaded: Bool = false
     private let collectId: String
-    private let addressId: String
+    let addressId: String
     private(set) var buildingInfo: BuildingInfo?
     private(set) var lidarDetailInfo: LidarDetailInfo?
     private let buildingRepository: BuildingRepositoryInterface

@@ -20,6 +20,16 @@ final class WebViewVC: UIViewController {
         self.loadWeb()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        AppDelegate.shared.shouldSupportAllOrientation = true
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        AppDelegate.shared.shouldSupportAllOrientation = false
+    }
+    
     private func configureWebView() {
         self.webView.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview(self.webView)

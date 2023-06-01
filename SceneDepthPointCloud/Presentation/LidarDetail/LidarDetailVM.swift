@@ -44,6 +44,10 @@ extension LidarDetailVM {
             self?.infosDownloaded = true
         }
     }
+    
+    func deleteLidar() {
+        print("deleteLidar")
+    }
 }
 
 extension LidarDetailVM {

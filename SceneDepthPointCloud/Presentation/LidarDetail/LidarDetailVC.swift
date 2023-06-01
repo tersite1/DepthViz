@@ -17,6 +17,15 @@ final class LidarDetailVC: UIViewController {
     private let openWebButton = OpenWebButton()
     private var viewModel: LidarDetailVM?
     private var cancellables: Set<AnyCancellable> = []
+    private var deleteButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setImage(UIImage(systemName: "trash"), for: .normal)
+        button.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 18, weight: .medium, scale: .default), forImageIn: .normal)
+        button.tintColor = .systemRed
+        button.contentMode = .scaleAspectFit
+        return button
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,6 +49,13 @@ final class LidarDetailVC: UIViewController {
 
 extension LidarDetailVC {
     private func configureUI() {
+        // delete button
+        self.deleteButton.addAction(UIAction(handler: { [weak self] _ in
+            self?.showAlertForDelete()
+        }), for: .touchUpInside)
+        let rightItem = UIBarButtonItem(customView: self.deleteButton)
+        self.navigationItem.setRightBarButton(rightItem, animated: true)
+        
         // buildingInfoView
         self.view.addSubview(self.buildingInfoView)
         NSLayoutConstraint.activate([
@@ -153,6 +169,17 @@ extension LidarDetailVC {
         
         self.lidarInfoView.configure(info: lidarInfo)
         self.lidarInfoView.fadeIn()
+    }
+    
+    private func showAlertForDelete() {
+        let alert = UIAlertController(title: "LiDAR 파일을 삭제하시겠습니까?", message: "삭제 후 복원되지 않습니다.", preferredStyle: .alert)
+        let cancel = UIAlertAction(title: "취소", style: .default)
+        let delete = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            self?.viewModel?.deleteLidar()
+        }
+        alert.addAction(cancel)
+        alert.addAction(delete)
+        self.present(alert, animated: true)
     }
 }
 

@@ -16,10 +16,11 @@ final class SelectLocationVM {
         case selectLocation
         case selectBuilding
         case setIndoorInfo
+        case setLidarName
         case done
     }
     /// MainVM 에서 생성된 lidarData 값
-    let lidarData: LiDARData
+    private(set) var lidarData: LiDARData
     /// MainVM 에서 생성된 locationData 값 및 사용자설정 위치값
     @Published private(set) var locationData: LocationData
     /// 주변 건물리스트
@@ -86,6 +87,8 @@ extension SelectLocationVM {
         case .selectBuilding:
             self.mode = .setIndoorInfo
         case .setIndoorInfo:
+            self.mode = .setLidarName
+        case .setLidarName:
             self.mode = .done
         case .done:
             print("upload")
@@ -106,8 +109,10 @@ extension SelectLocationVM {
             self.buildingList = []
             self.fetchBuildingList()
             self.mode = .selectBuilding
-        case .done:
+        case .setLidarName:
             self.mode = .setIndoorInfo
+        case .done:
+            self.mode = .setLidarName
         }
     }
     
@@ -124,6 +129,10 @@ extension SelectLocationVM {
     
     func setIndoorValue(to floor: Int?) {
         self.indoorFloor = floor
+    }
+    
+    func updateLidarName(to lidarName: String) {
+        self.lidarData.rename(to: lidarName)
     }
 }
 

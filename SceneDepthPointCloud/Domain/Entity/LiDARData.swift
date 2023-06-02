@@ -38,7 +38,7 @@ struct LiDARData: Codable {
     }
     
     // MARK: Filename 변경
-    mutating func rename(roadAddress: String) {
-        self.lidarFileName = "\(roadAddress)_\(MMddHHmm()).ply"
+    mutating func rename(to name: String) {
+        self.lidarFileName = "\(name).ply"
     }
 }

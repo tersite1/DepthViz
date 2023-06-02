@@ -145,8 +145,8 @@ extension MainVM {
         self.mode = .uploading
     }
     
-    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
-        self.lidarData?.rename(roadAddress: buildingInfo.roadAddress)
+    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int, lidarName: String) {
+        self.lidarData?.rename(to: lidarName)
         // roadAddress 확인
         var buildingInfo = buildingInfo
         if buildingInfo.dto.road_address_name == "" {

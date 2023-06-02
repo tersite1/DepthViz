@@ -10,5 +10,5 @@ import Foundation
 
 protocol SelectLocationDelegate: AnyObject {
     func uploadCancel()
-    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int)
+    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int, lidarName: String)
 }

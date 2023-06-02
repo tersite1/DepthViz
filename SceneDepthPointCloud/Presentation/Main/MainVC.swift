@@ -466,8 +466,8 @@ extension MainVC: SelectLocationDelegate {
     }
     
     /// 업로드 데이터들을 수신받아 업로드를 실행하는 함수
-    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
+    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int, lidarName: String) {
         self.viewModel?.changeMode()
-        self.viewModel?.uploadMeasuredData(location: location, buildingInfo: buildingInfo, floor: floor)
+        self.viewModel?.uploadMeasuredData(location: location, buildingInfo: buildingInfo, floor: floor, lidarName: lidarName)
     }
 }

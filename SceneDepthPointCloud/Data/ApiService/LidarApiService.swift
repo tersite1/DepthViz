@@ -78,7 +78,7 @@ final class LidarApiService {
         }
     }
     
-    func getLidarDetailInfo(collectId: String, completion: @escaping (Result<LidarDetailInfoDTO, FetchError>) -> Void)  {
+    func getLidarDetailInfo(collectId: String, completion: @escaping (Result<LidarDetailInfoDTO, FetchError>) -> Void) {
         Network.request(url: NetworkURL.Server.lidars + "/\(collectId)/detail", method: .get) { result in
             switch result.status {
             case .SUCCESS:
@@ -93,6 +93,24 @@ final class LidarApiService {
                 }
                 
                 completion(.success(dto))
+                
+            case .ERROR(let statusCode):
+                completion(.failure(.server(statusCode)))
+            }
+        }
+    }
+    
+    func deleteLidar(collectId: String, completion: @escaping (Result<Bool, FetchError>) -> Void) {
+        Network.request(url: NetworkURL.Server.deleteLidar(collectId: collectId), method: .delete) { result in
+            switch result.status {
+            case .SUCCESS:
+                guard let data = result.data else {
+                    completion(.failure(.empty))
+                    return
+                }
+                
+                print(String(data: data, encoding: .utf8)!)
+                completion(.success(true))
                 
             case .ERROR(let statusCode):
                 completion(.failure(.server(statusCode)))

@@ -132,6 +132,7 @@ extension LidarDetailVC {
 extension LidarDetailVC {
     private func bindViewModel() {
         self.bindInfosDownloaded()
+        self.bindDeleteCompleted()
     }
     
     private func bindInfosDownloaded() {
@@ -143,6 +144,22 @@ extension LidarDetailVC {
                 self?.showBuildingInfoView()
                 self?.showGpsInfoView()
                 self?.showLidarInfoView()
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindDeleteCompleted() {
+        self.viewModel?.$deleteCompleted
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] deleted in
+                guard let deleted = deleted else { return }
+                
+                if deleted {
+                    self?.showAlertAndExit()
+                } else {
+                    let message = self?.viewModel?.serverError ?? ""
+                    self?.showAlert(title: "Delete failed", text: message)
+                }
             })
             .store(in: &self.cancellables)
     }
@@ -179,6 +196,15 @@ extension LidarDetailVC {
         }
         alert.addAction(cancel)
         alert.addAction(delete)
+        self.present(alert, animated: true)
+    }
+    
+    private func showAlertAndExit() {
+        let alert = UIAlertController(title: "삭제가 완료되었습니다", message: "", preferredStyle: .alert)
+        let ok = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            self?.navigationController?.popViewController(animated: true)
+        }
+        alert.addAction(ok)
         self.present(alert, animated: true)
     }
 }

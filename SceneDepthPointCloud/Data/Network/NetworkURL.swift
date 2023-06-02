@@ -19,6 +19,9 @@ struct NetworkURL {
     enum Server {
         static let lidars: String = Domain.server + "/lidars"
         static let buildings: String = Domain.server + "/buildings"
+        static func deleteLidar(collectId: String) -> String {
+            return lidars + "/\(collectId)" 
+        }
     }
     
     enum Kakao {

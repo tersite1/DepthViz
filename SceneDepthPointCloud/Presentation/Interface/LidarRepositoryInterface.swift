@@ -11,6 +11,7 @@ import Foundation
 protocol LidarRepositoryInterface: AnyObject {
     func fetchLidarList(page: Int, completion: @escaping(Result<(infos: [LidarInfo], isLastPage: Bool), FetchError>) -> Void)
     func fetchLidarDetailInfo(collectId: String, completion: @escaping (Result<LidarDetailInfo, FetchError>) -> Void)
+    func deleteLidar(collectId: String, completion: @escaping (Result<Bool, FetchError>) -> Void)
     func saveToStorage(lidarData: LiDARData) -> Bool
     func getFromStorage() -> LiDARData?
     func clearStorage()

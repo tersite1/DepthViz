@@ -12,6 +12,8 @@ import Combine
 final class LidarDetailVM {
     @Published private(set) var networkError: (title: String, text: String)?
     @Published private(set) var infosDownloaded: Bool = false
+    @Published private(set) var deleteCompleted: Bool?
+    private(set) var serverError: String = ""
     private let collectId: String
     let addressId: String
     private(set) var buildingInfo: BuildingInfo?
@@ -46,7 +48,15 @@ extension LidarDetailVM {
     }
     
     func deleteLidar() {
-        print("deleteLidar")
+        self.lidarRepository.deleteLidar(collectId: self.collectId) { [weak self] result in
+            switch result {
+            case .success(let success):
+                self?.deleteCompleted = success
+            case .failure(let fetchError):
+                self?.serverError = fetchError.message
+                self?.deleteCompleted = false
+            }
+        }
     }
 }
 

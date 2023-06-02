@@ -39,6 +39,20 @@ final class LidarRepository: LidarRepositoryInterface {
         }
     }
     
+    func deleteLidar(collectId: String, completion: @escaping (Result<Bool, FetchError>) -> Void) {
+        let endpoint = LidarApiService()
+        
+        endpoint.deleteLidar(collectId: collectId) { result in
+            switch result {
+            case .success(let success):
+                completion(.success(success))
+                
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
     // MARK: 메모리 문제 및 업로드 문제로 인해 앱 내부에 저장하는 기능 추가
     func saveToStorage(lidarData: LiDARData) -> Bool {
         return LidarStorage.save(lidarData)

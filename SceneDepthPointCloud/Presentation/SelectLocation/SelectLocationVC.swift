@@ -245,9 +245,10 @@ extension SelectLocationVC {
     private func configureSettedInfoView() {
         guard let buildingInfo = self.viewModel?.buildingList.first,
               let floor = self.viewModel?.indoorFloor,
-              let lidarData = self.viewModel?.lidarData else { return }
+              let lidarData = self.viewModel?.lidarData,
+              let lidarName = self.viewModel?.lidarName else { return }
         
-        self.settedInfoView.configureInfos(buildingInfo: buildingInfo, floor: floor, lidarData: lidarData)
+        self.settedInfoView.configureInfos(buildingInfo: buildingInfo, floor: floor, lidarData: lidarData, lidarName: lidarName)
     }
 }
 
@@ -305,7 +306,7 @@ extension SelectLocationVC {
         guard let locationData = self.viewModel?.locationData,
               let buildingInfo = self.viewModel?.buildingList.first,
               let indoorFloor = self.viewModel?.indoorFloor,
-              let lidarName = self.viewModel?.lidarData.lidarFileName else {
+              let lidarName = self.viewModel?.lidarName else {
             return
         }
         // SelectLocationVC 화면 닫은 후 데이터 넘기기

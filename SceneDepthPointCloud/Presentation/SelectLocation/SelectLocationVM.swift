@@ -20,7 +20,7 @@ final class SelectLocationVM {
         case done
     }
     /// MainVM 에서 생성된 lidarData 값
-    private(set) var lidarData: LiDARData
+    let lidarData: LiDARData
     /// MainVM 에서 생성된 locationData 값 및 사용자설정 위치값
     @Published private(set) var locationData: LocationData
     /// 주변 건물리스트
@@ -31,6 +31,7 @@ final class SelectLocationVM {
     @Published private(set) var networkError: (title: String, text: String)?
     /// 건물리스트 api 사용시 pagenation 을 위한 현재 page 값
     @Published private(set) var indoorFloor: Int?
+    private(set) var lidarName: String = ""
     private(set) var fetchedList: [BuildingOfMapInfo] = []
     private(set) var fetching: Bool = false
     /// Address 데이터를 담당하는 객체
@@ -132,7 +133,7 @@ extension SelectLocationVM {
     }
     
     func updateLidarName(to lidarName: String) {
-        self.lidarData.rename(to: lidarName)
+        self.lidarName = lidarName
     }
 }
 

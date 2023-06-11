@@ -100,6 +100,13 @@ extension LidarDetailVM {
             }
         }
     }
+    
+    func removeDownloaded() {
+        if DownloadStorage.remove(fileName: self.fileName) == false {
+            self.networkError = (title: "파일삭제 실패", text: "")
+        }
+        self.downloadProgress = 0
+    }
 }
 
 extension LidarDetailVM {

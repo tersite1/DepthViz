@@ -26,6 +26,15 @@ final class LidarDetailVC: UIViewController {
         button.contentMode = .scaleAspectFit
         return button
     }()
+    private var progressLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        label.textColor = .white
+        label.textAlignment = .left
+        label.text = "0.0%"
+        return label
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -84,6 +93,14 @@ extension LidarDetailVC {
             self.lidarInfoView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             self.lidarInfoView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
         ])
+        
+        self.view.addSubview(self.progressLabel)
+        NSLayoutConstraint.activate([
+            self.progressLabel.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor),
+            self.progressLabel.centerYAnchor.constraint(equalTo: self.lidarInfoView.topAnchor, constant: 0)
+        ])
+        
+        self.progressLabel.alpha = 0
         
         self.lidarInfoView.disappear()
         
@@ -219,8 +236,13 @@ extension LidarDetailVC {
         self.viewModel?.$downloadProgress
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] progress in
-                guard progress > 0 else { return }
-                print(progress)
+                guard progress > 0 else {
+                    self?.progressLabel.alpha = 0
+                    return
+                }
+                
+                self?.progressLabel.alpha = 1
+                self?.progressLabel.text = "\(String(format: "%.1f", progress*100))%"
             })
             .store(in: &self.cancellables)
     }
@@ -277,6 +299,10 @@ extension LidarDetailVC {
         }
         
         self.present(activityViewController, animated: true)
+        
+        activityViewController.completionWithItemsHandler = { (activityType: UIActivity.ActivityType?, completed: Bool, arrayReturnedItems: [Any]?, error: Error?) in
+            self.viewModel?.removeDownloaded()
+        }
     }
 }
 

@@ -15,4 +15,5 @@ protocol LidarRepositoryInterface: AnyObject {
     func saveToStorage(lidarData: LiDARData) -> Bool
     func getFromStorage() -> LiDARData?
     func clearStorage()
+    func downloadLidarFile(fileName: String, fileId: String, isPLY: Bool, handler: @escaping ((Double) -> Void), completion: @escaping (Result<Bool, FetchError>) -> Void)
 }

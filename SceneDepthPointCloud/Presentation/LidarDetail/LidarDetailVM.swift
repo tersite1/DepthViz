@@ -60,11 +60,40 @@ extension LidarDetailVM {
     }
     
     func downloadPCD() {
+        guard let fileName = self.lidarDetailInfo?.originFileName,
+              let fileId = self.lidarDetailInfo?.generalFileId,
+              fileName.hasSuffix(".pcd") else { return }
         
+        self.lidarRepository.downloadLidarFile(fileName: fileName, fileId: fileId, isPLY: false) { [weak self] progress in
+            print(progress)
+        } completion: { [weak self] result in
+            switch result {
+            case .success(let success):
+                print("download completed")
+            case .failure(let fetchError):
+                print("download failed: \(fetchError.message)")
+            }
+        }
     }
     
     func downloadPLY() {
+        guard var fileName = self.lidarDetailInfo?.originFileName,
+              let fileId = self.lidarDetailInfo?.generalFileId,
+              fileName.hasSuffix(".pcd") else { return }
         
+        guard let name = fileName.split(separator: ".").first else { return }
+        fileName = "\(name).ply"
+        
+        self.lidarRepository.downloadLidarFile(fileName: fileName, fileId: fileId, isPLY: false) { [weak self] progress in
+            print(progress)
+        } completion: { [weak self] result in
+            switch result {
+            case .success(let success):
+                print("download completed")
+            case .failure(let fetchError):
+                print("download failed: \(fetchError.message)")
+            }
+        }
     }
 }
 

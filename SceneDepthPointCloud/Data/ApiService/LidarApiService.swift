@@ -43,7 +43,6 @@ final class LidarApiService {
                     return
                 }
                 
-                print(String(data: data, encoding: .utf8)!)
                 completion(.success(true))
                 
             case .ERROR(let statusCode):
@@ -109,7 +108,20 @@ final class LidarApiService {
                     return
                 }
                 
-                print(String(data: data, encoding: .utf8)!)
+                completion(.success(true))
+                
+            case .ERROR(let statusCode):
+                completion(.failure(.server(statusCode)))
+            }
+        }
+    }
+    
+    func downloadLidar(fileName: String, fileId: String, isPLY: Bool, handler: @escaping((Double) -> Void), completion: @escaping (Result<Bool, FetchError>) -> Void) {
+        Network.downloadData(url: NetworkURL.Server.downloadFile(fileId: fileId, isPLY: isPLY), fileName: fileName) { progress in
+            handler(progress)
+        } completion: { result in
+            switch result.status {
+            case .SUCCESS:
                 completion(.success(true))
                 
             case .ERROR(let statusCode):

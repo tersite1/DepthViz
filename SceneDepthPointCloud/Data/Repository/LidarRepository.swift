@@ -65,4 +65,21 @@ final class LidarRepository: LidarRepositoryInterface {
     func clearStorage() {
         LidarStorage.remove()
     }
+    
+    // MARK: LiDAR 파일 다운로드
+    func downloadLidarFile(fileName: String, fileId: String, isPLY: Bool, handler: @escaping ((Double) -> Void), completion: @escaping (Result<Bool, FetchError>) -> Void) {
+        let endpoint = LidarApiService()
+        
+        endpoint.downloadLidar(fileName: fileName, fileId: fileId, isPLY: isPLY) { progress in
+            handler(progress)
+        } completion: { result in
+            switch result {
+            case .success(let success):
+                completion(.success(success))
+                
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
 }

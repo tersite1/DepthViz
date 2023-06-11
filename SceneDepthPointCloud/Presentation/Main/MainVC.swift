@@ -39,10 +39,13 @@ final class MainVC: UIViewController, ARSessionDelegate {
         self.bindViewModel()
     }
     
-    /// MainVC 화면 진입시 NavigationBar를 표시되지 않도록 설정한다
+    /// MainVC 화면 진입시 필요한 설정들
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        // NavigationBar를 표시되지 않도록 설정한다
         self.navigationController?.setNavigationBarHidden(true, animated: true)
+        // ARSession을 활성화한다
+        self.configureARWorldTracking()
     }
     
     /// 다른화면으로 전환시 ARSession 일시정지한다
@@ -222,13 +225,11 @@ extension MainVC {
             .sink(receiveValue: { [weak self] mode in
                 switch mode {
                 case .ready:
-                    self?.session.pause()
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .ready)
                     self?.scansButton.fadeIn()
                     self?.viewModel?.rendererDraw()
                 case .recording:
-                    self?.configureARWorldTracking()
                     self?.locationManager.startUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .recording)
                     self?.scansButton.fadeOut()

@@ -5,13 +5,10 @@ Abstract:
 The host app renderer.
 */
 
+import Foundation
 import Metal
 import MetalKit
 import ARKit
-// MARK: SAVE PLY
-import Foundation
-import UIKit
-import Combine
 
 final class Renderer {
     // Maximum number of points we store in the point cloud
@@ -82,19 +79,16 @@ final class Renderer {
     private lazy var cameraResolution = Float2(Float(sampleFrame.camera.imageResolution.width), Float(sampleFrame.camera.imageResolution.height))
     private lazy var lastCameraTransform = sampleFrame.camera.transform
     
-    // interfaces
-    var confidenceThreshold = 2 {
+    // threshHold 값을 low로 설정 (반사율이 낮은 물질도 잘 표시되도록 설정)
+    var confidenceThreshold = 0 {
         didSet {
             // apply the change for the shader
             pointCloudUniforms.confidenceThreshold = Int32(confidenceThreshold)
         }
     }
     
-    // MARK: SAVE PLY
     // Whether recording is on
     var isRecording = false
-    // Current folder for saving data
-    public var currentFolder = ""
     // Pick every n frames (~1/sampling frequency)
     public var pickFrames = 5 // default to save 1/5 of the new frames
     public var currentFrameIndex = 0;
@@ -107,9 +101,9 @@ final class Renderer {
         self.session = session
         self.device = device
         self.renderDestination = renderDestination
-        
-        library = device.makeDefaultLibrary()!
-        commandQueue = device.makeCommandQueue()!
+        // MTLibrary를 생성
+        self.library = device.makeDefaultLibrary()!
+        self.commandQueue = device.makeCommandQueue()!
         
         // initialize our buffers
         for _ in 0 ..< maxInFlightBuffers {
@@ -364,27 +358,7 @@ private extension Renderer {
     }
 }
 
-// MARK: SAVE PLY
 extension Renderer {
-    /// Check if the current frame should be saved or dropped based on sampling rate configuration
-    private func checkSamplingRate() -> Bool {
-        currentFrameIndex += 1
-        return currentFrameIndex % pickFrames == 0
-    }
-    
-    // custom struct for pulling necessary data from arframes
-    struct ARFrameDataPack {
-        var timestamp: Double
-        var cameraTransform: simd_float4x4
-        var cameraEulerAngles: simd_float3
-        var depthMap: CVPixelBuffer
-        var smoothedDepthMap: CVPixelBuffer
-        var confidenceMap: CVPixelBuffer
-        var capturedImage: CVPixelBuffer
-        var localToWorld: simd_float4x4
-        var cameraIntrinsicsInversed: simd_float3x3
-    }
-    
     /// Save all particles to a point cloud file in ply format.
     func savePointCloud() {
         delegate?.startMakingPlyFile()

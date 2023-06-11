@@ -32,6 +32,7 @@ final class LidarDetailVC: UIViewController {
         self.title = "Lidar Detail"
         self.configureUI()
         self.configureBuildingInfo()
+        self.configureLidarInfo()
         self.bindViewModel()
     }
     
@@ -119,6 +120,32 @@ extension LidarDetailVC {
     @objc private func tapBuildingInfo(_ gesture: UITapGestureRecognizer) {
         guard let url = self.viewModel?.buildingInfo?.placeURL else { return }
         self.showWebView(url: url)
+    }
+    
+    private func configureLidarInfo() {
+        let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapLidarInfo(_:)))
+        self.lidarInfoView.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func tapLidarInfo(_ gesture: UITapGestureRecognizer) {
+        // showAlert
+        let alert = UIAlertController(title: "LiDAR 파일을 다운로드하시겠습니까?", message: "받고자 하는 파일 형식을 선택하세요", preferredStyle: .actionSheet)
+        let lidar = UIAlertAction(title: "PCD", style: .default) { [weak self] _ in
+            self?.viewModel?.downloadPCD()
+        }
+        let pcd = UIAlertAction(title: "PLY", style: .default) { [weak self] _ in
+            self?.viewModel?.downloadPLY()
+        }
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        alert.addAction(lidar)
+        alert.addAction(pcd)
+        alert.addAction(cancel)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            alert.popoverPresentationController?.sourceView = self.lidarInfoView
+        }
+        
+        self.present(alert, animated: true)
     }
     
     private func showWebView(url: String) {

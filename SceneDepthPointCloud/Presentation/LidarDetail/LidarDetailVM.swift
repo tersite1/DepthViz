@@ -58,6 +58,14 @@ extension LidarDetailVM {
             }
         }
     }
+    
+    func downloadPCD() {
+        
+    }
+    
+    func downloadPLY() {
+        
+    }
 }
 
 extension LidarDetailVM {

@@ -13,6 +13,9 @@ final class LidarDetailVM {
     @Published private(set) var networkError: (title: String, text: String)?
     @Published private(set) var infosDownloaded: Bool = false
     @Published private(set) var deleteCompleted: Bool?
+    @Published private(set) var downloadProgress: Double = 0
+    @Published private(set) var downloadedURL: URL?
+    private(set) var fileName: String = ""
     private(set) var serverError: String = ""
     private let collectId: String
     let addressId: String
@@ -65,13 +68,14 @@ extension LidarDetailVM {
               fileName.hasSuffix(".pcd") else { return }
         
         self.lidarRepository.downloadLidarFile(fileName: fileName, fileId: fileId, isPLY: false) { [weak self] progress in
-            print(progress)
+            self?.downloadProgress = progress
         } completion: { [weak self] result in
             switch result {
-            case .success(let success):
-                print("download completed")
+            case .success(_):
+                self?.fileName = fileName
+                self?.downloadedURL = DownloadStorage.url.appendingPathComponent(fileName)
             case .failure(let fetchError):
-                print("download failed: \(fetchError.message)")
+                self?.networkError = (title: "다운로드 실패", text: fetchError.message)
             }
         }
     }
@@ -84,14 +88,15 @@ extension LidarDetailVM {
         guard let name = fileName.split(separator: ".").first else { return }
         fileName = "\(name).ply"
         
-        self.lidarRepository.downloadLidarFile(fileName: fileName, fileId: fileId, isPLY: false) { [weak self] progress in
-            print(progress)
+        self.lidarRepository.downloadLidarFile(fileName: fileName, fileId: fileId, isPLY: true) { [weak self] progress in
+            self?.downloadProgress = progress
         } completion: { [weak self] result in
             switch result {
-            case .success(let success):
-                print("download completed")
+            case .success(_):
+                self?.fileName = fileName
+                self?.downloadedURL = DownloadStorage.url.appendingPathComponent(fileName)
             case .failure(let fetchError):
-                print("download failed: \(fetchError.message)")
+                self?.networkError = (title: "다운로드 실패", text: fetchError.message)
             }
         }
     }

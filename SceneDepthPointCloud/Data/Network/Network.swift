@@ -55,6 +55,7 @@ struct Network {
             .downloadProgress { progress in
                 handler(progress.fractionCompleted)
         }.response { response in
+            print(response.request?.url)
             if response.error != nil {
                 completion(NetworkResult(data: nil, status: .ERROR(500)))
             } else{

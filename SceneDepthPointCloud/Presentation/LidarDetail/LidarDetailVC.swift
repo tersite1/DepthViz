@@ -160,6 +160,9 @@ extension LidarDetailVC {
     private func bindViewModel() {
         self.bindInfosDownloaded()
         self.bindDeleteCompleted()
+        self.bindNetworkError()
+        self.bindDownloadedURL()
+        self.bindProgress()
     }
     
     private func bindInfosDownloaded() {
@@ -187,6 +190,37 @@ extension LidarDetailVC {
                     let message = self?.viewModel?.serverError ?? ""
                     self?.showAlert(title: "Delete failed", text: message)
                 }
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindNetworkError() {
+        self.viewModel?.$networkError
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] error in
+                guard let error = error else { return }
+                self?.showAlert(title: error.title, text: error.text)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindDownloadedURL() {
+        self.viewModel?.$downloadedURL
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] url in
+                guard let url = url else { return }
+                
+                self?.shareFile(url: url)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindProgress() {
+        self.viewModel?.$downloadProgress
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] progress in
+                guard progress > 0 else { return }
+                print(progress)
             })
             .store(in: &self.cancellables)
     }
@@ -233,6 +267,16 @@ extension LidarDetailVC {
         }
         alert.addAction(ok)
         self.present(alert, animated: true)
+    }
+    
+    private func shareFile(url: URL) {
+        let activityViewController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            activityViewController.popoverPresentationController?.sourceView = self.lidarInfoView
+        }
+        
+        self.present(activityViewController, animated: true)
     }
 }
 

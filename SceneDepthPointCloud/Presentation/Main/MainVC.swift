@@ -39,15 +39,128 @@ final class MainVC: UIViewController, ARSessionDelegate {
         self.bindViewModel()
     }
     
-    /// MainVC 화면 진입시 configure
+    /// MainVC 화면 진입시 필요한 설정들
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.configureARWorldTracking()
+        // NavigationBar를 표시되지 않도록 설정한다
         self.navigationController?.setNavigationBarHidden(true, animated: true)
+        // ARSession을 활성화한다
+        self.configureARWorldTracking()
+    }
+    
+    /// 다른화면으로 전환시 ARSession 일시정지한다
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.session.pause()
+    }
+    
+    /// 앱이 메모리경고를 수신받는 경우
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // 현재까지 측정중인 파일을 앱 내부로 임시저장 후 앱을 종료한다
+        self.viewModel?.terminateRecording()
     }
 }
 
-// MARK: Configure
+// MARK: HomeBar & StatusBar Hidden
+extension MainVC {
+    // Auto-hide the home indicator to maximize immersion in AR experiences.
+    override var prefersHomeIndicatorAutoHidden: Bool {
+        return true
+    }
+    
+    // Hide the status bar to maximize immersion in AR experiences.
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
+}
+
+
+
+// MARK: - AR 관련 함수들
+extension MainVC {
+    /// LiDAR 센서 사용가능여부 확인 함수
+    private func checkLidarSensor() {
+        if !ARWorldTrackingConfiguration.supportsFrameSemantics([.sceneDepth, .smoothedSceneDepth]) {
+            self.viewModel?.cantRecording()
+        }
+    }
+    
+    /// AR로 표시하기 위한 MetalKitView를 설정하는 부분 및 viewModel 설정
+    private func configureViewModel() {
+        // Metal 디바이스 생성
+        guard let device = MTLCreateSystemDefaultDevice() else {
+            print("Metal is not supported on this device")
+            return
+        }
+        
+        // Metal Object를 표시하기 위한 MetalKitView로 설정
+        if let view = view as? MTKView {
+            // MetalKitView에 표시하기 위한 Metal 디바이스 설정
+            view.device = device
+            
+            view.backgroundColor = UIColor.clear
+            // MetalKitView의 depth 크기 설정
+            view.depthStencilPixelFormat = .depth32Float
+            // 논리적 좌표공간(logical coordinate)(단위: points)과 장치 좌표공간(device coordinate)(단위: pixels)간의 스케일링 값
+            // 1로 설정한 경우 실제좌표계와 MTKView에서 표시되는 좌표계와 동일하게 설정한다 (실제를 그대로 아이폰에서 표시하는 경우)
+            view.contentScaleFactor = 1
+            // MetalKitView의 내용을 업데이트하고자 하는 경우 호출하기 위한 delegate 설정
+            view.delegate = self
+            
+            // Configure the ViewModel, Renderer to draw to the view
+            self.viewModel = MainVM(session: self.session, device: device, view: view)
+        }
+    }
+    
+    /// LiDAR 측정을 위한 ARSession 활성화 및 Configure 설정 부분
+    private func configureARWorldTracking() {
+        guard self.viewModel?.mode != .cantRecord else { return }
+        // Create a world-tracking configuration, and enable the scene depth frame-semantic.
+        // 디바이스(iPhone)의 움직임을 추적하기 위한 Configuration 값 (움직이는대로 그대로 AR로 표시하기 위함)
+        let configuration = ARWorldTrackingConfiguration()
+        // 카메라를 통해 보이는 실제 객체까지의 거리, 여러 프레임의 평균 거리값을 제공하도록 설정
+        configuration.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
+
+        // Run the view's session
+        self.session.run(configuration)
+        
+        // The screen shouldn't dim during AR experiences.
+        UIApplication.shared.isIdleTimerDisabled = true
+    }
+}
+
+// MARK: AR 표출을 위한 MTKView Delegate
+extension MainVC: MTKViewDelegate {
+    // Called whenever view changes orientation or layout is changed
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        self.viewModel?.rendererResize(to: size)
+    }
+    
+    // MetalKitView가 업데이트되어야 할 때 불린다. 이때 새롭게 다시 그린다.
+    func draw(in view: MTKView) {
+        guard self.viewModel?.mode != .ready else {
+            return
+        }
+        
+        self.viewModel?.rendererDraw()
+    }
+}
+
+// MARK: RenderDestinationProvider
+protocol RenderDestinationProvider {
+    var currentRenderPassDescriptor: MTLRenderPassDescriptor? { get }
+    var currentDrawable: CAMetalDrawable? { get }
+    var colorPixelFormat: MTLPixelFormat { get set }
+    var depthStencilPixelFormat: MTLPixelFormat { get set }
+    var sampleCount: Int { get set }
+}
+
+extension MTKView: RenderDestinationProvider { }
+
+
+
+// MARK: - Configure
 extension MainVC {
     /// MainVC 표시할 UI 설정
     private func configureUI() {
@@ -84,70 +197,15 @@ extension MainVC {
         ])
     }
     
-    /// View를 나타내기 위한 데이터 처리담당 설정 함수
-    private func configureViewModel() {
-        guard let device = MTLCreateSystemDefaultDevice() else {
-            print("Metal is not supported on this device")
-            return
-        }
-        
-        // Set the view to use the default device
-        if let view = view as? MTKView {
-            view.device = device
-            
-            view.backgroundColor = UIColor.clear
-            // we need this to enable depth test
-            view.depthStencilPixelFormat = .depth32Float
-            view.contentScaleFactor = 1
-            view.delegate = self
-            
-            // Configure the ViewModel, Renderer to draw to the view
-            self.viewModel = MainVM(session: self.session, device: device, view: view)
-        }
-    }
-    
     /// gps 값 수신을 위한 설정 함수
     private func configureLocationManager() {
         guard self.viewModel?.mode != .cantRecord else { return }
         self.locationManager.delegate = self
         self.locationManager.requestWhenInUseAuthorization()
     }
-    
-    /// LiDAR 센서 사용가능여부 확인 함수
-    private func checkLidarSensor() {
-        if !ARWorldTrackingConfiguration.supportsFrameSemantics(.sceneDepth) {
-            self.viewModel?.cantRecording()
-        }
-    }
-    
-    /// session 설정 및 화면꺼짐방지
-    private func configureARWorldTracking() {
-        guard self.viewModel?.mode != .cantRecord else { return }
-        // Create a world-tracking configuration, and
-        // enable the scene depth frame-semantic.
-        let configuration = ARWorldTrackingConfiguration()
-        configuration.frameSemantics = [.sceneDepth, .smoothedSceneDepth]
-
-        // Run the view's session
-        self.session.run(configuration)
-        
-        // The screen shouldn't dim during AR experiences.
-        UIApplication.shared.isIdleTimerDisabled = true
-    }
-    
-    /// 기록측정 불가 상태의 UI 표시 함수
-    private func configureCantRecording() {
-        // MARK: 기록측정불가 UI 구현 필요
-        print("cant Recording")
-    }
-    
-    private func configureCantGetGPS() {
-        // MARK: GPS 수신불가 UI 구현 필요
-        print("cant get gps")
-    }
 }
 
-// MARK: INPUT
+// MARK: INPUT (Binding Data)
 extension MainVC {
     /// viewModel 에서 값 변화를 수신하기 위한 함수
     private func bindViewModel() {
@@ -170,6 +228,7 @@ extension MainVC {
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .ready)
                     self?.scansButton.fadeIn()
+                    self?.viewModel?.rendererDraw()
                 case .recording:
                     self?.locationManager.startUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .recording)
@@ -181,12 +240,10 @@ extension MainVC {
                 case .cantRecord:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
-                    self?.configureCantRecording()
                     self?.scansButton.fadeIn()
                 case .cantGetGPS:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
-                    self?.configureCantGetGPS()
                     self?.scansButton.fadeIn()
                 default:
                     self?.locationManager.stopUpdatingLocation()
@@ -270,7 +327,7 @@ extension MainVC {
     }
 }
 
-// MARK: Action
+// MARK: Action & Logic
 extension MainVC {
     /// RecordingButton Tab 액션
     @objc private func tapRecordingButton(_ sender: UIButton) {
@@ -282,10 +339,8 @@ extension MainVC {
         let scansVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: ScansVC.identifier)
         self.navigationController?.pushViewController(scansVC, animated: true)
     }
-}
-
-extension MainVC {
-    /// mode값에 따라 현재 동작상태 표시내용 설정 함수 
+    
+    /// mode값에 따라 현재 동작상태 표시내용 설정 함수
     private func changeStatusLabel(to mode: MainVM.Mode) {
         switch mode {
         case .ready:
@@ -308,55 +363,7 @@ extension MainVC {
     }
 }
 
-// MARK: HomeBar & StatusBar Hidden
-extension MainVC {
-    // Auto-hide the home indicator to maximize immersion in AR experiences.
-    override var prefersHomeIndicatorAutoHidden: Bool {
-        return true
-    }
-    
-    // Hide the status bar to maximize immersion in AR experiences.
-    override var prefersStatusBarHidden: Bool {
-        return true
-    }
-}
-
-// MARK: MTKViewDelegate
-extension MainVC: MTKViewDelegate {
-    // Called whenever view changes orientation or layout is changed
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        self.viewModel?.rendererResize(to: size)
-    }
-    
-    // Called whenever the view needs to render
-    func draw(in view: MTKView) {
-        self.viewModel?.rendererDraw()
-    }
-}
-
-// MARK: RenderDestinationProvider
-protocol RenderDestinationProvider {
-    var currentRenderPassDescriptor: MTLRenderPassDescriptor? { get }
-    var currentDrawable: CAMetalDrawable? { get }
-    var colorPixelFormat: MTLPixelFormat { get set }
-    var depthStencilPixelFormat: MTLPixelFormat { get set }
-    var sampleCount: Int { get set }
-}
-
-extension MTKView: RenderDestinationProvider {
-    
-}
-
-// MARK: SAVE PLY
-extension MainVC {
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        
-        self.viewModel?.terminateRecording()
-    }
-}
-
-// MARK: Location-related properties and delegate methods.
+// MARK: 위치정보 활성화표출 및 위치정보 수신 부분
 extension MainVC: CLLocationManagerDelegate {
     /// 앱이 위치 관리자를 생성할 때와 권한 부여 상태가 변경될 때 delegate 에게 알립니다.
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -394,6 +401,7 @@ extension MainVC: CLLocationManagerDelegate {
     }
 }
 
+// MARK: Present
 extension MainVC {
     /// SelectLocationVC 를 Modal 형식으로 띄우는 함수
     private func popupSelectLocationVC(_ lidarData: LiDARData, _ locationData: LocationData) {
@@ -413,25 +421,8 @@ extension MainVC {
             self.present(vc, animated: true)
         }
     }
-}
-
-// MARK: SelectLocationVC 에서 MainVC 의 함수 일부를 위임받는 부분
-extension MainVC: SelectLocationDelegate {
-    /// 측정된 데이터 서버 업로드 취소 함수
-    func uploadCancel() {
-        self.viewModel?.uploadCancel()
-        self.showAlert(title: "Upload Canceled", text: "")
-        self.viewModel?.changeMode()
-    }
     
-    /// 업로드 데이터들을 수신받아 업로드를 실행하는 함수
-    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int) {
-        self.viewModel?.changeMode()
-        self.viewModel?.uploadMeasuredData(location: location, buildingInfo: buildingInfo, floor: floor)
-    }
-}
-
-extension MainVC {
+    /// 앱의 임시데이터로 복구할지 여부를 띄우는 함수
     private func showAlertWithStorageStart() {
         let alert = UIAlertController(title: "임시저장된 데이터가 존재합니다. 복구하시겠습니까?", message: "복구하지 않는 경우 해당데이터는 제거됩니다.", preferredStyle: .alert)
         let remove = UIAlertAction(title: "제거", style: .destructive) { [weak self] _ in
@@ -447,6 +438,7 @@ extension MainVC {
         self.present(alert, animated: true)
     }
     
+    /// 업로드 실패 및 메모리 부족으로 인해 임시데이터가 저장된 후 앱 종료메세지를 띄우는 함수
     private func showAlertAndTerminate() {
         self.statusLabel.changeText(to: .removed)
         let title = self.viewModel?.mode == .recordingTerminate ? "Low Memory Warning" : "Upload Failed (\(self.viewModel?.networkErrorMessage ?? ""))"
@@ -460,5 +452,23 @@ extension MainVC {
         
         alert.addAction(ok)
         self.present(alert, animated: true)
+    }
+}
+
+
+
+// MARK: - SelectLocationVC 에서 MainVC 의 함수 일부를 위임받는 부분
+extension MainVC: SelectLocationDelegate {
+    /// 측정된 데이터 서버 업로드 취소 함수
+    func uploadCancel() {
+        self.viewModel?.uploadCancel()
+        self.showAlert(title: "Upload Canceled", text: "")
+        self.viewModel?.changeMode()
+    }
+    
+    /// 업로드 데이터들을 수신받아 업로드를 실행하는 함수
+    func uploadMeasuredData(location: LocationData, buildingInfo: BuildingOfMapInfo, floor: Int, lidarName: String) {
+        self.viewModel?.changeMode()
+        self.viewModel?.uploadMeasuredData(location: location, buildingInfo: buildingInfo, floor: floor, lidarName: lidarName)
     }
 }

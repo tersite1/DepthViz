@@ -16,6 +16,7 @@ final class SelectLocationVM {
         case selectLocation
         case selectBuilding
         case setIndoorInfo
+        case setLidarName
         case done
     }
     /// MainVM 에서 생성된 lidarData 값
@@ -30,6 +31,7 @@ final class SelectLocationVM {
     @Published private(set) var networkError: (title: String, text: String)?
     /// 건물리스트 api 사용시 pagenation 을 위한 현재 page 값
     @Published private(set) var indoorFloor: Int?
+    private(set) var lidarName: String = ""
     private(set) var fetchedList: [BuildingOfMapInfo] = []
     private(set) var fetching: Bool = false
     /// Address 데이터를 담당하는 객체
@@ -86,6 +88,8 @@ extension SelectLocationVM {
         case .selectBuilding:
             self.mode = .setIndoorInfo
         case .setIndoorInfo:
+            self.mode = .setLidarName
+        case .setLidarName:
             self.mode = .done
         case .done:
             print("upload")
@@ -106,8 +110,10 @@ extension SelectLocationVM {
             self.buildingList = []
             self.fetchBuildingList()
             self.mode = .selectBuilding
-        case .done:
+        case .setLidarName:
             self.mode = .setIndoorInfo
+        case .done:
+            self.mode = .setLidarName
         }
     }
     
@@ -124,6 +130,10 @@ extension SelectLocationVM {
     
     func setIndoorValue(to floor: Int?) {
         self.indoorFloor = floor
+    }
+    
+    func updateLidarName(to lidarName: String) {
+        self.lidarName = lidarName
     }
 }
 
@@ -153,7 +163,7 @@ extension SelectLocationVM {
     
     private func fetchAllPages(totalCount: Int) {
         // page 1이 마지막인지 확인
-        if totalCount < 15 {
+        if totalCount <= 15 {
             self.buildingList = fetchedList.sorted { $0.distance < $1.distance }
             self.fetching = false
         } else {

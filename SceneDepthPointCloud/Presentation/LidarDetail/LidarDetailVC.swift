@@ -17,12 +17,31 @@ final class LidarDetailVC: UIViewController {
     private let openWebButton = OpenWebButton()
     private var viewModel: LidarDetailVM?
     private var cancellables: Set<AnyCancellable> = []
+    private var deleteButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setImage(UIImage(systemName: "trash"), for: .normal)
+        button.setPreferredSymbolConfiguration(UIImage.SymbolConfiguration(pointSize: 18, weight: .medium, scale: .default), forImageIn: .normal)
+        button.tintColor = .systemRed
+        button.contentMode = .scaleAspectFit
+        return button
+    }()
+    private var progressLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
+        label.textColor = .white
+        label.textAlignment = .left
+        label.text = "0.0%"
+        return label
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Lidar Detail"
         self.configureUI()
         self.configureBuildingInfo()
+        self.configureLidarInfo()
         self.bindViewModel()
     }
     
@@ -40,6 +59,13 @@ final class LidarDetailVC: UIViewController {
 
 extension LidarDetailVC {
     private func configureUI() {
+        // delete button
+        self.deleteButton.addAction(UIAction(handler: { [weak self] _ in
+            self?.showAlertForDelete()
+        }), for: .touchUpInside)
+        let rightItem = UIBarButtonItem(customView: self.deleteButton)
+        self.navigationItem.setRightBarButton(rightItem, animated: true)
+        
         // buildingInfoView
         self.view.addSubview(self.buildingInfoView)
         NSLayoutConstraint.activate([
@@ -67,6 +93,14 @@ extension LidarDetailVC {
             self.lidarInfoView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             self.lidarInfoView.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
         ])
+        
+        self.view.addSubview(self.progressLabel)
+        NSLayoutConstraint.activate([
+            self.progressLabel.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor),
+            self.progressLabel.centerYAnchor.constraint(equalTo: self.lidarInfoView.topAnchor, constant: 0)
+        ])
+        
+        self.progressLabel.alpha = 0
         
         self.lidarInfoView.disappear()
         
@@ -105,6 +139,32 @@ extension LidarDetailVC {
         self.showWebView(url: url)
     }
     
+    private func configureLidarInfo() {
+        let tapGesture: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(tapLidarInfo(_:)))
+        self.lidarInfoView.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func tapLidarInfo(_ gesture: UITapGestureRecognizer) {
+        // showAlert
+        let alert = UIAlertController(title: "LiDAR 파일을 다운로드하시겠습니까?", message: "받고자 하는 파일 형식을 선택하세요", preferredStyle: .actionSheet)
+        let lidar = UIAlertAction(title: "PCD", style: .default) { [weak self] _ in
+            self?.viewModel?.downloadPCD()
+        }
+        let pcd = UIAlertAction(title: "PLY", style: .default) { [weak self] _ in
+            self?.viewModel?.downloadPLY()
+        }
+        let cancel = UIAlertAction(title: "취소", style: .cancel)
+        alert.addAction(lidar)
+        alert.addAction(pcd)
+        alert.addAction(cancel)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            alert.popoverPresentationController?.sourceView = self.lidarInfoView
+        }
+        
+        self.present(alert, animated: true)
+    }
+    
     private func showWebView(url: String) {
         guard let webViewVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: WebViewVC.identifier) as? WebViewVC else { return }
         
@@ -116,6 +176,10 @@ extension LidarDetailVC {
 extension LidarDetailVC {
     private func bindViewModel() {
         self.bindInfosDownloaded()
+        self.bindDeleteCompleted()
+        self.bindNetworkError()
+        self.bindDownloadedURL()
+        self.bindProgress()
     }
     
     private func bindInfosDownloaded() {
@@ -127,6 +191,58 @@ extension LidarDetailVC {
                 self?.showBuildingInfoView()
                 self?.showGpsInfoView()
                 self?.showLidarInfoView()
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindDeleteCompleted() {
+        self.viewModel?.$deleteCompleted
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] deleted in
+                guard let deleted = deleted else { return }
+                
+                if deleted {
+                    self?.showAlertAndExit()
+                } else {
+                    let message = self?.viewModel?.serverError ?? ""
+                    self?.showAlert(title: "Delete failed", text: message)
+                }
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindNetworkError() {
+        self.viewModel?.$networkError
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] error in
+                guard let error = error else { return }
+                self?.showAlert(title: error.title, text: error.text)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindDownloadedURL() {
+        self.viewModel?.$downloadedURL
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] url in
+                guard let url = url else { return }
+                
+                self?.shareFile(url: url)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindProgress() {
+        self.viewModel?.$downloadProgress
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] progress in
+                guard progress > 0 else {
+                    self?.progressLabel.alpha = 0
+                    return
+                }
+                
+                self?.progressLabel.alpha = 1
+                self?.progressLabel.text = "\(String(format: "%.1f", progress*100))%"
             })
             .store(in: &self.cancellables)
     }
@@ -153,6 +269,40 @@ extension LidarDetailVC {
         
         self.lidarInfoView.configure(info: lidarInfo)
         self.lidarInfoView.fadeIn()
+    }
+    
+    private func showAlertForDelete() {
+        let alert = UIAlertController(title: "LiDAR 파일을 삭제하시겠습니까?", message: "삭제 후 복원되지 않습니다.", preferredStyle: .alert)
+        let cancel = UIAlertAction(title: "취소", style: .default)
+        let delete = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            self?.viewModel?.deleteLidar()
+        }
+        alert.addAction(cancel)
+        alert.addAction(delete)
+        self.present(alert, animated: true)
+    }
+    
+    private func showAlertAndExit() {
+        let alert = UIAlertController(title: "삭제가 완료되었습니다", message: "", preferredStyle: .alert)
+        let ok = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            self?.navigationController?.popViewController(animated: true)
+        }
+        alert.addAction(ok)
+        self.present(alert, animated: true)
+    }
+    
+    private func shareFile(url: URL) {
+        let activityViewController = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            activityViewController.popoverPresentationController?.sourceView = self.lidarInfoView
+        }
+        
+        self.present(activityViewController, animated: true)
+        
+        activityViewController.completionWithItemsHandler = { (activityType: UIActivity.ActivityType?, completed: Bool, arrayReturnedItems: [Any]?, error: Error?) in
+            self.viewModel?.removeDownloaded()
+        }
     }
 }
 

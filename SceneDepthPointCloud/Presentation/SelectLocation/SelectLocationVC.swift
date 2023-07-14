@@ -38,6 +38,8 @@ final class SelectLocationVC: UIViewController {
     private var collectionViewHeight: NSLayoutConstraint!
     /// 실내위치 설정 view
     private let indoorSettingView = IndoorSettingView()
+    /// Lidar 파일명 설정 view
+    private let lidarNameSettingView = LidarNameSettingView()
     /// 업로드될 데이터 표시 view
     private let settedInfoView = SettedInfoView()
     /// 선택 및 데이터 업로드 버튼
@@ -56,6 +58,7 @@ final class SelectLocationVC: UIViewController {
         self.configureBuildingListView()
         self.configureBuildingListDataSource()
         self.configureIndoorSettingView()
+        self.configureLidarNameSettingView()
         self.bindViewModel()
     }
 }
@@ -151,15 +154,23 @@ extension SelectLocationVC {
         // indoorSettingView
         self.view.addSubview(self.indoorSettingView)
         NSLayoutConstraint.activate([
-            self.indoorSettingView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 76+52),
+            self.indoorSettingView.topAnchor.constraint(equalTo: self.currentLocationLabel.bottomAnchor, constant: 76+32),
             self.indoorSettingView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.indoorSettingView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        ])
+        
+        // lidarNameSettingView
+        self.view.addSubview(self.lidarNameSettingView)
+        NSLayoutConstraint.activate([
+            self.lidarNameSettingView.topAnchor.constraint(equalTo: self.indoorSettingView.bottomAnchor, constant: 32),
+            self.lidarNameSettingView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            self.lidarNameSettingView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         ])
         
         // settedInfoView
         self.view.addSubview(self.settedInfoView)
         NSLayoutConstraint.activate([
-            self.settedInfoView.topAnchor.constraint(equalTo: self.indoorSettingView.bottomAnchor, constant: 52),
+            self.settedInfoView.topAnchor.constraint(equalTo: self.lidarNameSettingView.bottomAnchor, constant: 32),
             self.settedInfoView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             self.settedInfoView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
         ])
@@ -225,12 +236,19 @@ extension SelectLocationVC {
         self.indoorSettingView.alpha = 0
     }
     
+    /// lidarNameSettingView 화면을 표시할 초기화 함수
+    private func configureLidarNameSettingView() {
+        self.lidarNameSettingView.lidarNameField.delegate = self
+        self.lidarNameSettingView.alpha = 0
+    }
+    
     private func configureSettedInfoView() {
         guard let buildingInfo = self.viewModel?.buildingList.first,
               let floor = self.viewModel?.indoorFloor,
-              let lidarData = self.viewModel?.lidarData else { return }
+              let lidarData = self.viewModel?.lidarData,
+              let lidarName = self.viewModel?.lidarName else { return }
         
-        self.settedInfoView.configureInfos(buildingInfo: buildingInfo, floor: floor, lidarData: lidarData)
+        self.settedInfoView.configureInfos(buildingInfo: buildingInfo, floor: floor, lidarData: lidarData, lidarName: lidarName)
     }
 }
 
@@ -270,6 +288,15 @@ extension SelectLocationVC {
             self.viewModel?.setIndoorValue(to: floor)
         }
     }
+    
+    /// lidarNameSettingView textField 값 입력된 상태인지 확인하는 함수
+    private func checkLidarName() {
+        guard let lidarName = self.lidarNameSettingView.lidarNameField.text,
+              lidarName != "" else { return }
+        
+        self.viewModel?.updateLidarName(to: lidarName)
+        self.bottomButton.changeStatus(to: .settingChanged)
+    }
 }
 
 // MARK: Action
@@ -278,12 +305,13 @@ extension SelectLocationVC {
         // lidarData의 경우 MainVM의 값을 사용하므로 패스
         guard let locationData = self.viewModel?.locationData,
               let buildingInfo = self.viewModel?.buildingList.first,
-              let indoorFloor = self.viewModel?.indoorFloor else {
+              let indoorFloor = self.viewModel?.indoorFloor,
+              let lidarName = self.viewModel?.lidarName else {
             return
         }
         // SelectLocationVC 화면 닫은 후 데이터 넘기기
         self.dismiss(animated: true) { [weak self] in
-            self?.delegate?.uploadMeasuredData(location: locationData, buildingInfo: buildingInfo, floor: indoorFloor)
+            self?.delegate?.uploadMeasuredData(location: locationData, buildingInfo: buildingInfo, floor: indoorFloor, lidarName: lidarName)
         }
     }
 }
@@ -348,6 +376,10 @@ extension SelectLocationVC {
                     self?.collectionViewBottom.isActive = false
                     self?.collectionViewHeight.isActive = true
                     self?.indoorSettingView.fadeIn()
+                    self?.lidarNameSettingView.fadeOut()
+                    self?.bottomButton.changeStatus(to: .beforeSetting)
+                case .setLidarName:
+                    self?.lidarNameSettingView.fadeIn()
                     self?.settedInfoView.fadeOut()
                     self?.bottomButton.changeStatus(to: .beforeSetting)
                 case .done:
@@ -417,7 +449,12 @@ extension SelectLocationVC: UICollectionViewDelegate {
 extension SelectLocationVC: UITextFieldDelegate {
     /// keyboard의 done 액션 수신함수를 통해 키보드내림 구현한 함수
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        self.checkIndoorSetting()
+        if textField == self.indoorSettingView.floorField {
+            self.checkIndoorSetting()
+        } else {
+            self.checkLidarName()
+        }
+        
         self.view.endEditing(true)
         return true
     }

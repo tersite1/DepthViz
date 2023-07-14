@@ -19,6 +19,13 @@ struct NetworkURL {
     enum Server {
         static let lidars: String = Domain.server + "/lidars"
         static let buildings: String = Domain.server + "/buildings"
+        static func deleteLidar(collectId: String) -> String {
+            return lidars + "/\(collectId)" 
+        }
+        static let download: String = Domain.server + "/files/download"
+        static func downloadFile(fileId: String, isPLY: Bool) -> String {
+            return isPLY ? download + "/\(fileId)?format=ply" : download + "/\(fileId)"
+        }
     }
     
     enum Kakao {

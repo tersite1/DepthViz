@@ -35,6 +35,7 @@ final class ScansVC: UIViewController {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(false, animated: true)
         AppDelegate.shared.shouldSupportAllOrientation = true
+        self.viewModel?.reload()
     }
     
     override func viewWillDisappear(_ animated: Bool) {

@@ -42,6 +42,28 @@ struct Network {
             .resume()
     }
     
+    // MARK: pcd, ply 파일 다운로드 하는 함수
+    static func downloadData(url: String, fileName: String, handler: @escaping ((Double) -> Void), completion: @escaping (NetworkResult) -> Void) {
+        // 파일 경로 생성
+        let fileURL = DownloadStorage.url.appendingPathComponent(fileName)
+        // 파일 경로 지정 및 다운로드 옵션 설정 ( 이전 파일 삭제 , 디렉토리 생성 )
+        let destination: DownloadRequest.Destination = { _, _ in
+            return (fileURL, [.removePreviousFile, .createIntermediateDirectories])
+        }
+        // 다운로드 시작
+        AF.download(url, method: .get, to: destination)
+            .downloadProgress { progress in
+                handler(progress.fractionCompleted)
+        }.response { response in
+            print(response.request?.url)
+            if response.error != nil {
+                completion(NetworkResult(data: nil, status: .ERROR(500)))
+            } else{
+                completion(NetworkResult(data: nil, status: .SUCCESS))
+            }
+        }
+    }
+    
     /// statusCode 값과 Data 값으로 NetworkResult 반환
     static func configurationNetworkResult(_ response: AFDataResponse<Data?>) -> NetworkResult {
         print("Network Request: \(String(describing: response.request))")

@@ -58,13 +58,13 @@ final class SettedInfoView: UIView {
     }
     
     /// SettedInfoView 표시될 내용 설정 함수
-    func configureInfos(buildingInfo: BuildingOfMapInfo, floor: Int, lidarData: LiDARData) {
+    func configureInfos(buildingInfo: BuildingOfMapInfo, floor: Int, lidarData: LiDARData, lidarName: String) {
         let placeFloor = floor >= 0 ? "F\(floor)" : "B\(-floor)"
         let placeTitle = "\(buildingInfo.placeName) floor \(placeFloor)"
         self.placeCell.setText(title: placeTitle, text: buildingInfo.roadAddress)
         
         let lidarText = "\(self.numberFormatter.string(for: lidarData.pointCount)!) Points / \(lidarData.lidarFileSize)"
-        self.lidarCell.setText(title: lidarData.lidarFileName, text: lidarText)
+        self.lidarCell.setText(title: "\(lidarName).ply", text: lidarText)
     }
 }
 

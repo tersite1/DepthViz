@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// 서버에서 다운로드받은 PCD, 또는 PLY 데이터 저장위치
 final class DownloadStorage {
     private init() { }
     

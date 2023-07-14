@@ -188,7 +188,8 @@ extension MainVC {
         
         // scansButton
         self.scansButton.addAction(UIAction(handler: { [weak self] _ in
-            self?.moveToScansVC()
+//            self?.moveToScansVC()
+            self?.moveToScanStorageVC()
         }), for: .touchUpInside)
         self.view.addSubview(self.scansButton)
         NSLayoutConstraint.activate([
@@ -216,6 +217,9 @@ extension MainVC {
         self.bindUploadProgress()
         self.bindProcessWithStorageData()
         self.bindSaveToStorageSuccess()
+        
+        self.bindScanData()
+        self.bindSaveScanDataSuccess()
     }
     
     /// viewModel 의 mode 값 변화를 수신하기 위한 함수
@@ -325,6 +329,32 @@ extension MainVC {
             })
             .store(in: &self.cancellables)
     }
+    
+    private func bindScanData() {
+        self.viewModel?.$scanData
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] scanData in
+                guard scanData != nil else { return }
+                
+                self?.showAlertWithFilenameInput()
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindSaveScanDataSuccess() {
+        self.viewModel?.$saveScanDataSuccess
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] success in
+                guard let success = success else { return }
+                
+                if success == false {
+                    self?.showAlert(title: "ScanData 저장 실패", text: "")
+                } else {
+                    self?.showAlert(title: "ScanData 저장 성공", text: "")
+                }
+            })
+            .store(in: &self.cancellables)
+    }
 }
 
 // MARK: Action & Logic
@@ -338,6 +368,11 @@ extension MainVC {
     private func moveToScansVC() {
         let scansVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: ScansVC.identifier)
         self.navigationController?.pushViewController(scansVC, animated: true)
+    }
+    
+    private func moveToScanStorageVC() {
+        let scanStorageVC = ScanStorageVC()
+        self.navigationController?.pushViewController(scanStorageVC, animated: true)
     }
     
     /// mode값에 따라 현재 동작상태 표시내용 설정 함수
@@ -448,6 +483,20 @@ extension MainVC {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 exit(0)
             }
+        }
+        
+        alert.addAction(ok)
+        self.present(alert, animated: true)
+    }
+    
+    private func showAlertWithFilenameInput() {
+        let alert = UIAlertController(title: "저장될 파일명을 입력해주세요", message: "", preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.placeholder = "File Name"
+        }
+        let ok = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+            let fileName = alert.textFields?.first?.text
+            self?.viewModel?.saveScanData(fileName: fileName)
         }
         
         alert.addAction(ok)

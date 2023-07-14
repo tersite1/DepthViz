@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// 서버전송 오류로 인한 LiDAR 스캔파일 저장소
 final class LidarStorage {
     private init() { }
     

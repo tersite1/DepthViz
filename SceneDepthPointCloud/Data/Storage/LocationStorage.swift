@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// 서버전송 오류로 인한 위치정보 임시저장소
 final class LocationStorage {
     private init() { }
     

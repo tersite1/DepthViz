@@ -96,6 +96,7 @@ final class Renderer {
     public weak var delegate: TaskDelegate?
     
     @Published private(set) var lidarRawStringData: String?
+    private var clearing: Bool = false
     
     init(session: ARSession, metalDevice device: MTLDevice, renderDestination: RenderDestinationProvider) {
         self.session = session
@@ -165,6 +166,8 @@ final class Renderer {
     }
     
     func draw() {
+        guard self.clearing == false else { return }
+        
         guard let currentFrame = session.currentFrame,
               let renderDescriptor = renderDestination.currentRenderPassDescriptor,
               let commandBuffer = commandQueue.makeCommandBuffer(),
@@ -396,6 +399,7 @@ extension Renderer {
     /// 재측정을 위한 Renderer 초기화 함수
     /// https://github.com/ryanphilly/IOS-PointCloud 코드 참고
     func clearParticles() {
+        self.clearing = true
         self.currentPointIndex = 0
         self.currentPointCount = 0
         
@@ -408,5 +412,6 @@ extension Renderer {
             self.pointCloudUniformsBuffers.append(.init(device: device, count: 1, index: kPointCloudUniforms.rawValue))
         }
         self.particlesBuffer = .init(device: device, count: maxPoints, index: kParticleUniforms.rawValue)
+        self.clearing = false
     }
 }

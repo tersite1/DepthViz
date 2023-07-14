@@ -1,22 +1,26 @@
-# PROJECT
-iPhone LiDAR 센서를 통해 실내지도 구축을 위한 측정앱 및 뷰어 Tool
+# LiDAR-Map
+Apple 디바이스의 LiDAR 스캐너를 활용한 실내지도 구축용 측정 앱 및 뷰어 Tool
 ## 주요 기능
 - LiDAR & GPS 측정 및 전송
-- 2D 지도기반 LiDAR 데이터 3D 렌더링 및 표시
-- LiDAR 데이터 가공 및 Annotation
+- 3D지도 기반 PCD 데이터 렌더링 및 표시
 
 [Wiki 참고](https://github.com/FreeDeveloper97/point-cloud-with-lidar/wiki)
+
+## 프로젝트 소개 영상
+[![Video Label](https://img.youtube.com/vi/O4DZUXq9sqQ/0.jpg)](https://youtu.be/O4DZUXq9sqQ)
 
 ---
 
 # APPLICATION
 ## 개발 범위
-- **LiDAR 측정**
+- **LiDAR Scanner 로 Point Cloud Data 측정**
+- **Point Clout Data를 PLY 파일로 생성**
 - **GPS 측정**
-- **GPS 기반 주소검색 API 활용 건물정보 조회**
-- **LiDAR 및 데이터 전송**
-- **측정된 LiDAR 데이터 리스트 수신**
+- **Kakao Local API 활용 및 건물정보 조회**
+- **PLY 및 데이터 전송**
+- **LiDAR 데이터 리스트 수신**
 - **LiDAR 데이터 상세내역 표시**
+- **LiDAR 데이터 삭제, 다운로드 API 연동**
 - **2D 지도 및 LiDAR 데이터 측정위치 표시**
 
 ## 개발 환경
@@ -70,8 +74,13 @@ Or, Create Configuration Settings File Save AS: `env.xcconfig`
 // https://help.apple.com/xcode/#/dev745c5c974
 
 // 서버 URL
-BASE_URL = http:/$()/121.172.188.145:3000
+BASE_URL = http:/$()/111.222.333.444:3000
 
+// kakao auth
+KAKAO_AUTH = abcdeabcdeabcdeabcdeabcdeabcde
+
+// Web URL
+WEB_URL = http:/$()/111.222.333.444:3000
 ```
 
 5. Connect Apple Device (LiDAR capable device, such as the iPad Pro devices and iPhone Pro devices)

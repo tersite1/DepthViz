@@ -163,7 +163,7 @@ extension SelectLocationVM {
     
     private func fetchAllPages(totalCount: Int) {
         // page 1이 마지막인지 확인
-        if totalCount < 15 {
+        if totalCount <= 15 {
             self.buildingList = fetchedList.sorted { $0.distance < $1.distance }
             self.fetching = false
         } else {

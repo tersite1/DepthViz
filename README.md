@@ -126,7 +126,7 @@ To build DepthViz, follow these steps:
 
 ## Contact
 
-For inquiries, support, or feedback, please contact us at: itcouldbe0@yonsei.ac.kr
+For inquiries, support, or feedback, please contact us at: minsukjang@kaist.ac.kr
 
 ## Ownership
 

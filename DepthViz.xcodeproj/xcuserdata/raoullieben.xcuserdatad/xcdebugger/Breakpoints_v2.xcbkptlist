@@ -20,5 +20,97 @@
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "078C66A5-D468-4981-BF7A-A126B43743F3"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "DepthViz/Presentation/ScanStorageVC/ScanStorageVC.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "162"
+            endingLineNumber = "162"
+            landmarkName = "zipWithZIPFoundation(sourceURL:destinationURL:pointcloudFileURL:pointcloudFileName:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "078C66A5-D468-4981-BF7A-A126B43743F3 - 859f6205654ec9e0"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Point_Cloud.ScanStorageVC.zipWithZIPFoundation(sourceURL: Foundation.URL, destinationURL: Foundation.URL, pointcloudFileURL: Foundation.URL, pointcloudFileName: Swift.String) throws -&gt; ()"
+                  moduleName = "Point Cloud.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/raoullieben/development/DepthViz/DepthViz/Presentation/ScanStorageVC/ScanStorageVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "162"
+                  endingLineNumber = "162">
+               </Location>
+               <Location
+                  uuid = "078C66A5-D468-4981-BF7A-A126B43743F3 - 859f6205654ec9e0"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Point_Cloud.ScanStorageVC.zipWithZIPFoundation(sourceURL: Foundation.URL, destinationURL: Foundation.URL, pointcloudFileURL: Foundation.URL, pointcloudFileName: Swift.String) throws -&gt; ()"
+                  moduleName = "Point Cloud.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/raoullieben/development/DepthViz/DepthViz/Presentation/ScanStorageVC/ScanStorageVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "162"
+                  endingLineNumber = "162">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "1D6A78A1-BA2F-42F0-B017-6CBE749D21DE"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "DepthViz/Presentation/ScanStorageVC/ScanStorageVC.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "161"
+            endingLineNumber = "161"
+            landmarkName = "zipWithZIPFoundation(sourceURL:destinationURL:pointcloudFileURL:pointcloudFileName:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "1D6A78A1-BA2F-42F0-B017-6CBE749D21DE - 859f6205654ec9c3"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Point_Cloud.ScanStorageVC.zipWithZIPFoundation(sourceURL: Foundation.URL, destinationURL: Foundation.URL, pointcloudFileURL: Foundation.URL, pointcloudFileName: Swift.String) throws -&gt; ()"
+                  moduleName = "Point Cloud.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/raoullieben/development/DepthViz/DepthViz/Presentation/ScanStorageVC/ScanStorageVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "161"
+                  endingLineNumber = "161">
+               </Location>
+               <Location
+                  uuid = "1D6A78A1-BA2F-42F0-B017-6CBE749D21DE - 859f6205654ec9c3"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Point_Cloud.ScanStorageVC.zipWithZIPFoundation(sourceURL: Foundation.URL, destinationURL: Foundation.URL, pointcloudFileURL: Foundation.URL, pointcloudFileName: Swift.String) throws -&gt; ()"
+                  moduleName = "Point Cloud.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/raoullieben/development/DepthViz/DepthViz/Presentation/ScanStorageVC/ScanStorageVC.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "161"
+                  endingLineNumber = "161">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
    </Breakpoints>
 </Bucket>

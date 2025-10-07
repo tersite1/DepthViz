@@ -3,11 +3,14 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		126440172E95491C0068DB41 /* AccumulatedFrameData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126440162E95491C0068DB41 /* AccumulatedFrameData.swift */; };
+		1264401A2E954E050068DB41 /* FrameGalleryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126440192E954E050068DB41 /* FrameGalleryVC.swift */; };
+		1264401B2E954E050068DB41 /* FrameDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126440182E954E050068DB41 /* FrameDetailVC.swift */; };
+		126440202E955E5F0068DB41 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1264401F2E955E5F0068DB41 /* ZIPFoundation */; };
 		66B1C0172C22B9E5003CDAD8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */; };
 		870959442A24573700021125 /* LidarStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870959432A24573700021125 /* LidarStorage.swift */; };
 		871356C62A0AA5C50005DE8C /* Double+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C52A0AA5C50005DE8C /* Double+Extension.swift */; };
@@ -52,6 +55,10 @@
 
 /* Begin PBXFileReference section */
 		126440162E95491C0068DB41 /* AccumulatedFrameData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccumulatedFrameData.swift; sourceTree = "<group>"; };
+		126440182E954E050068DB41 /* FrameDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameDetailVC.swift; sourceTree = "<group>"; };
+		126440192E954E050068DB41 /* FrameGalleryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameGalleryVC.swift; sourceTree = "<group>"; };
+		1264401C2E9558FC0068DB41 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/Main.storyboard; sourceTree = "<group>"; };
+		1264401D2E9558FC0068DB41 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		870959432A24573700021125 /* LidarStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarStorage.swift; sourceTree = "<group>"; };
 		871356C52A0AA5C50005DE8C /* Double+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+Extension.swift"; sourceTree = "<group>"; };
@@ -90,8 +97,6 @@
 		E73DD13424636FEF00D77039 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		E73DD13524636FEF00D77039 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
 		E73DD13724636FEF00D77039 /* MainVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVC.swift; sourceTree = "<group>"; };
-		E73DD13A24636FEF00D77039 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		E73DD13F24636FF100D77039 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E73DD14124636FF100D77039 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E73DD14224636FF100D77039 /* DepthViz-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DepthViz-Bridging-Header.h"; sourceTree = "<group>"; };
 		E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalBuffer.swift; sourceTree = "<group>"; };
@@ -104,6 +109,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				126440202E955E5F0068DB41 /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,6 +257,8 @@
 		DBFC96312C1C1744009B5AEC /* ScanViewer */ = {
 			isa = PBXGroup;
 			children = (
+				126440182E954E050068DB41 /* FrameDetailVC.swift */,
+				126440192E954E050068DB41 /* FrameGalleryVC.swift */,
 				DBFC96322C1C1765009B5AEC /* ScanViewerVC.swift */,
 			);
 			path = ScanViewer;
@@ -307,6 +315,7 @@
 			);
 			name = DepthViz;
 			packageProductDependencies = (
+				1264401F2E955E5F0068DB41 /* ZIPFoundation */,
 			);
 			productName = SceneDepthDemo;
 			productReference = E73DD12D24636FEF00D77039 /* Point Cloud.app */;
@@ -333,10 +342,10 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
-				Base,
 			);
 			mainGroup = E73DD12424636FEF00D77039;
 			packageReferences = (
+				1264401E2E955E5F0068DB41 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			productRefGroup = E73DD12E24636FEF00D77039 /* Products */;
 			projectDirPath = "";
@@ -376,6 +385,8 @@
 				87F6F0A12A61812F00CE6679 /* ScanInfoRowEventListener.swift in Sources */,
 				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,
 				87295C992A038DD50067392D /* ScansVC.swift in Sources */,
+				1264401A2E954E050068DB41 /* FrameGalleryVC.swift in Sources */,
+				1264401B2E954E050068DB41 /* FrameDetailVC.swift in Sources */,
 				87FA5D732A35C4D800E04B4D /* DownloadStorage.swift in Sources */,
 				87D842AE2A611CF600032711 /* ScanStorage.swift in Sources */,
 				87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */,
@@ -412,7 +423,7 @@
 		E73DD13924636FEF00D77039 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E73DD13A24636FEF00D77039 /* Base */,
+				1264401C2E9558FC0068DB41 /* en */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -420,7 +431,7 @@
 		E73DD13E24636FF100D77039 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				E73DD13F24636FF100D77039 /* Base */,
+				1264401D2E9558FC0068DB41 /* en */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -630,6 +641,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1264401E2E955E5F0068DB41 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.20;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1264401F2E955E5F0068DB41 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1264401E2E955E5F0068DB41 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E73DD12524636FEF00D77039 /* Project object */;
 }

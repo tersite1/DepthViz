@@ -39,4 +39,21 @@ struct AccumulatedFrameData: Codable {
     static func metadataFileName(for index: Int) -> String {
         "frame_\(index).json"
     }
+
+    /// Saves the image and metadata to the specified directory.
+    /// - Parameter directory: The directory URL where files will be saved.
+    /// - Throws: An error if writing fails.
+    func save(to directory: URL) throws {
+        // Save image
+        let imageURL = directory.appendingPathComponent(Self.imageFileName(for: index))
+        try capturedImagePNGData.write(to: imageURL)
+
+        // Save metadata (excluding image data)
+        let metadata = metadataRecord()
+        let metadataURL = directory.appendingPathComponent(Self.metadataFileName(for: index))
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        let metadataData = try encoder.encode(metadata)
+        try metadataData.write(to: metadataURL)
+    }
 }

@@ -322,7 +322,7 @@ extension MainVC {
                 guard let success = success else { return }
                 
                 if success == false {
-                    self?.showAlert(title: "임시데이터 저장 실패", text: "")
+                    self?.showAlert(title: "Temporary Data Save Failed", text: "")
                 } else {
                     self?.showAlertAndTerminate()
                 }
@@ -348,9 +348,9 @@ extension MainVC {
                 guard let success = success else { return }
                 
                 if success == false {
-                    self?.showAlert(title: "ScanData 저장 실패", text: "")
+                    self?.showAlert(title: "ScanData Save Failed", text: "")
                 } else {
-                    self?.showAlert(title: "ScanData 저장 성공", text: "")
+                    self?.showAlert(title: "ScanData Save Successful", text: "")
                 }
             })
             .store(in: &self.cancellables)
@@ -439,39 +439,36 @@ extension MainVC: CLLocationManagerDelegate {
 // MARK: Present
 extension MainVC {
     
-    /// 앱의 임시데이터로 복구할지 여부를 띄우는 함수
+    /// Show alert to ask if user wants to restore temporary data
     private func showAlertWithStorageStart() {
-        let alert = UIAlertController(title: "임시저장된 데이터가 존재합니다. 복구하시겠습니까?", message: "복구하지 않는 경우 해당데이터는 제거됩니다.", preferredStyle: .alert)
-        
+        let alert = UIAlertController(title: "Temporary data exists. Would you like to restore it?", message: "If you do not restore, the data will be deleted.", preferredStyle: .alert)
         self.present(alert, animated: true)
     }
     
-    /// 업로드 실패 및 메모리 부족으로 인해 임시데이터가 저장된 후 앱 종료메세지를 띄우는 함수
+    /// Show alert and terminate app after upload failure or low memory
     private func showAlertAndTerminate() {
         self.statusLabel.changeText(to: .removed)
         let title = self.viewModel?.mode == .recordingTerminate ? "Low Memory Warning" : "Upload Failed (\(self.viewModel?.networkErrorMessage ?? ""))"
-        let alert = UIAlertController(title: title, message: "앱을 재 실행 하시기 바랍니다.", preferredStyle: .alert)
-        let ok = UIAlertAction(title: "확인", style: .default) { _ in
+        let alert = UIAlertController(title: title, message: "Please restart the app.", preferredStyle: .alert)
+        let ok = UIAlertAction(title: "OK", style: .default) { _ in
             UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 exit(0)
             }
         }
-        
         alert.addAction(ok)
         self.present(alert, animated: true)
     }
     
     private func showAlertWithFilenameInput() {
-        let alert = UIAlertController(title: "저장될 파일명을 입력해주세요", message: "", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Enter a file name to save", message: "", preferredStyle: .alert)
         alert.addTextField { textField in
             textField.placeholder = "File Name"
         }
-        let ok = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+        let ok = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
             let fileName = alert.textFields?.first?.text
             self?.viewModel?.saveScanData(fileName: fileName)
         }
-        
         alert.addAction(ok)
         self.present(alert, animated: true)
     }

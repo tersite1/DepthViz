@@ -10,6 +10,12 @@ import UIKit
 import SceneKit
 
 class ScanViewerVC: UIViewController, UIGestureRecognizerDelegate, SCNSceneRendererDelegate {
+    private let frameGalleryButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Show Frames", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
 
     @IBOutlet weak var sceneView: SCNView!
     static let identifier = "ScanViewerVC"
@@ -59,6 +65,16 @@ class ScanViewerVC: UIViewController, UIGestureRecognizerDelegate, SCNSceneRende
         if let fileURL = fileURL {
             show3DModel(fileURL: fileURL)
         }
+
+        // Add frame gallery button
+        view.addSubview(frameGalleryButton)
+        NSLayoutConstraint.activate([
+            frameGalleryButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            frameGalleryButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            frameGalleryButton.widthAnchor.constraint(equalToConstant: 120),
+            frameGalleryButton.heightAnchor.constraint(equalToConstant: 44)
+        ])
+        frameGalleryButton.addTarget(self, action: #selector(openFrameGallery), for: .touchUpInside)
         
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureRecognized(gesture:)) )
         panGesture.delegate = self
@@ -72,6 +88,11 @@ class ScanViewerVC: UIViewController, UIGestureRecognizerDelegate, SCNSceneRende
         doubleTapGesture.delegate = self
         doubleTapGesture.numberOfTapsRequired = 2
         sceneView.addGestureRecognizer(doubleTapGesture)
+    }
+
+    @objc private func openFrameGallery() {
+        let galleryVC = FrameGalleryVC()
+        navigationController?.pushViewController(galleryVC, animated: true)
     }
     
     func show3DModel(fileURL: URL) {

@@ -80,7 +80,7 @@ final class Renderer {
     private lazy var cameraResolution = Float2(Float(sampleFrame.camera.imageResolution.width), Float(sampleFrame.camera.imageResolution.height))
     private lazy var lastCameraTransform = sampleFrame.camera.transform
     
-    // threshHold 값을 low로 설정 (반사율이 낮은 물질도 잘 표시되도록 설정)
+    // Set threshold to low (to display materials with low reflectivity more clearly)
     var confidenceThreshold = 0 {
         didSet {
             // apply the change for the shader
@@ -103,7 +103,7 @@ final class Renderer {
         self.session = session
         self.device = device
         self.renderDestination = renderDestination
-        // MTLibrary를 생성
+    // Create Metal library
         self.library = device.makeDefaultLibrary()!
         self.commandQueue = device.makeCommandQueue()!
         
@@ -240,6 +240,24 @@ final class Renderer {
         currentPointIndex = (currentPointIndex + gridPointsBuffer.count) % maxPoints
         currentPointCount = min(currentPointCount + gridPointsBuffer.count, maxPoints)
         lastCameraTransform = frame.camera.transform
+
+        // --- Save AccumulatedFrameData for this frame ---
+        if let cgImage = CIContext().createCGImage(CIImage(cvPixelBuffer: frame.capturedImage), from: CGRect(x: 0, y: 0, width: CVPixelBufferGetWidth(frame.capturedImage), height: CVPixelBufferGetHeight(frame.capturedImage))),
+           let uiImage = UIImage(cgImage: cgImage).pngData() {
+            let accumulatedFrame = AccumulatedFrameData(
+                index: currentPointIndex,
+                timestamp: frame.timestamp,
+                cameraPose: frame.camera.transform,
+                cameraIntrinsics: frame.camera.intrinsics,
+                viewMatrix: frame.camera.viewMatrix(for: orientation),
+                projectionMatrix: frame.camera.projectionMatrix(for: orientation, viewportSize: viewportSize, zNear: 0.001, zFar: 0),
+                capturedImagePNGData: uiImage
+            )
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let saveDir = documentsURL.appendingPathComponent("AccumulatedFrames", isDirectory: true)
+            try? FileManager.default.createDirectory(at: saveDir, withIntermediateDirectories: true)
+            try? accumulatedFrame.save(to: saveDir)
+        }
     }
 }
 
@@ -397,8 +415,8 @@ extension Renderer {
 }
 
 extension Renderer {
-    /// 재측정을 위한 Renderer 초기화 함수
-    /// https://github.com/ryanphilly/IOS-PointCloud 코드 참고
+    /// Renderer reset function for re-measurement
+    /// See https://github.com/ryanphilly/IOS-PointCloud for reference
     func clearParticles() {
         self.clearing = true
         self.currentPointIndex = 0

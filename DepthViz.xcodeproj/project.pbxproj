@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		126440172E95491C0068DB41 /* AccumulatedFrameData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 126440162E95491C0068DB41 /* AccumulatedFrameData.swift */; };
 		66B1C0172C22B9E5003CDAD8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */; };
 		870959442A24573700021125 /* LidarStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870959432A24573700021125 /* LidarStorage.swift */; };
 		871356C62A0AA5C50005DE8C /* Double+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C52A0AA5C50005DE8C /* Double+Extension.swift */; };
@@ -50,6 +51,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		126440162E95491C0068DB41 /* AccumulatedFrameData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccumulatedFrameData.swift; sourceTree = "<group>"; };
 		66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		870959432A24573700021125 /* LidarStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarStorage.swift; sourceTree = "<group>"; };
 		871356C52A0AA5C50005DE8C /* Double+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+Extension.swift"; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 		87FDBC1C29EEA52100D90D02 /* Entity */ = {
 			isa = PBXGroup;
 			children = (
+				126440162E95491C0068DB41 /* AccumulatedFrameData.swift */,
 				87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */,
 				87D842AF2A611F0000032711 /* ScanData.swift */,
 				87D842B52A61353000032711 /* ScanInfo.swift */,
@@ -386,6 +389,7 @@
 				87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */,
 				87F6F0992A613F8900CE6679 /* ScanStorageVC.swift in Sources */,
 				870959442A24573700021125 /* LidarStorage.swift in Sources */,
+				126440172E95491C0068DB41 /* AccumulatedFrameData.swift in Sources */,
 				87D842B42A6120BD00032711 /* Data+Extension.swift in Sources */,
 				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,
 				8793524F29B9D8F200D6A079 /* Utils.swift in Sources */,
@@ -550,7 +554,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 28;
-				DEVELOPMENT_TEAM = D9WJV9698J;
+				DEVELOPMENT_TEAM = G4MH6C6SWP;
 				INFOPLIST_FILE = DepthViz/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DeptgViz;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -560,7 +564,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = DepthViz.;
+				PRODUCT_BUNDLE_IDENTIFIER = DepthViz;
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -581,7 +585,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 28;
-				DEVELOPMENT_TEAM = D9WJV9698J;
+				DEVELOPMENT_TEAM = G4MH6C6SWP;
 				INFOPLIST_FILE = DepthViz/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DeptgViz;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -591,7 +595,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = DepthViz.;
+				PRODUCT_BUNDLE_IDENTIFIER = DepthViz;
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;

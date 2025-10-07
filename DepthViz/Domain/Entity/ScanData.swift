@@ -10,15 +10,18 @@
 import Foundation
 
 /// ScanStorage에 저장되는 스캔된 Point Cloud Data 정보
+
+import simd
+
 struct ScanData: Codable {
     let date: Date
     var fileName: String
     let lidarData: Data
     let fileSize: String
     let points: Int
-    
-    
-    init(rawStringData: String, pointCount: Int) {
+    var frames: [AccumulatedFrameData]? // Optional array of frame info
+
+    init(rawStringData: String, pointCount: Int, frames: [AccumulatedFrameData]? = nil) {
         let now = Date()
         self.date = now
         self.fileName = "\(now.yyyyMMddHHmmss).ply"
@@ -26,19 +29,20 @@ struct ScanData: Codable {
             self.lidarData = Data()
             self.fileSize = "0 MB"
             self.points = 0
+            self.frames = frames
             return
         }
-        
         self.lidarData = plyData
         self.fileSize = plyData.fileSize
         self.points = pointCount
+        self.frames = frames
     }
-    
+
     // MARK: Filename 변경
     mutating func rename(to name: String) {
         self.fileName = "\(name).ply"
     }
-    
+
     var info: ScanInfo {
         return ScanInfo(id: self.fileName, date: self.date, fileName: self.fileName, fileSize: self.fileSize, points: self.points)
     }

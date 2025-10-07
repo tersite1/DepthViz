@@ -9,7 +9,7 @@
 
 import Foundation
 
-/// 스캔된 Point Cloud Data 저장소
+/// Storage for scanned Point Cloud Data
 final class ScanStorage: ObservableObject {
     static let shared = ScanStorage()
     
@@ -62,26 +62,43 @@ final class ScanStorage: ObservableObject {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         encoder.dateEncodingStrategy = .iso8601
-        
+
         do {
             if FileManager.default.fileExists(atPath: infosRoot.path) == false {
                 createDirectory()
             }
-            
+
             let infoData = try encoder.encode(obj.info)
-            //동일이름의 파일이 있는 경우 삭제
+            // If a file with the same name exists, delete it
             if FileManager.default.fileExists(atPath: infoUrl.path) {
                 try FileManager.default.removeItem(at: infoUrl)
             }
-            //파일을 저장
+            // Save the file
             FileManager.default.createFile(atPath: infoUrl.path, contents: infoData, attributes: nil)
-            
+
             if FileManager.default.fileExists(atPath: fileUrl.path) {
                 try FileManager.default.removeItem(at: fileUrl)
             }
-            
+
             FileManager.default.createFile(atPath: fileUrl.path, contents: obj.lidarData)
-            
+
+            // Save frame info if present
+            if let frames = obj.frames {
+                let frameDir = filesRoot.appendingPathComponent("\(obj.fileName)_frames", isDirectory: true)
+                if !FileManager.default.fileExists(atPath: frameDir.path) {
+                    try FileManager.default.createDirectory(at: frameDir, withIntermediateDirectories: true)
+                }
+                for frame in frames {
+                    // Save metadata JSON
+                    let metaFile = frameDir.appendingPathComponent(AccumulatedFrameData.metadataFileName(for: frame.index))
+                    let metaData = try encoder.encode(frame.metadataRecord())
+                    FileManager.default.createFile(atPath: metaFile.path, contents: metaData, attributes: nil)
+                    // Save image PNG
+                    let imageFile = frameDir.appendingPathComponent(AccumulatedFrameData.imageFileName(for: frame.index))
+                    FileManager.default.createFile(atPath: imageFile.path, contents: frame.capturedImagePNGData, attributes: nil)
+                }
+            }
+
             self.updateInfos()
             return true
         } catch let error {

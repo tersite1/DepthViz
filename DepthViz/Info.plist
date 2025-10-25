@@ -43,9 +43,9 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>The camera is used for augmenting reality.</string>
+	<string>3D 스캔을 위해 카메라와 LiDAR 센서 접근 권한이 필요합니다.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>LiDAR 센서 사용을 위한 권한이 필요합니다.</string>
+	<string>스캔 데이터에 위치 정보를 저장하기 위해 위치 권한이 필요합니다.</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-2516597008794244~5862958546</string>
 	<key>SKAdNetworkItems</key>

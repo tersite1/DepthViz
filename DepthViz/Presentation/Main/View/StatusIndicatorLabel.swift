@@ -12,13 +12,13 @@ import UIKit
 
 final class StatusIndicatorLabel: UILabel {
     enum TextType: String {
-        case readyForRecording = "Tap to start recording\n↓"
-        case recording = "Recording..."
-        case loading = "Loading..."
-        case uploading = "Uploading..."
+        case readyForRecording = "녹화를 시작하려면 탭하세요\n↓"
+        case recording = "녹화 중..."
+        case loading = "처리 중..."
+        case uploading = "업로드 중..."
         case removed = ""
-        case needGPS = "Inactivate GPS"
-        case cantRecord = "Unsupported Device"
+        case needGPS = "위치 권한이 필요합니다\n설정에서 위치 권한을 허용해주세요"
+        case cantRecord = "LiDAR를 지원하지 않는 기기입니다\niPhone 12 Pro 이상이 필요합니다"
     }
     
     convenience init() {
@@ -40,6 +40,6 @@ final class StatusIndicatorLabel: UILabel {
     }
     
     func uploadProgress(to progress: Double) {
-        self.text = "Uploading\n\(String(format: "%.1f", progress*100))%"
+        self.text = "업로드 중\n\(String(format: "%.1f", progress*100))%"
     }
 }

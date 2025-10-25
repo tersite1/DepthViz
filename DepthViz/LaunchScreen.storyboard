@@ -16,7 +16,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Powered by" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DxR-Mr-D6T">
-                                <rect key="frame" x="121" y="639" width="150" height="237"/>
+                                <rect key="frame" x="121" y="601" width="150" height="237"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="6"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -24,11 +24,11 @@
                                 <size key="shadowOffset" width="0.0" height="10"/>
                             </label>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" fixedFrame="YES" image="logo 5" translatesAutoresizingMaskIntoConstraints="NO" id="S6y-xw-5yu">
-                                <rect key="frame" x="144" y="724" width="104" height="140"/>
+                                <rect key="frame" x="144" y="698" width="104" height="140"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" fixedFrame="YES" image="building4.png" translatesAutoresizingMaskIntoConstraints="NO" id="wg2-ME-QtK">
-                                <rect key="frame" x="38" y="353" width="317" height="177"/>
+                                <rect key="frame" x="38" y="306" width="317" height="177"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
                         </subviews>

@@ -25,8 +25,20 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
     private let pointCloudCountView = PointCloudCountView()
     /// 측정이력창 표시 버튼
     private let scansButton = ScansButton()
-    /// cpm 표시 버튼
-    private let cpmButton = CPMButton()
+    /// 보상형 광고 버튼
+    private let rewardAdButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("🎁", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 32)
+        button.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.9)
+        button.layer.cornerRadius = 30
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.3
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowRadius = 4
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
     /// Point Cloud 표시를 위한 Session
     private let session = ARSession()
     /// gps 측정을 위한 객체
@@ -44,25 +56,50 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
         self.configureLocationManager()
         self.bindViewModel()
         
-        // AdMob 배너 광고 추가 (SDK가 설치된 경우에만)
-        // TODO: AdMob API key를 등록한 후 주석 해제하세요
-        /*
+        // AdMob 배너 광고 추가 (최하단)
         #if canImport(GoogleMobileAds)
         self.setupAdMobBanner()
         #endif
-        */
     }
     
     #if canImport(GoogleMobileAds)
-    /// AdMob 배너 광고 설정
+    /// AdMob 배너 광고 설정 (최하단)
     private func setupAdMobBanner() {
-        // AdMobManager를 통해 배너 광고 추가
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self = self else { return }
             AdMobManager.shared.addBannerToViewController(self, at: .bottom)
         }
     }
     #endif
+    
+    /// 보상형 광고 표시
+    func showRewardedAd() {
+        #if canImport(GoogleMobileAds)
+        RewardedAdManager.shared.showAdIfAvailable(from: self) { [weak self] success, rewardAmount in
+            if success {
+                print("🎁 보상 지급: \(rewardAmount)")
+                // 보상 처리 (예: 포인트 지급, 기능 해제 등)
+                self?.showRewardAlert(amount: rewardAmount)
+            } else {
+                print("⚠️ 광고를 표시할 수 없습니다.")
+                self?.showAlert(title: "광고 준비중", text: "잠시 후 다시 시도해주세요.")
+            }
+        }
+        #else
+        print("⚠️ GoogleMobileAds not available")
+        #endif
+    }
+    
+    /// 보상 알림 표시
+    private func showRewardAlert(amount: Int) {
+        let alert = UIAlertController(
+            title: "🎉 보상 획득!",
+            message: "광고 시청 완료! \(amount) 포인트를 획득했습니다.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        self.present(alert, animated: true)
+    }
     
     /// MainVC 화면 진입시 필요한 설정들
     override func viewWillAppear(_ animated: Bool) {
@@ -86,17 +123,6 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
         self.viewModel?.terminateRecording()
     }
     
-    // CPM 계산 뷰로 이동하는 함수 추가
-    // MainVC.swift 안에 있는 moveToCPMCalculation 함수
-    func moveToCPMCalculation() {
-        let cpmView = MContentView()  // SwiftUI View
-        
-        // UIHostingController 생성과 함께 modelContainer 전달
-        let cpmViewController = UIHostingController(rootView: cpmView
-            .modelContainer(for: [Activity.self]))  // CPM View에 modelContainer 전달
-        
-        self.navigationController?.pushViewController(cpmViewController, animated: true)
-    }
 }
 
 // MARK: HomeBar & StatusBar Hidden
@@ -229,16 +255,15 @@ extension MainVC {
             self.scansButton.centerYAnchor.constraint(equalTo: self.recordingButton.centerYAnchor)
         ])
         
-        // cpmButton (New button added to the right of scansButton)
-        self.cpmButton.addAction(UIAction(handler: { [weak self] _ in
-                    self?.moveToCPMCalculation()
-                }), for: .touchUpInside)
-        self.view.addSubview(self.cpmButton)
+        // rewardAdButton (보상형 광고 버튼 - 우측 상단)
+        self.rewardAdButton.addTarget(self, action: #selector(tapRewardAdButton), for: .touchUpInside)
+        self.view.addSubview(self.rewardAdButton)
         NSLayoutConstraint.activate([
-            // CPM Button Constraints
-            self.cpmButton.leadingAnchor.constraint(equalTo: self.scansButton.trailingAnchor, constant: 212),
-            self.cpmButton.centerYAnchor.constraint(equalTo: self.recordingButton.centerYAnchor)
-                    ])
+            self.rewardAdButton.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -20),
+            self.rewardAdButton.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            self.rewardAdButton.widthAnchor.constraint(equalToConstant: 60),
+            self.rewardAdButton.heightAnchor.constraint(equalToConstant: 60)
+        ])
 }
      
     
@@ -289,18 +314,14 @@ extension MainVC {
                     self?.locationManager.startUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .recording)
                     self?.scansButton.fadeOut()
-                    self?.cpmButton.disappear()
                 case .loading:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .loading)
                     self?.scansButton.disappear()
-                    /// cpm 표시 버튼
-                    self?.cpmButton.disappear()
                 case .cantRecord:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
                     self?.scansButton.fadeIn()
-                    self?.cpmButton.disappear()
                 case .cantGetGPS:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
@@ -427,6 +448,11 @@ extension MainVC {
     /// RecordingButton Tab 액션
     @objc private func tapRecordingButton(_ sender: UIButton) {
         self.viewModel?.changeMode()
+    }
+    
+    /// 보상형 광고 버튼 Tab 액션
+    @objc private func tapRewardAdButton(_ sender: UIButton) {
+        self.showRewardedAd()
     }
     
     /// ScansButton Tab 액션

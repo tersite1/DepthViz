@@ -13,15 +13,12 @@ final class AdMobManager: NSObject {
     static let shared = AdMobManager()
     
     // MARK: - 광고 ID 설정
-    // ⚠️ 실제 앱스토어 배포 시 본인의 AdMob ID로 교체해야 합니다
     #if DEBUG
     // 테스트용 광고 ID (개발 중에 사용)
     private let bannerAdUnitID = "ca-app-pub-3940256099942544/2934735716" // Google 테스트 배너 ID
     #else
     // 실제 광고 ID (배포용)
-    // TODO: 앱스토어 출시 전에 본인의 AdMob 계정에서 발급받은 광고 단위 ID로 교체하세요
-    // 예: "ca-app-pub-1234567890123456/9876543210"
-    private let bannerAdUnitID = "YOUR_ACTUAL_BANNER_AD_UNIT_ID"
+    private let bannerAdUnitID = "ca-app-pub-2516597008794244/6421361743"
     #endif
     
     private var bannerView: GADBannerView?

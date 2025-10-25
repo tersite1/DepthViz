@@ -24,13 +24,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 앱 실행 횟수 증가
         incrementLaunchCount()
         
-        // AdMob 초기화 (SDK가 설치된 경우에만)
-        // TODO: AdMob API key를 등록한 후 주석 해제하세요
-        /*
+        // AdMob 초기화
         #if canImport(GoogleMobileAds)
         initializeAdMob()
         #endif
-        */
         
         return true
     }
@@ -52,9 +49,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("  \(key): \(value.state.rawValue) - \(value.description)")
             }
             
-            // 앱 오프닝 광고 미리 로드
+            // 보상형 광고 미리 로드
             Task {
-                await AppOpenAdManager.shared.loadAd()
+                await RewardedAdManager.shared.loadAd()
             }
         }
     }

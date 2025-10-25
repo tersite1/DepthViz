@@ -44,6 +44,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidBecomeActive(_ scene: UIScene) {
         // 앱이 포그라운드로 올 때 앱 오프닝 광고 표시
+        // TODO: AdMob API key를 등록한 후 주석 해제하세요
+        /*
         #if canImport(GoogleMobileAds)
         // 콜드 스타트 시 한 번만 표시하도록 제한
         if !hasShownAppOpenAd {
@@ -51,11 +53,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             AppOpenAdManager.shared.showAdIfAvailable()
         }
         #endif
+        */
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
         // Called when the scene will move from an active state to an inactive state.
         // This may occur due to temporary interruptions (ex. an incoming phone call).
+        
+        // 앱이 백그라운드로 갈 때 다음 포그라운드 진입 시 광고 표시 준비
+        hasShownAppOpenAd = false
     }
 
     func sceneWillEnterForeground(_ scene: UIScene) {
@@ -67,11 +73,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Called as the scene transitions from the foreground to the background.
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
-    }
-    
-    func sceneWillResignActive(_ scene: UIScene) {
-        // 앱이 백그라운드로 갈 때 다음 포그라운드 진입 시 광고 표시 준비
-        hasShownAppOpenAd = false
     }
 }
 

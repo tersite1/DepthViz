@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "contents.xcworkspacedata",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

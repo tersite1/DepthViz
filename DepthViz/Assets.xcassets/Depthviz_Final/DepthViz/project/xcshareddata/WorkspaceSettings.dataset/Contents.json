@@ -1,0 +1,12 @@
+{
+  "data" : [
+    {
+      "filename" : "WorkspaceSettings.xcsettings",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

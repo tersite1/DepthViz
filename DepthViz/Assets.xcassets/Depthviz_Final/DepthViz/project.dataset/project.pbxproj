@@ -1,0 +1,632 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		66B1C0172C22B9E5003CDAD8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */; };
+		870959442A24573700021125 /* LidarStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870959432A24573700021125 /* LidarStorage.swift */; };
+		871356C62A0AA5C50005DE8C /* Double+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 871356C52A0AA5C50005DE8C /* Double+Extension.swift */; };
+		87295C942A0386B30067392D /* ScansButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C932A0386B30067392D /* ScansButton.swift */; };
+		87295C962A038BAD0067392D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C952A038BAD0067392D /* SceneDelegate.swift */; };
+		87295C992A038DD50067392D /* ScansVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C982A038DD50067392D /* ScansVC.swift */; };
+		87295C9C2A03AA550067392D /* ReloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C9B2A03AA550067392D /* ReloadButton.swift */; };
+		87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87295C9D2A03ACF40067392D /* ScansVM.swift */; };
+		8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */; };
+		877F534B29F69D1600A0F931 /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534A29F69D1600A0F931 /* UIView+Extension.swift */; };
+		877F534D29F7C46600A0F931 /* Collection+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877F534C29F7C46600A0F931 /* Collection+Extension.swift */; };
+		8793524F29B9D8F200D6A079 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8793524E29B9D8F200D6A079 /* Utils.swift */; };
+		87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86629D1946400881FFB /* UIViewController+Extension.swift */; };
+		87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86B29D290E900881FFB /* RecordingButton.swift */; };
+		87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */; };
+		87D842AE2A611CF600032711 /* ScanStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D842AD2A611CF600032711 /* ScanStorage.swift */; };
+		87D842B02A611F0000032711 /* ScanData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D842AF2A611F0000032711 /* ScanData.swift */; };
+		87D842B22A611F9B00032711 /* Date+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D842B12A611F9B00032711 /* Date+Extension.swift */; };
+		87D842B42A6120BD00032711 /* Data+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D842B32A6120BD00032711 /* Data+Extension.swift */; };
+		87D842B62A61353000032711 /* ScanInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87D842B52A61353000032711 /* ScanInfo.swift */; };
+		87E9B5222A08A9D200FF4A8D /* LidarProcessStatusLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87E9B5212A08A9D200FF4A8D /* LidarProcessStatusLabel.swift */; };
+		87F6F0992A613F8900CE6679 /* ScanStorageVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F6F0982A613F8900CE6679 /* ScanStorageVC.swift */; };
+		87F6F09B2A61780A00CE6679 /* ScanList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F6F09A2A61780A00CE6679 /* ScanList.swift */; };
+		87F6F09D2A61793600CE6679 /* ScanInfoRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F6F09C2A61793600CE6679 /* ScanInfoRow.swift */; };
+		87F6F09F2A617C8500CE6679 /* Int+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F6F09E2A617C8500CE6679 /* Int+Extension.swift */; };
+		87F6F0A12A61812F00CE6679 /* ScanInfoRowEventListener.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F6F0A02A61812F00CE6679 /* ScanInfoRowEventListener.swift */; };
+		87FA5D732A35C4D800E04B4D /* DownloadStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FA5D722A35C4D800E04B4D /* DownloadStorage.swift */; };
+		87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1A29EE270A00D90D02 /* MainVM.swift */; };
+		87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */; };
+		DB255B972C21EF8B00209FD8 /* launchicon2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DB255B962C21EF8B00209FD8 /* launchicon2x.png */; };
+		DBFC96332C1C1765009B5AEC /* ScanViewerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFC96322C1C1765009B5AEC /* ScanViewerVC.swift */; };
+		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
+		E73DD13324636FEF00D77039 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13224636FEF00D77039 /* Shaders.metal */; };
+		E73DD13624636FEF00D77039 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13524636FEF00D77039 /* Renderer.swift */; };
+		E73DD13824636FEF00D77039 /* MainVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13724636FEF00D77039 /* MainVC.swift */; };
+		E73DD13B24636FEF00D77039 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E73DD13924636FEF00D77039 /* Main.storyboard */; };
+		E73DD14024636FF100D77039 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E73DD13E24636FF100D77039 /* LaunchScreen.storyboard */; };
+		E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */; };
+		E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B7223C24809D1E002E43E8 /* Helpers.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		870959432A24573700021125 /* LidarStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarStorage.swift; sourceTree = "<group>"; };
+		871356C52A0AA5C50005DE8C /* Double+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Double+Extension.swift"; sourceTree = "<group>"; };
+		87295C932A0386B30067392D /* ScansButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansButton.swift; sourceTree = "<group>"; };
+		87295C952A038BAD0067392D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		87295C982A038DD50067392D /* ScansVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansVC.swift; sourceTree = "<group>"; };
+		87295C9B2A03AA550067392D /* ReloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReloadButton.swift; sourceTree = "<group>"; };
+		87295C9D2A03ACF40067392D /* ScansVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScansVM.swift; sourceTree = "<group>"; };
+		8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloudCountView.swift; sourceTree = "<group>"; };
+		877F534A29F69D1600A0F931 /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
+		877F534C29F7C46600A0F931 /* Collection+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Collection+Extension.swift"; sourceTree = "<group>"; };
+		8793524E29B9D8F200D6A079 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		87ABC86629D1946400881FFB /* UIViewController+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Extension.swift"; sourceTree = "<group>"; };
+		87ABC86B29D290E900881FFB /* RecordingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingButton.swift; sourceTree = "<group>"; };
+		87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusIndicatorLabel.swift; sourceTree = "<group>"; };
+		87D842AD2A611CF600032711 /* ScanStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanStorage.swift; sourceTree = "<group>"; };
+		87D842AF2A611F0000032711 /* ScanData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanData.swift; sourceTree = "<group>"; };
+		87D842B12A611F9B00032711 /* Date+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extension.swift"; sourceTree = "<group>"; };
+		87D842B32A6120BD00032711 /* Data+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Extension.swift"; sourceTree = "<group>"; };
+		87D842B52A61353000032711 /* ScanInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanInfo.swift; sourceTree = "<group>"; };
+		87E9B5212A08A9D200FF4A8D /* LidarProcessStatusLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LidarProcessStatusLabel.swift; sourceTree = "<group>"; };
+		87F6F0982A613F8900CE6679 /* ScanStorageVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanStorageVC.swift; sourceTree = "<group>"; };
+		87F6F09A2A61780A00CE6679 /* ScanList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanList.swift; sourceTree = "<group>"; };
+		87F6F09C2A61793600CE6679 /* ScanInfoRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanInfoRow.swift; sourceTree = "<group>"; };
+		87F6F09E2A617C8500CE6679 /* Int+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+Extension.swift"; sourceTree = "<group>"; };
+		87F6F0A02A61812F00CE6679 /* ScanInfoRowEventListener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanInfoRowEventListener.swift; sourceTree = "<group>"; };
+		87FA5D722A35C4D800E04B4D /* DownloadStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadStorage.swift; sourceTree = "<group>"; };
+		87FDBC1A29EE270A00D90D02 /* MainVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVM.swift; sourceTree = "<group>"; };
+		87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARData.swift; sourceTree = "<group>"; };
+		DB23EE222C08398500FC4167 /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
+		DB255B962C21EF8B00209FD8 /* launchicon2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchicon2x.png; sourceTree = "<group>"; };
+		DBFC96322C1C1765009B5AEC /* ScanViewerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanViewerVC.swift; sourceTree = "<group>"; };
+		E73DD12D24636FEF00D77039 /* Point Cloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Point Cloud.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E73DD13024636FEF00D77039 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E73DD13224636FEF00D77039 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		E73DD13424636FEF00D77039 /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
+		E73DD13524636FEF00D77039 /* Renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Renderer.swift; sourceTree = "<group>"; };
+		E73DD13724636FEF00D77039 /* MainVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVC.swift; sourceTree = "<group>"; };
+		E73DD13A24636FEF00D77039 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		E73DD13F24636FF100D77039 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		E73DD14124636FF100D77039 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E73DD14224636FF100D77039 /* DepthViz-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DepthViz-Bridging-Header.h"; sourceTree = "<group>"; };
+		E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalBuffer.swift; sourceTree = "<group>"; };
+		E7B7223C24809D1E002E43E8 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		E7E2ED6F1473F1FD1E9543FA /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E73DD12A24636FEF00D77039 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		870959422A24572400021125 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				870959432A24573700021125 /* LidarStorage.swift */,
+				87FA5D722A35C4D800E04B4D /* DownloadStorage.swift */,
+				87D842AD2A611CF600032711 /* ScanStorage.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		8711C71529D1322A00F6D5CC /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				DBFC96312C1C1744009B5AEC /* ScanViewer */,
+				87F6F0972A613F5800CE6679 /* ScanStorageVC */,
+				87ABC86529D1945200881FFB /* Extension */,
+				87ABC86829D2805300881FFB /* Main */,
+				87295C972A038DBB0067392D /* Scans */,
+			);
+			path = Presentation;
+			sourceTree = "<group>";
+		};
+		8711C71629D1323800F6D5CC /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				E73DD13524636FEF00D77039 /* Renderer.swift */,
+				8793524E29B9D8F200D6A079 /* Utils.swift */,
+				E7B7223C24809D1E002E43E8 /* Helpers.swift */,
+				87FDBC1C29EEA52100D90D02 /* Entity */,
+				8711C71829D1329C00F6D5CC /* Metal */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		8711C71729D1324000F6D5CC /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				870959422A24572400021125 /* Storage */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		8711C71829D1329C00F6D5CC /* Metal */ = {
+			isa = PBXGroup;
+			children = (
+				E73DD13424636FEF00D77039 /* ShaderTypes.h */,
+				E73DD13224636FEF00D77039 /* Shaders.metal */,
+				E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */,
+			);
+			path = Metal;
+			sourceTree = "<group>";
+		};
+		87295C972A038DBB0067392D /* Scans */ = {
+			isa = PBXGroup;
+			children = (
+				87295C982A038DD50067392D /* ScansVC.swift */,
+				87295C9D2A03ACF40067392D /* ScansVM.swift */,
+				87295C9A2A03AA420067392D /* View */,
+			);
+			path = Scans;
+			sourceTree = "<group>";
+		};
+		87295C9A2A03AA420067392D /* View */ = {
+			isa = PBXGroup;
+			children = (
+				87295C9B2A03AA550067392D /* ReloadButton.swift */,
+				87E9B5212A08A9D200FF4A8D /* LidarProcessStatusLabel.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		8749E16829EEE2720093F7A7 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				87ABC86B29D290E900881FFB /* RecordingButton.swift */,
+				87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */,
+				8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */,
+				87295C932A0386B30067392D /* ScansButton.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		87ABC85829D173AC00881FFB /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				E73DD14224636FF100D77039 /* DepthViz-Bridging-Header.h */,
+				E7E2ED6F1473F1FD1E9543FA /* LICENSE.txt */,
+				DB23EE222C08398500FC4167 /* env.xcconfig */,
+			);
+			path = Configuration;
+			sourceTree = "<group>";
+		};
+		87ABC86529D1945200881FFB /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				87ABC86629D1946400881FFB /* UIViewController+Extension.swift */,
+				877F534A29F69D1600A0F931 /* UIView+Extension.swift */,
+				877F534C29F7C46600A0F931 /* Collection+Extension.swift */,
+				871356C52A0AA5C50005DE8C /* Double+Extension.swift */,
+				87D842B12A611F9B00032711 /* Date+Extension.swift */,
+				87D842B32A6120BD00032711 /* Data+Extension.swift */,
+				87F6F09E2A617C8500CE6679 /* Int+Extension.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
+		87ABC86829D2805300881FFB /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				E73DD13724636FEF00D77039 /* MainVC.swift */,
+				87FDBC1A29EE270A00D90D02 /* MainVM.swift */,
+				8749E16829EEE2720093F7A7 /* View */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		87F6F0972A613F5800CE6679 /* ScanStorageVC */ = {
+			isa = PBXGroup;
+			children = (
+				87F6F0982A613F8900CE6679 /* ScanStorageVC.swift */,
+				87F6F09A2A61780A00CE6679 /* ScanList.swift */,
+				87F6F09C2A61793600CE6679 /* ScanInfoRow.swift */,
+				87F6F0A02A61812F00CE6679 /* ScanInfoRowEventListener.swift */,
+			);
+			path = ScanStorageVC;
+			sourceTree = "<group>";
+		};
+		87FDBC1C29EEA52100D90D02 /* Entity */ = {
+			isa = PBXGroup;
+			children = (
+				87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */,
+				87D842AF2A611F0000032711 /* ScanData.swift */,
+				87D842B52A61353000032711 /* ScanInfo.swift */,
+			);
+			path = Entity;
+			sourceTree = "<group>";
+		};
+		DBFC96312C1C1744009B5AEC /* ScanViewer */ = {
+			isa = PBXGroup;
+			children = (
+				DBFC96322C1C1765009B5AEC /* ScanViewerVC.swift */,
+			);
+			path = ScanViewer;
+			sourceTree = "<group>";
+		};
+		E73DD12424636FEF00D77039 = {
+			isa = PBXGroup;
+			children = (
+				E73DD12F24636FEF00D77039 /* DepthViz */,
+				E73DD12E24636FEF00D77039 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E73DD12E24636FEF00D77039 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E73DD12D24636FEF00D77039 /* Point Cloud.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E73DD12F24636FEF00D77039 /* DepthViz */ = {
+			isa = PBXGroup;
+			children = (
+				87ABC85829D173AC00881FFB /* Configuration */,
+				8711C71529D1322A00F6D5CC /* Presentation */,
+				8711C71629D1323800F6D5CC /* Domain */,
+				8711C71729D1324000F6D5CC /* Data */,
+				E73DD13924636FEF00D77039 /* Main.storyboard */,
+				E73DD13E24636FF100D77039 /* LaunchScreen.storyboard */,
+				E73DD13024636FEF00D77039 /* AppDelegate.swift */,
+				87295C952A038BAD0067392D /* SceneDelegate.swift */,
+				66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */,
+				E73DD14124636FF100D77039 /* Info.plist */,
+				DB255B962C21EF8B00209FD8 /* launchicon2x.png */,
+			);
+			path = DepthViz;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E73DD12C24636FEF00D77039 /* DepthViz */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E73DD14524636FF100D77039 /* Build configuration list for PBXNativeTarget "DepthViz" */;
+			buildPhases = (
+				E73DD12924636FEF00D77039 /* Sources */,
+				E73DD12A24636FEF00D77039 /* Frameworks */,
+				E73DD12B24636FEF00D77039 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DepthViz;
+			packageProductDependencies = (
+			);
+			productName = SceneDepthDemo;
+			productReference = E73DD12D24636FEF00D77039 /* Point Cloud.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E73DD12524636FEF00D77039 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastSwiftUpdateCheck = 1140;
+				LastUpgradeCheck = 1610;
+				ORGANIZATIONNAME = Apple;
+				TargetAttributes = {
+					E73DD12C24636FEF00D77039 = {
+						CreatedOnToolsVersion = 11.4;
+					};
+				};
+			};
+			buildConfigurationList = E73DD12824636FEF00D77039 /* Build configuration list for PBXProject "DepthViz" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E73DD12424636FEF00D77039;
+			packageReferences = (
+			);
+			productRefGroup = E73DD12E24636FEF00D77039 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E73DD12C24636FEF00D77039 /* DepthViz */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E73DD12B24636FEF00D77039 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E73DD14024636FF100D77039 /* LaunchScreen.storyboard in Resources */,
+				DB255B972C21EF8B00209FD8 /* launchicon2x.png in Resources */,
+				66B1C0172C22B9E5003CDAD8 /* Assets.xcassets in Resources */,
+				E73DD13B24636FEF00D77039 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E73DD12924636FEF00D77039 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				87E9B5222A08A9D200FF4A8D /* LidarProcessStatusLabel.swift in Sources */,
+				871356C62A0AA5C50005DE8C /* Double+Extension.swift in Sources */,
+				87D842B22A611F9B00032711 /* Date+Extension.swift in Sources */,
+				87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */,
+				87F6F09F2A617C8500CE6679 /* Int+Extension.swift in Sources */,
+				E73DD13324636FEF00D77039 /* Shaders.metal in Sources */,
+				87F6F0A12A61812F00CE6679 /* ScanInfoRowEventListener.swift in Sources */,
+				E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */,
+				87295C992A038DD50067392D /* ScansVC.swift in Sources */,
+				87FA5D732A35C4D800E04B4D /* DownloadStorage.swift in Sources */,
+				87D842AE2A611CF600032711 /* ScanStorage.swift in Sources */,
+				87ABC86E29D3041100881FFB /* StatusIndicatorLabel.swift in Sources */,
+				87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */,
+				87ABC86729D1946400881FFB /* UIViewController+Extension.swift in Sources */,
+				87F6F09D2A61793600CE6679 /* ScanInfoRow.swift in Sources */,
+				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,
+				87D842B62A61353000032711 /* ScanInfo.swift in Sources */,
+				87295C942A0386B30067392D /* ScansButton.swift in Sources */,
+				DBFC96332C1C1765009B5AEC /* ScanViewerVC.swift in Sources */,
+				87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */,
+				87F6F0992A613F8900CE6679 /* ScanStorageVC.swift in Sources */,
+				870959442A24573700021125 /* LidarStorage.swift in Sources */,
+				87D842B42A6120BD00032711 /* Data+Extension.swift in Sources */,
+				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,
+				8793524F29B9D8F200D6A079 /* Utils.swift in Sources */,
+				87295C9C2A03AA550067392D /* ReloadButton.swift in Sources */,
+				87ABC86C29D290E900881FFB /* RecordingButton.swift in Sources */,
+				87F6F09B2A61780A00CE6679 /* ScanList.swift in Sources */,
+				E73DD13624636FEF00D77039 /* Renderer.swift in Sources */,
+				E73DD13824636FEF00D77039 /* MainVC.swift in Sources */,
+				877F534D29F7C46600A0F931 /* Collection+Extension.swift in Sources */,
+				87295C962A038BAD0067392D /* SceneDelegate.swift in Sources */,
+				877F534B29F69D1600A0F931 /* UIView+Extension.swift in Sources */,
+				87D842B02A611F0000032711 /* ScanData.swift in Sources */,
+				E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		E73DD13924636FEF00D77039 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E73DD13A24636FEF00D77039 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		E73DD13E24636FF100D77039 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E73DD13F24636FF100D77039 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E73DD14324636FF100D77039 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E73DD14424636FF100D77039 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E73DD14624636FF100D77039 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 28;
+				DEVELOPMENT_TEAM = D9WJV9698J;
+				INFOPLIST_FILE = DepthViz/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DeptgViz;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = DepthViz...;
+				PRODUCT_NAME = "Point Cloud";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DepthViz/Configuration/DepthViz-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E73DD14724636FF100D77039 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 28;
+				DEVELOPMENT_TEAM = D9WJV9698J;
+				INFOPLIST_FILE = DepthViz/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = DeptgViz;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = DepthViz...;
+				PRODUCT_NAME = "Point Cloud";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DepthViz/Configuration/DepthViz-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E73DD12824636FEF00D77039 /* Build configuration list for PBXProject "DepthViz" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E73DD14324636FF100D77039 /* Debug */,
+				E73DD14424636FF100D77039 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E73DD14524636FF100D77039 /* Build configuration list for PBXNativeTarget "DepthViz" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E73DD14624636FF100D77039 /* Debug */,
+				E73DD14724636FF100D77039 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E73DD12524636FEF00D77039 /* Project object */;
+}

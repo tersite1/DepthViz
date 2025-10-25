@@ -12,16 +12,8 @@
 		6666DEE32C8F46B900D21424 /* a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 6666DEE22C8F46B900D21424 /* a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4 */; };
 		66689B492C8C702200DB20E9 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B482C8C702200DB20E9 /* UserModel.swift */; };
 		66689B4C2C8C70BD00DB20E9 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4B2C8C70A700DB20E9 /* LoginViewController.swift */; };
-		66689B4E2C8C70E900DB20E9 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4D2C8C70E500DB20E9 /* AuthManager.swift */; };
-		66689B572C8CAF7000DB20E9 /* Activity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4F2C8CAF7000DB20E9 /* Activity.swift */; };
-		66689B582C8CAF7000DB20E9 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B532C8CAF7000DB20E9 /* Project.swift */; };
-		66689B592C8CAF7000DB20E9 /* EditActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B502C8CAF7000DB20E9 /* EditActivityView.swift */; };
-		66689B5A2C8CAF7000DB20E9 /* ProjectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B542C8CAF7000DB20E9 /* ProjectView.swift */; };
-		66689B5B2C8CAF7000DB20E9 /* MContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B512C8CAF7000DB20E9 /* MContentView.swift */; };
-		66689B5C2C8CAF7000DB20E9 /* PersistentContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B522C8CAF7000DB20E9 /* PersistentContainer.swift */; };
-		66689B5D2C8CAF7000DB20E9 /* Schedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B552C8CAF7000DB20E9 /* Schedule.swift */; };
-		66689B612C8CB40C00DB20E9 /* CPMButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B602C8CB40900DB20E9 /* CPMButton.swift */; };
-		666BA4A92EAD4CD6001372FE /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 666BA4A82EAD4CD6001372FE /* logo.png */; };
+	66689B4E2C8C70E900DB20E9 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4D2C8C70E500DB20E9 /* AuthManager.swift */; };
+	666BA4A92EAD4CD6001372FE /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 666BA4A82EAD4CD6001372FE /* logo.png */; };
 		669A6F0C2C7F35B100F8BDAC /* MatrixMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A6F0B2C7F35A700F8BDAC /* MatrixMath.swift */; };
 		669A6F0E2C7F47F100F8BDAC /* PointCloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A6F0D2C7F47F100F8BDAC /* PointCloud.swift */; };
 		66B1C0172C22B9E5003CDAD8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */; };
@@ -76,16 +68,8 @@
 		6666DEE22C8F46B900D21424 /* a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4"; sourceTree = "<group>"; };
 		66689B482C8C702200DB20E9 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
 		66689B4B2C8C70A700DB20E9 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
-		66689B4D2C8C70E500DB20E9 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
-		66689B4F2C8CAF7000DB20E9 /* Activity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Activity.swift; sourceTree = "<group>"; };
-		66689B502C8CAF7000DB20E9 /* EditActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditActivityView.swift; sourceTree = "<group>"; };
-		66689B512C8CAF7000DB20E9 /* MContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MContentView.swift; sourceTree = "<group>"; };
-		66689B522C8CAF7000DB20E9 /* PersistentContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistentContainer.swift; sourceTree = "<group>"; };
-		66689B532C8CAF7000DB20E9 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
-		66689B542C8CAF7000DB20E9 /* ProjectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectView.swift; sourceTree = "<group>"; };
-		66689B552C8CAF7000DB20E9 /* Schedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schedule.swift; sourceTree = "<group>"; };
-		66689B602C8CB40900DB20E9 /* CPMButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPMButton.swift; sourceTree = "<group>"; };
-		666BA4A82EAD4CD6001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
+	66689B4D2C8C70E500DB20E9 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+	666BA4A82EAD4CD6001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		666BA4AA2EAD4D32001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		669A6F0B2C7F35A700F8BDAC /* MatrixMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixMath.swift; sourceTree = "<group>"; };
 		669A6F0D2C7F47F100F8BDAC /* PointCloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloud.swift; sourceTree = "<group>"; };
@@ -158,24 +142,10 @@
 				66689B4D2C8C70E500DB20E9 /* AuthManager.swift */,
 				66689B4B2C8C70A700DB20E9 /* LoginViewController.swift */,
 			);
-			path = Login;
-			sourceTree = "<group>";
-		};
-		66689B562C8CAF7000DB20E9 /* CPM_calculation */ = {
-			isa = PBXGroup;
-			children = (
-				66689B4F2C8CAF7000DB20E9 /* Activity.swift */,
-				66689B502C8CAF7000DB20E9 /* EditActivityView.swift */,
-				66689B512C8CAF7000DB20E9 /* MContentView.swift */,
-				66689B522C8CAF7000DB20E9 /* PersistentContainer.swift */,
-				66689B532C8CAF7000DB20E9 /* Project.swift */,
-				66689B542C8CAF7000DB20E9 /* ProjectView.swift */,
-				66689B552C8CAF7000DB20E9 /* Schedule.swift */,
-			);
-			path = CPM_calculation;
-			sourceTree = "<group>";
-		};
-		870959422A24572400021125 /* Storage */ = {
+		path = Login;
+		sourceTree = "<group>";
+	};
+	870959422A24572400021125 /* Storage */ = {
 			isa = PBXGroup;
 			children = (
 				870959432A24573700021125 /* LidarStorage.swift */,
@@ -185,12 +155,11 @@
 			path = Storage;
 			sourceTree = "<group>";
 		};
-		8711C71529D1322A00F6D5CC /* Presentation */ = {
-			isa = PBXGroup;
-			children = (
-				66689B562C8CAF7000DB20E9 /* CPM_calculation */,
-				66689B4A2C8C70A000DB20E9 /* Login */,
-				DBFC96312C1C1744009B5AEC /* ScanViewer */,
+	8711C71529D1322A00F6D5CC /* Presentation */ = {
+		isa = PBXGroup;
+		children = (
+			66689B4A2C8C70A000DB20E9 /* Login */,
+			DBFC96312C1C1744009B5AEC /* ScanViewer */,
 				87F6F0972A613F5800CE6679 /* ScanStorageVC */,
 				87ABC86529D1945200881FFB /* Extension */,
 				87ABC86829D2805300881FFB /* Main */,
@@ -249,11 +218,10 @@
 			path = View;
 			sourceTree = "<group>";
 		};
-		8749E16829EEE2720093F7A7 /* View */ = {
-			isa = PBXGroup;
-			children = (
-				66689B602C8CB40900DB20E9 /* CPMButton.swift */,
-				87ABC86B29D290E900881FFB /* RecordingButton.swift */,
+	8749E16829EEE2720093F7A7 /* View */ = {
+		isa = PBXGroup;
+		children = (
+			87ABC86B29D290E900881FFB /* RecordingButton.swift */,
 				87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */,
 				8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */,
 				87295C932A0386B30067392D /* ScansButton.swift */,
@@ -472,22 +440,14 @@
 				66689B4C2C8C70BD00DB20E9 /* LoginViewController.swift in Sources */,
 				87F6F09D2A61793600CE6679 /* ScanInfoRow.swift in Sources */,
 				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,
-				87D842B62A61353000032711 /* ScanInfo.swift in Sources */,
-				87295C942A0386B30067392D /* ScansButton.swift in Sources */,
-				66689B572C8CAF7000DB20E9 /* Activity.swift in Sources */,
-				66689B582C8CAF7000DB20E9 /* Project.swift in Sources */,
-				66689B592C8CAF7000DB20E9 /* EditActivityView.swift in Sources */,
-				66689B5A2C8CAF7000DB20E9 /* ProjectView.swift in Sources */,
-				66689B5B2C8CAF7000DB20E9 /* MContentView.swift in Sources */,
-				66689B5C2C8CAF7000DB20E9 /* PersistentContainer.swift in Sources */,
-				66689B5D2C8CAF7000DB20E9 /* Schedule.swift in Sources */,
-				DBFC96332C1C1765009B5AEC /* ScanViewerVC.swift in Sources */,
+			87D842B62A61353000032711 /* ScanInfo.swift in Sources */,
+			87295C942A0386B30067392D /* ScansButton.swift in Sources */,
+			DBFC96332C1C1765009B5AEC /* ScanViewerVC.swift in Sources */,
 				87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */,
 				66E374612C7EE053002BBE77 /* ViewController.swift in Sources */,
-				87F6F0992A613F8900CE6679 /* ScanStorageVC.swift in Sources */,
-				66689B492C8C702200DB20E9 /* UserModel.swift in Sources */,
-				66689B612C8CB40C00DB20E9 /* CPMButton.swift in Sources */,
-				870959442A24573700021125 /* LidarStorage.swift in Sources */,
+			87F6F0992A613F8900CE6679 /* ScanStorageVC.swift in Sources */,
+			66689B492C8C702200DB20E9 /* UserModel.swift in Sources */,
+			870959442A24573700021125 /* LidarStorage.swift in Sources */,
 				66E374672C7F31F3002BBE77 /* Shaders.metal in Sources */,
 				87D842B42A6120BD00032711 /* Data+Extension.swift in Sources */,
 				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,

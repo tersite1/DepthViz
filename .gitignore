@@ -22,3 +22,9 @@
 
 # environment
 env.xcconfig
+
+# AdMob guides and documentation
+*AdMob*.md
+*광고*.md
+README*.md
+*_가이드*.md

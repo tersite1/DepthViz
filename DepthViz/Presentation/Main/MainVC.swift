@@ -45,9 +45,12 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
         self.bindViewModel()
         
         // AdMob 배너 광고 추가 (SDK가 설치된 경우에만)
+        // TODO: AdMob API key를 등록한 후 주석 해제하세요
+        /*
         #if canImport(GoogleMobileAds)
         self.setupAdMobBanner()
         #endif
+        */
     }
     
     #if canImport(GoogleMobileAds)

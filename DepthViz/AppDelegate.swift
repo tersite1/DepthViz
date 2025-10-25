@@ -25,9 +25,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         incrementLaunchCount()
         
         // AdMob 초기화 (SDK가 설치된 경우에만)
+        // TODO: AdMob API key를 등록한 후 주석 해제하세요
+        /*
         #if canImport(GoogleMobileAds)
         initializeAdMob()
         #endif
+        */
         
         return true
     }

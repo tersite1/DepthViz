@@ -27,9 +27,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window?.makeKeyAndVisible()
         
         // AppOpenAdManager 델리게이트 설정
+        // TODO: AdMob API key를 등록한 후 주석 해제하세요
+        /*
         #if canImport(GoogleMobileAds)
         AppOpenAdManager.shared.delegate = self
         #endif
+        */
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {

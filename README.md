@@ -23,7 +23,7 @@
 - Major **performance and stability improvements**  
 - Fixed several scanning & file management bugs  
 - Officially **released on the App Store** 🎉  
-  → Search **“DepthViz”** on the App Store or [click here](https://apps.apple.com/) *(replace with actual link)*  
+  → Search **“DepthViz”** on the App Store or [click here](https://apps.apple.com/app/depthviz/id6754522044) 
 
 ---
 

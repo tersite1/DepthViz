@@ -81,7 +81,7 @@ Developers can now easily process LiDAR data and explore its full potential for 
 
 ## ⚙️ Technical Details
 - **Languages:** Swift, Metal, C++  
-- **Compatibility:** iPhone 14 Pro and newer with LiDAR sensor  
+- **Compatibility:** iPhone 12 Pro and newer with LiDAR sensor  
 
 ---
 
@@ -115,12 +115,11 @@ For inquiries, support, or feedback:
 ---
 
 ## 🏢 Ownership
-DepthViz is owned and maintained by **FluXmap**, dedicated to advancing LiDAR-based tools for 3D visualization and construction analytics.  
+DepthViz is owned and maintained by **XYZ Innovation**, dedicated to advancing LiDAR-based tools for 3D visualization and construction analytics.  
 _All Rights Reserved._
 
 ### Contributors
-FluXmap
-
+XYZ Innovation
 ---
 
 ## ⚖️ License

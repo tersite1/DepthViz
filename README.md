@@ -26,10 +26,10 @@
   → Search **“DepthViz”** on the App Store or [click here](https://apps.apple.com/app/depthviz/id6754522044) 
 ---
 
+
 🏅DepthViz acquied KR Patent, LiDAR Micro Mobile Mapping System, Minsuk Jang (KR Patent Application 10-2024-0130327)
 🏅DepthViz awarded Yonsei Student ICEE challenge 2024
 🏅DepthViz awarded World Robo Festa 2025 in Chungcheongnamdo
----
 
 DepthViz is an iOS application designed to function as a point cloud scanner by integrating data from the **LiDAR sensor**, **camera**, and **IMU sensor**.  
 This app is specifically tailored to operate on iPhone 14 Pro and newer models equipped with a LiDAR sensor, offering a robust tool for capturing and managing 3D data.

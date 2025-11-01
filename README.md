@@ -30,6 +30,7 @@
 DepthViz is an iOS application designed to function as a point cloud scanner by integrating data from the **LiDAR sensor**, **camera**, and **IMU sensor**.  
 This app is specifically tailored to operate on iPhone 14 Pro and newer models equipped with a LiDAR sensor, offering a robust tool for capturing and managing 3D data.
 
+As far as I know, DepthViz is the first LiDAR Scanner on iPhone in Korea.
 ---
 
 ### 🧩 Update 24/8/28

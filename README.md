@@ -11,10 +11,11 @@
 [![Platform](https://img.shields.io/badge/Platform-iOS%2012%20Pro%2B-lightgrey)]()
 
 <p align="center">  
-  <img src="https://github.com/tersite1/DepthViz/blob/main/launch.png?raw=true" >
+  <img src="https://github.com/tersite1/DepthViz/blob/main/launch.png?raw=true" height="540">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://github.com/tersite1/tersite1/assets/160453556/08cccf5e-2763-4005-8299-e4865d256547" width="32%">
+  <img src="https://github.com/tersite1/tersite1/assets/160453556/08cccf5e-2763-4005-8299-e4865d256547" height="540">
 </p>
+
 
 </div>
 

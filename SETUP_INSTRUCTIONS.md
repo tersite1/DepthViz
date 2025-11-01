@@ -161,38 +161,6 @@ AdMob 설정 후 추가할 항목 (6단계 참조):
 
 ---
 
-## AdMob 설정
-
-### 8단계: Google AdMob 계정 설정
-
-자세한 내용은 `ADMOB_SETUP_GUIDE.md` 참조
-
-**간단 요약:**
-1. [Google AdMob](https://admob.google.com) 계정 생성
-2. 앱 등록
-3. 배너 광고 단위 생성
-4. App ID와 광고 단위 ID 복사
-
-### 9단계: 광고 ID 설정
-
-**AdMobManager.swift 수정:**
-```swift
-#else
-// 실제 광고 ID (배포용)
-private let bannerAdUnitID = "ca-app-pub-XXXXXXXX/YYYYYYYYYY"
-#endif
-```
-
-**Info.plist 수정:**
-```xml
-<key>GADApplicationIdentifier</key>
-<string>ca-app-pub-XXXXXXXX~YYYYYYYYYY</string>
-```
-
-⚠️ **개발 중에는 테스트 ID가 자동으로 사용됩니다!**
-
----
-
 ## 빌드 및 실행
 
 ### 10단계: 빌드
@@ -300,7 +268,6 @@ pod install
 - [ ] Signing 설정
 
 AdMob 설정:
-- [ ] Google AdMob 계정 생성
 - [ ] 앱 및 광고 단위 등록
 - [ ] Info.plist 수정
 - [ ] AdMobManager.swift 수정
@@ -328,7 +295,6 @@ AdMob 설정:
 
 문제가 계속되면:
 - Apple Developer Forums
-- Google AdMob Support
 - Stack Overflow
 
 **Happy Coding! 🚀**

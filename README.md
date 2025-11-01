@@ -8,7 +8,7 @@
 
 [![App Store](https://img.shields.io/badge/App%20Store-Available-blue)](https://apps.apple.com/app/depthviz/id6754522044)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-iOS%2014%20Pro%2B-lightgrey)]()
+[![Platform](https://img.shields.io/badge/Platform-iOS%2012%20Pro%2B-lightgrey)]()
 
 <p align="center">  
   <img src="https://github.com/user-attachments/assets/39453a31-8d5f-427f-bbe0-471788eb5cf4" width="32%">

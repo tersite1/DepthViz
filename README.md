@@ -10,6 +10,11 @@
 [![License](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-iOS%2012%20Pro%2B-lightgrey)]()
 
+
+We're currently in the process of licensing, and we're interested in further collaborations. For academic collaborations or business contacts, please contact minsukjang@kaist.ac.kr. The current code only uses Apple's native libraries.
+
+
+
 <p align="center">  
   <img src="https://github.com/tersite1/DepthViz/blob/main/launch.png?raw=true" height="540">
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

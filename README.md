@@ -32,7 +32,6 @@ opencv.framework
 
 ### 2. CocoaPods (필수)
 
-AdMob SDK 설치:
 ```bash
 pod install
 ```
@@ -46,11 +45,12 @@ SLAM 알고리즘 참고용 (빌드에 불필요, 이미 소스 포함됨):
 
 ## Build
 
-1. `pod install`
-2. `DepthViz.xcworkspace` 열기
-3. Signing & Capabilities에서 Team 설정
-4. Bundle ID: `DepthViz-Kaist`
-5. LiDAR 기기에서 빌드 & 실행
+1. OpenCV Framework 배치
+2. `pod install`
+3. `DepthViz.xcworkspace` 열기
+4. Signing & Capabilities에서 Team 설정
+5. Bundle ID: `DepthViz-Kaist`
+6. LiDAR 기기에서 빌드 & 실행
 
 ## Project Structure
 

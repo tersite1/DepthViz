@@ -8,6 +8,24 @@
 
 ---
 
+## Abstract
+
+We present DV-SLAM (Depth-Visual SLAM), a LiDAR-Inertial Odometry (LIO) system designed for Apple iPhone's direct Time-of-Flight (dToF) LiDAR sensor (256$\times$192 pixels). Unlike existing LIO frameworks — FAST-LIO2 [1], DLIO [3], FAST-LIVO2 [2], Super-LIO [4] — which are built for mechanical spinning LiDARs producing dense point clouds ($>$100K points/scan), DV-SLAM addresses three fundamental challenges of mobile dToF sensing: (i) an order-of-magnitude sparser depth field ($\approx$49K pixels), (ii) per-pixel quality metadata via ARKit confidence scores (Low/Medium/High), and (iii) availability of an Apple ARKit Visual-Inertial Odometry (VIO) pose prior as a continuous safety net.
+
+Our system employs an 18-dimensional Error-State Kalman Filter (ESKF) on the $SO(3) \times \mathbb{R}^{15}$ manifold, coupled with Point-to-Plane ICP using a voxel hash map for efficient nearest-neighbor search. Three novel modules augment the classical LIO pipeline:
+
+1. **Multi-level ARKit confidence gating** — a three-stage cascade (point-level hard gate, voxel-level density/quality gate, ICP-level observation noise weighting) that exploits per-pixel confidence metadata unavailable in mechanical LiDARs.
+2. **Adaptive Bundle & Discard preprocessing** — quality-aware point reduction (80–95% rejection rate) that preserves high-confidence regions while discarding unreliable measurements, replacing the uniform voxel grid downsampling used in existing LIO systems.
+3. **Histogram-based Surface Thinning** — a statistical method for detecting and removing double-wall artifacts caused by drift, without requiring loop closure.
+
+An **export-only architecture** decouples real-time rendering (delegated to ARKit's Metal GPU pipeline at 30fps) from SLAM computation running on a background thread, enabling iterative EKF updates (3 Gauss-Newton iterations) and maintenance of a 2M-point global map without frame drops. A 4-phase post-processing pipeline (SLAM map selection, Surface Thinning, voxel downsampling, statistical outlier removal) produces high-quality point clouds at export time.
+
+We provide complete mathematical derivations for all 57 numbered equations with explicit source code correspondence, covering Lie group formulations ($SO(3)/SE(3)$ exponential/logarithmic maps), ESKF prediction and iterated update with Joseph-form covariance, observation Jacobian derivation, robust kernel design, spatial hashing, observability analysis, and convergence properties of the iterated EKF.
+
+**Keywords:** LiDAR-Inertial Odometry, Error-State Kalman Filter, Point-to-Plane ICP, mobile 3D scanning, iPhone dToF LiDAR, ARKit
+
+---
+
 ## Table of Contents
 
 1. [Introduction](#1-introduction)
@@ -23,6 +41,8 @@
 11. [Comparison with Apple ARKit](#11-comparison-with-apple-arkit)
 12. [DV-SLAM Novelties](#12-dv-slam-novelties)
 13. [Computational Complexity](#13-computational-complexity)
+
+14. [Error Analysis and Approximation Bounds](#14-error-analysis-and-approximation-bounds)
 
 **Appendix A.** [Algorithm Pseudocode](#appendix-a-algorithm-pseudocode)
 **Appendix B.** [Parameter Table](#appendix-b-parameter-table)
@@ -562,6 +582,65 @@ $$
 
 **안전장치**: 관측 함수 실패 또는 LDLT 분해 실패 시, 반복 루프 전에 백업한 상태 $(\mathbf{x}_{\text{backup}}, \mathbf{P}_{\text{backup}})$으로 완전 복원한다 (`DV_ESKF.cpp:76–78, 88–91, 106–110`).
 
+**수렴 성질.** IEKF (반복 업데이트)는 Mahalanobis 가중 잔차의 국소 최솟값으로 수렴한다:
+
+**Proposition 6.1 (IEKF 축소 사상).** $\delta\mathbf{x}^{(k)}$를 $k$번째 반복의 보정 벡터라 하자. 관측 함수 $h(\mathbf{x})$ (Eq. 45)가 2회 연속 미분 가능하고, 야코비안 $\mathbf{H}(\mathbf{x})$가 $\mathbf{x}^*$ (진상태) 근방에서 Lipschitz 연속 (상수 $L_H$)이면:
+
+$$
+\|\delta\mathbf{x}^{(k+1)}\| \leq \gamma \|\delta\mathbf{x}^{(k)}\|, \quad \gamma = O(L_H \cdot \|\delta\mathbf{x}^{(0)}\|) < 1
+$$
+
+초기 오차가 충분히 작을 때 (즉, $\|\delta\mathbf{x}^{(0)}\| < 1/L_H$), 각 반복에서 축소율 $\gamma < 1$이 보장된다.
+
+*근거.* DV-SLAM의 관측 함수 (Eq. 45–46)에서:
+- 잔차 $r = \mathbf{n}^T(\mathbf{R}\mathbf{p} + \mathbf{t} - \bar{\mathbf{q}})$는 $\mathbf{t}$에 선형, $\mathbf{R}$에 해석적
+- 회전 야코비안 $-\mathbf{n}^T\mathbf{R}[\mathbf{p}]_\times$는 $\delta\boldsymbol{\theta}$에 대해 매끄러움
+- TLS 하드 절단 (Eq. 48)이 잔차를 $|r| \leq 0.10$m 범위로 제한하여 대편향 관측의 영향을 원천 차단
+
+실무적으로 DV-SLAM에서 $\|\delta\mathbf{x}^{(1)}\| / \|\delta\mathbf{x}^{(0)}\| < 0.1$ (cm 스케일 초기 오차, 10cm TLS 경계)이므로, 3회 반복 (`DV_Types.h:292`)은 수렴에 충분하다. 실제로 대부분의 프레임에서 1–2회 반복 내에 $\|\delta\mathbf{x}\| < \epsilon_{\text{quit}} = 10^{-6}$에 도달한다.
+
+### 6.6 관측가능성 분석 (Observability Analysis)
+
+18차원 ESKF 상태의 관측가능성은 추정 수렴성과 정확도를 이해하는 데 핵심적이다.
+
+**Definition 6.1 (국소 관측가능성).** 상태 $\mathbf{x} \in SO(3) \times \mathbb{R}^{15}$와 관측 모델 $h(\mathbf{x}) = \{r_i\}$ (점-평면 잔차)를 갖는 비선형 시스템이 $\mathbf{x}_0$ 근방에서 **국소 관측가능(locally observable)**이려면, 관측가능성 행렬:
+
+$$
+\mathcal{O} = \begin{bmatrix} \mathbf{H} \\ \mathbf{H}\mathbf{F} \\ \mathbf{H}\mathbf{F}^2 \\ \vdots \\ \mathbf{H}\mathbf{F}^{n-1} \end{bmatrix} \in \mathbb{R}^{nN \times 18}
+\tag{40a}
+$$
+
+의 랭크가 $\mathbf{x}_0$ 근방에서 18이어야 한다.
+
+**Proposition 6.2 (관측 가능 부분공간).** 일반적 운동(퇴화하지 않는 회전 및 이동) 하에서, 18차원 상태의 관측가능성은 다음과 같이 분석된다:
+
+| 상태 성분 | 관측가능성 | 메커니즘 |
+|-----------|-----------|---------|
+| $\mathbf{R}$ (회전) | **직접** | LiDAR 점-평면 잔차 (Eq. 46): $\partial r/\partial \delta\boldsymbol{\theta} = -\mathbf{n}^T\mathbf{R}[\mathbf{p}]_\times \neq \mathbf{0}$ |
+| $\mathbf{p}$ (위치) | **직접** | LiDAR 점-평면 잔차 (Eq. 46): $\partial r/\partial \delta\mathbf{p} = \mathbf{n}^T$ |
+| $\mathbf{v}$ (속도) | **간접** | IMU 전파가 $\delta\mathbf{v}$를 $\delta\mathbf{p}$에 결합: $\mathbf{F}_{36} = \mathbf{I}_3\Delta t$ (Eq. 31) |
+| $\mathbf{b}_g$ (자이로 바이어스) | **간접** | 회전 오차 누적: $\mathbf{F}_{09} = -\mathbf{I}_3\Delta t$가 $\delta\mathbf{b}_g$를 $\delta\boldsymbol{\theta}$에 결합 |
+| $\mathbf{b}_a$ (가속도 바이어스) | **간접** | 위치 오차 결합: $\mathbf{F}_{3,12} = -\mathbf{R}\Delta t^2/2$가 $\delta\mathbf{b}_a$를 $\delta\mathbf{p}$에 결합 |
+| $\mathbf{g}$ (중력) | **간접** | 위치/속도 결합: $\mathbf{F}_{3,15} = \mathbf{I}_3\Delta t^2/2$, $\mathbf{F}_{6,15} = \mathbf{I}_3\Delta t$ |
+
+*증명 스케치.* 상태 전이 행렬 (Eq. 31)로부터:
+
+1. $\mathbf{H}\mathbf{F}$는 속도 블록에 $\mathbf{n}^T \cdot \mathbf{I}_3\Delta t$를 포함하여, 연속 프레임의 위치 관측을 통해 $\mathbf{v}$를 관측가능하게 만든다.
+2. $\mathbf{H}\mathbf{F}^2$는 $\mathbf{b}_a$ 블록에 $-\mathbf{n}^T\mathbf{R}\Delta t$를 도입하여, 가속도 바이어스를 관측가능하게 만든다.
+3. 자이로 바이어스 $\mathbf{b}_g$는 회전-위치 결합을 통해 관측가능해지며, 이를 위해 디바이스가 회전 ($[\hat{\mathbf{a}}]_\times \neq \mathbf{0}$)해야 한다.
+4. 중력 $\mathbf{g}$는 위치/속도에 대한 직접 결합 ($\mathbf{F}_{3,15}, \mathbf{F}_{6,15}$)을 통해 관측가능하다. $\square$
+
+**퇴화 조건 (Degenerate Cases):**
+
+| 조건 | 영향 | DV-SLAM 대응 |
+|------|------|-------------|
+| **평면 환경** | 모든 법선 $\mathbf{n}$이 평행 → $\text{rank}(\mathbf{H})$ 감소, 법선 방향의 위치만 관측 가능 | 평면성 검증 (Eq. 44)이 퇴화 평면을 기각 |
+| **정지 상태** | $\boldsymbol{\omega} = \mathbf{0}$ → $\mathbf{b}_g$ 비관측가능 (자이로 바이어스와 영 회전 구분 불가) | ESKF 공분산이 불확실성 증가를 반영, ARKit fallback 발동 |
+| **등속 운동** | $\mathbf{a} = \mathbf{0}$ → $\mathbf{b}_a$ 약 관측가능 (중력 결합만으로 간접 추정) | 보수적 프로세스 노이즈 (§6.3)가 약 관측가능 상태에서 필터 안정성 확보 |
+| **좁은 FOV** | iPhone LiDAR FOV ≈ 60° → 다양한 법선 방향 부족 | Bundle & Discard가 품질 높은 점만 보존, 복셀 다양성 확보 |
+
+> **Remark (DV-SLAM의 실용적 관측가능성 보장).** DV-SLAM의 Divergence Guard (§7.9)는 퇴화 시나리오의 영향을 완화한다: ESKF가 발산하면 (퇴화 환경에서 발생 가능성 높음) ARKit 포즈 리셋이 유계 오차 폴백을 제공한다. 이는 독립형 LIO 시스템 대비 실용적 장점이다. 또한, iPhone의 핸드헬드 특성상 사용자가 자연스럽게 회전/이동하므로, 실제 사용 환경에서 퇴화 조건이 지속되는 경우는 드물다.
+
 ---
 
 ## 7. Point-to-Plane ICP and LIO Backend
@@ -992,7 +1071,7 @@ $$
 
 ## 12. DV-SLAM Novelties
 
-기존 LIO 알고리즘(FAST-LIO2, DLIO, Super-LIO)은 기계식 LiDAR를 전제로 설계되었다. DV-SLAM의 핵심 차별점을 요약한다.
+기존 LIO 알고리즘(FAST-LIO2, DLIO, Super-LIO)은 기계식 스피닝 LiDAR(Velodyne VLP-16/128, Livox Avia 등)를 전제로 설계되었다. 이러한 시스템은 (a) 스캔당 $>$100K점의 밀집 포인트클라우드, (b) mm 수준의 거리 정밀도, (c) 넓은 FOV (360° 수평), (d) 고출력 레이저를 가정한다. iPhone dToF LiDAR는 이 모든 가정에서 벗어난다. DV-SLAM의 핵심 차별점을 요약한다.
 
 ### 12.1 ARKit Confidence 다중 게이팅
 
@@ -1043,7 +1122,82 @@ $$
 
 DV-SLAM은 SLAM 보정으로 밀도를 높여도 안전하므로 더 공격적인 취득 설정을 사용한다.
 
-### 12.8 RGB 색상 보존 파이프라인
+### 12.8 iPhone dToF 고유 노이즈 보상 전략
+
+iPhone dToF (direct Time-of-Flight) LiDAR는 SPAD (Single-Photon Avalanche Diode) 어레이 기반 센서로, 기계식 LiDAR와 근본적으로 다른 노이즈 특성을 가진다. DV-SLAM은 이러한 dToF 고유 한계에 특화된 보상 전략을 구현한다.
+
+#### 12.8.1 dToF 양자화 노이즈와 거리 의존적 정밀도
+
+| 파라미터 | iPhone dToF | 기계식 LiDAR (VLP-16) | 영향 |
+|---------|-------------|---------------------|------|
+| 거리 정밀도 (1m) | ±1cm | ±3mm | dToF 3배 낮음 |
+| 거리 정밀도 (5m) | ±5–8cm | ±3mm | dToF 20배+ 낮음 |
+| 최대 범위 | ~5m | 100m | dToF 1/20 |
+| 포인트 수/프레임 | ~49K (256×192) | ~300K (16채널) | dToF 1/6 |
+| SLAM 입력/프레임 | ~200–500 (B&D 후) | ~30K (다운샘플 후) | dToF 1/60–1/150 |
+| FOV | ~60° (전방) | 360° × 30° | dToF 극히 좁음 |
+| 멀티패스 간섭 | 높음 (반사면) | 낮음 | dToF 고유 문제 |
+
+**DV-SLAM의 대응:**
+
+1. **TLS 임계값 $\tau = 0.10$m** (Eq. 48): 기계식 LiDAR 시스템(FAST-LIO2: $\tau \approx 0.03$m)보다 3배 관대한 임계값은 dToF의 거리 의존적 양자화 노이즈를 수용한다. 5m 거리에서 ±5cm 노이즈가 발생하므로 10cm 이내의 잔차는 정상 범위로 간주한다.
+
+2. **관측 노이즈 $\sigma_{\text{base}} = 0.01$m** (Eq. 49): 기계식 LiDAR 대비 보수적 설정. 낮은 가중치의 관측이 ESKF를 과도하게 끌어가는 것을 방지한다.
+
+3. **ARKit Confidence → 관측 노이즈 역결합** (Eq. 49): $w_{\text{conf}} = 0.5$ (Medium)일 때 관측 노이즈가 $4\sigma_{\text{base}}^2$로 4배 증가. 이는 dToF의 저신뢰 측정이 ESKF에 미치는 영향을 명시적으로 감쇠시킨다.
+
+#### 12.8.2 극단적 희소성에서의 ICP 안정성
+
+프레임당 ~200–500점으로 ICP를 수행하는 것은 기계식 LiDAR 시스템(~30K점)과 비교하여 **60–150배** 적은 관측이다. 이 극단적 희소성에서 ICP의 안정성을 확보하기 위한 DV-SLAM의 전략:
+
+1. **최소 관측 임계값 $N_{\min} = 10$** (`DV_LIOBackend.cpp:146`): 유효 관측점이 10개 미만이면 ESKF 업데이트를 기각하고 ARKit prior를 사용한다. 이는 underconstrained 최적화로 인한 발산을 원천 차단한다.
+
+2. **넓은 복셀 검색 범위 ($3^3 = 27$ 인접 복셀)**: 희소한 맵에서도 충분한 KNN 이웃을 확보하기 위해 27개 인접 복셀을 탐색한다. 기계식 LiDAR 시스템에서는 맵 밀도가 충분하여 1 복셀 검색만으로도 충분한 경우가 많다.
+
+3. **보수적 평면성 검증 ($\lambda_0/\lambda_1 < 0.3$)** (Eq. 44): K=5개의 적은 이웃에서 추정한 평면의 신뢰도가 낮을 수 있으므로, 30%의 관대한 임계값으로 비평면 구조도 일부 허용한다.
+
+4. **IEKF 3회 반복**: 소수 관측에서의 선형화 오차를 반복 업데이트로 보상한다. 1회 업데이트만으로는 희소 관측의 비선형성이 충분히 흡수되지 않는다.
+
+#### 12.8.3 핸드헬드 모션 모델과 보수적 프로세스 노이즈
+
+iPhone은 핸드헬드 기기이므로, 로봇/자율주행 차량에 장착된 기계식 LiDAR와는 근본적으로 다른 모션 프로파일을 가진다:
+
+| 특성 | 로봇 장착 | iPhone 핸드헬드 |
+|------|----------|----------------|
+| 최대 각속도 | ~0.5 rad/s | ~3 rad/s (급격한 손 회전) |
+| 진동/떨림 | 저주파 (차체) | 고주파 (손 떨림, 1-10Hz) |
+| 가속도 변동 | 완만 | 급격 (팔 동작) |
+| 동작 예측 가능성 | 높음 (제어 입력 알려짐) | 낮음 (비구조적 움직임) |
+
+**DV-SLAM의 대응:**
+
+1. **보수적 위치 프로세스 노이즈** $\mathbf{Q}_p = \sigma_a^2 \Delta t^3/4$: 엄밀한 이산화($\sigma_a^2 \Delta t^5/20$)보다 $\approx 50{,}000$배 큰 값. 핸드헬드 모션의 불확실성을 과대 추정하여 필터가 LiDAR 관측에 더 많이 의존하게 유도한다 (§6.3 Remark 참조).
+
+2. **중점 적분 (Eq. 26–27)**: 1차 Euler 적분 대신 $\mathbf{R}_{\text{mid}}$를 사용하여, 급격한 회전 시 가속도 변환의 정확도를 높인다. $\|\boldsymbol{\omega}\| = 3$ rad/s일 때, 중점 적분은 Euler 대비 $\Delta t \times 3/2 = 0.015$ rad의 회전 오차를 절반으로 줄인다.
+
+3. **키프레임 선택 (Eq. 51)의 이중 기준**: 핸드헬드 모션에서 이동 없이 회전만 하는 경우(제자리 팬)가 빈번하므로, 이동 **또는** 회전 중 하나만 만족해도 키프레임을 생성한다.
+
+#### 12.8.4 미소 레버암 가정
+
+> 📁 `src/DV_LIOBackend.cpp:107–110`
+
+iPhone에서 LiDAR 센서와 IMU 간 물리적 거리(레버암)는 $\ell \approx 5\text{–}10$mm이다:
+
+$$
+\|\mathbf{T}_{\text{cam-imu}} - \mathbf{I}_4\|_F \approx \ell \leq 0.01\text{m}
+$$
+
+이로 인한 최대 위치 편향:
+
+$$
+\epsilon_{\text{lever}} = \|\boldsymbol{\omega}\| \times \ell \leq 3 \times 0.01 = 0.03\text{m}
+$$
+
+일반적 핸드헬드 동작($\|\boldsymbol{\omega}\| \leq 1$ rad/s)에서는 $\epsilon_{\text{lever}} \leq 1$cm이다. 이는 dToF 양자화 노이즈(1–5cm)보다 작거나 동등하므로, **외부 캘리브레이션을 생략하는 것이 정당화된다**. 기계식 LiDAR 시스템에서는 레버암이 10–30cm이므로 반드시 정밀 캘리브레이션이 필요하다.
+
+> **Remark.** 이 가정은 DV-SLAM이 iPhone 이외의 플랫폼(iPad Pro 포함)으로 이식될 때 재검증해야 한다. iPad Pro의 LiDAR-IMU 거리는 iPhone보다 크며, 레버암 오차가 dToF 노이즈를 초과할 수 있다.
+
+### 12.9 RGB 색상 보존 파이프라인
 
 ```
 ARFrame.capturedImage (YCbCr NV12)

@@ -9,6 +9,7 @@
 6. [포인트클라우드 전처리: Bundle & Discard](#6-포인트클라우드-전처리-bundle--discard)
 7. [포스트프로세싱 파이프라인](#7-포스트프로세싱-파이프라인)
 8. [Apple ARKit 대비 DV-SLAM 이점](#8-apple-arkit-대비-dv-slam-이점)
+9. [DV-SLAM 고유 기술 혁신](#9-dv-slam-고유-기술-혁신)
 
 ---
 
@@ -571,6 +572,161 @@ $$
 - 발산 시: ARKit으로 자동 폴백 (안전망)
 
 이 하이브리드 접근법은 ARKit의 안정성과 DV-SLAM의 정밀도를 동시에 확보한다.
+
+---
+
+## 9. DV-SLAM 고유 기술 혁신
+
+기존 LIO 알고리즘(FAST-LIO2, DLIO 등)은 로봇/자율주행 환경의 기계식 LiDAR(Velodyne, Livox 등)를 전제로 설계되었다. DV-SLAM은 이를 **iPhone LiDAR(dToF, 256×192)** 환경에 맞게 근본적으로 재설계한 것이 핵심 차별점이다.
+
+### 9.1 ARKit Confidence 기반 다중 게이팅
+
+기존 LIO 시스템에는 **점별 신뢰도 개념이 없다.** 기계식 LiDAR는 반사 강도(intensity)만 제공하며, 이는 표면 재질에 의존적이라 품질 지표로 부적합하다.
+
+iPhone LiDAR는 ARKit이 각 깊이 픽셀에 `0(Low) / 1(Medium) / 2(High)` 신뢰도를 부여한다. DV-SLAM은 이를 **3중 게이팅**으로 활용한다:
+
+```
+[Gate 1] 점 단위:  confidence == 0 → 즉시 제거
+[Gate 2] 복셀 단위: 복셀 평균 confidence < 1.5 → 복셀 통째로 제거
+[Gate 3] ICP 단위:  confidence 기반 관측 가중치 차등 부여
+```
+
+이는 단순 임계값 필터(ARKit 기본)와 본질적으로 다르다. 복셀 레벨 통계를 사용하면 **개별 점은 신뢰도가 높지만 주변 맥락상 불안정한 영역**(예: 유리 반사, 가장자리 아티팩트)까지 걸러낼 수 있다.
+
+수학적으로, 관측 노이즈는 confidence에 반비례:
+
+$$
+\sigma_{\text{obs},i}^2 = \frac{\sigma_\text{base}^2}{w_\text{conf}(c_i)} \implies \text{High confidence 점은 ESKF에 더 큰 영향력}
+$$
+
+### 9.2 Bundle & Discard: 연산량 제어 전처리
+
+기존 LIO는 포인트클라우드를 **균일 다운샘플링**(예: 복셀 그리드 필터)하거나 전체를 사용한다. 이 방식의 문제:
+
+- 균일 다운샘플링은 중요한 기하학적 특징(모서리, 평면 경계)도 동일하게 간략화
+- 밀도가 높은 영역과 낮은 영역을 동등하게 취급
+
+DV-SLAM의 Bundle & Discard는 **품질 기반 적응적 감소**를 수행한다:
+
+$$
+\text{Reduction Ratio} = 1 - \frac{|\mathcal{P}_\text{bundled}|}{|\mathcal{P}_\text{raw}|} \approx 80\text{-}95\%
+$$
+
+핵심은 **밀도 게이트(density gate)**: 한 복셀에 5개 미만의 점만 있으면 해당 영역은 신뢰할 수 없는 관측으로 판단하여 통째로 제거한다. 이는 통계적 유의성에 기반한 판단이며, 단순 랜덤 샘플링과 근본적으로 다르다.
+
+iPhone LiDAR의 특성상 프레임당 약 3,000개 점(서브샘플 후)으로, 기계식 LiDAR(10만~30만 점/프레임)에 비해 매우 적다. 따라서 **적은 점에서 최대한 유의미한 것만 뽑아내는** 전략이 필수적이며, Bundle & Discard가 이 역할을 한다.
+
+### 9.3 Divergence Guard: ARKit Prior 안전망
+
+기존 LIO 시스템이 발산하면 — 복구할 방법이 없다. ESKF 공분산이 발산하면 시스템 전체가 무용지물이 된다.
+
+DV-SLAM은 ARKit 포즈를 **상시 수신**하면서 ESKF 추정값과의 차이를 모니터링한다:
+
+$$
+d = \|\mathbf{p}_\text{ESKF} - \mathbf{p}_\text{ARKit}\|
+$$
+
+$$
+\text{if}\; d > 1.0\;\text{m}: \quad \mathbf{x}_\text{ESKF} \leftarrow \mathbf{x}_\text{ARKit}, \quad \mathbf{P} \leftarrow \mathbf{P}_0
+$$
+
+이것은 **dual-system redundancy** 패턴이다:
+- 정상 시: DV-SLAM이 ARKit보다 정밀한 추정 제공
+- 이상 시: ARKit으로 즉시 폴백하여 catastrophic failure 방지
+
+이 설계는 산업용 드론/로봇의 GPS-INS 폴백 메커니즘에서 영감을 받았으나, iOS에서 ARKit이라는 기존 인프라를 활용한다는 점에서 독특하다.
+
+### 9.4 Surface Thinning: 이중 벽 제거
+
+LIO 시스템이 장시간 운용되면 미세한 드리프트가 누적되어, 같은 벽면이 **두 겹으로 기록**되는 문제가 발생한다. 기존 시스템은 이를 루프 클로저나 그래프 최적화로 해결하려 하지만, DV-SLAM은 다른 접근을 취한다.
+
+**히스토그램 기반 표면 분석:**
+
+각 50mm 셀에서 최대 분산 축(주성분)을 따라 5mm 빈으로 히스토그램을 만든다:
+
+```
+벽면 단면 히스토그램 (5mm bins):
+
+밀도 ▲
+     │  ██                    ██
+     │  ████                ████
+     │  ██████            ██████
+     └──────────────────────────→ 주성분 축
+       표면 A    15mm 갭    표면 B
+       (진짜)    (빈 공간)   (드리프트 복제)
+```
+
+15mm 이상 갭이 감지되면 두 표면 레이어 중 **밀도가 높은 쪽만 보존**한다. 이 방법은:
+
+- 루프 클로저 없이도 이중 벽을 제거할 수 있음
+- 복잡한 그래프 최적화 없이 순수 통계적 방법으로 해결
+- 안전 제한(최대 40% 제거)으로 과도한 제거 방지
+
+### 9.5 Export-Only 아키텍처
+
+기존 SLAM 시스템은 실시간 포즈를 네비게이션에 사용하므로, 지연시간(latency)이 최우선 제약이다. 이로 인해 ICP 반복 횟수, 맵 크기, 후처리 단계에서 타협이 불가피하다.
+
+DV-SLAM은 실시간 렌더링을 ARKit GPU 파이프라인에 맡기고, **SLAM은 오프라인 내보내기 전용**으로 설계했다:
+
+```
+실시간 (30fps 보장):
+  ARFrame → Metal Shader → GPU 포인트 누적 → 화면 렌더링
+
+백그라운드 (품질 우선):
+  ARFrame → SLAMService → ESKF + ICP → 글로벌 맵
+
+내보내기:
+  글로벌 맵 → Surface Thinning → 12mm 다운샘플 → SOR → PLY
+```
+
+이 분리 설계의 이점:
+- **ICP를 3회 반복** 가능 (실시간에서는 1회가 한계)
+- 포인트 누적에 **최대 200만 점** 맵 유지 (실시간에서는 메모리 제약)
+- 4단계 후처리 파이프라인 수행 가능 (실시간에서는 불가)
+- 실시간 렌더링은 ARKit이 보장하므로 **프레임 드롭 제로**
+
+### 9.6 경량 의존성 설계
+
+| 시스템 | 핵심 의존성 | 바이너리 크기 영향 |
+|--------|-----------|-----------------|
+| FAST-LIO2 | PCL, Eigen, ikd-Tree | ~50MB+ (PCL) |
+| DLIO | PCL, nanoflann, TBB | ~50MB+ (PCL) |
+| FAST-LIVO2 | PCL, OpenCV, Eigen | ~100MB+ (PCL+OpenCV) |
+| Super-LIO | PCL, Sophus, tsl::robin_map | ~50MB+ (PCL) |
+| **DV-SLAM** | **Eigen만** | **~3MB (헤더 온리)** |
+
+DV-SLAM의 핵심 엔진(`DepthViz/` 디렉토리)은 **Eigen 외 외부 의존성이 전혀 없다.** PCL, OpenCV, ROS, Sophus 등을 모두 제거하고, 필요한 자료구조(복셀 해시맵, KNN 검색)를 STL + Eigen으로 자체 구현했다.
+
+이는 iOS 앱 바이너리 크기 제약과 App Store 심사 기준을 만족시키면서도, 수학적으로 동등한 연산을 수행할 수 있게 한다.
+
+### 9.7 적응적 누적 임계값
+
+DV-SLAM과 ARKit 모드는 포인트 누적 기준이 다르다:
+
+| 파라미터 | DV-SLAM | ARKit |
+|---------|---------|-------|
+| 회전 임계값 | 2° | 5° |
+| 이동 임계값 | 1.5cm | 3cm |
+| 정지 판정 | 8프레임 | 5프레임 |
+| 그리드 밀도 | 4096점 | 2048점 |
+
+DV-SLAM은 ESKF가 바이어스를 실시간 보정하므로, **더 작은 변화량에서도 정밀한 누적**이 가능하다. ARKit은 바이어스 보정이 내부에서만 이루어지고 제어 불가하므로, 보수적 임계값을 사용해야 한다.
+
+### 9.8 RGB 색상 보존 파이프라인
+
+기존 LIO 시스템은 기하학적 정합에만 집중하며, 색상 정보를 다루지 않는다 (기계식 LiDAR는 색상을 제공하지 않으므로). DV-SLAM은 iPhone의 카메라-LiDAR 동기화를 활용하여 **전체 파이프라인에서 RGB를 보존**한다:
+
+```
+ARFrame.capturedImage (YCbCr)
+  → BT.601 변환 → RGB
+  → Point3D{x, y, z, r, g, b}
+  → Bundle & Discard: 복셀 내 RGB 평균
+  → 글로벌 맵: RGB 보존
+  → Voxel Downsampling: 복셀 내 RGB 평균
+  → PLY 출력: vertex color 포함
+```
+
+결과적으로 DV-SLAM으로 내보낸 포인트클라우드는 **기하학적으로 정합된 + 색상이 보존된** 완전한 3D 표현이다. 이는 단순히 ARKit 깊이를 카메라에 투영하는 것과 달리, SLAM 최적화된 좌표계에서 색상이 매핑되므로 드리프트로 인한 색상 불일치가 감소한다.
 
 ---
 

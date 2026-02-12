@@ -15,25 +15,37 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Powered by" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DxR-Mr-D6T">
-                                <rect key="frame" x="121" y="601" width="150" height="237"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="6"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="building4.png" translatesAutoresizingMaskIntoConstraints="NO" id="wg2-ME-QtK">
+                                <rect key="frame" x="36.666666666666657" y="227" width="320" height="218"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="218" id="bld-h1"/>
+                                    <constraint firstAttribute="width" constant="320" id="bld-w1"/>
+                                </constraints>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Powered by" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DxR-Mr-D6T">
+                                <rect key="frame" x="152.33333333333334" y="672" width="88.333333333333343" height="18"/>
+                                <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="15"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
-                                <size key="shadowOffset" width="0.0" height="10"/>
                             </label>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" fixedFrame="YES" image="logo 5" translatesAutoresizingMaskIntoConstraints="NO" id="S6y-xw-5yu">
-                                <rect key="frame" x="144" y="698" width="104" height="140"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" fixedFrame="YES" image="building4.png" translatesAutoresizingMaskIntoConstraints="NO" id="wg2-ME-QtK">
-                                <rect key="frame" x="38" y="306" width="317" height="177"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" misplaced="YES" image="Image 2" translatesAutoresizingMaskIntoConstraints="NO" id="Tex-VR-egE">
+                                <rect key="frame" x="102" y="698" width="171" height="100"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="100" id="logo-h1"/>
+                                    <constraint firstAttribute="width" constant="171" id="logo-w1"/>
+                                </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" red="0.12549019607843137" green="0.12549019607843137" blue="0.12549019607843137" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="wg2-ME-QtK" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="bld-cx"/>
+                            <constraint firstItem="wg2-ME-QtK" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-90" id="bld-cy"/>
+                            <constraint firstItem="DxR-Mr-D6T" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="lbl-cx"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Tex-VR-egE" secondAttribute="bottom" constant="20" id="logo-bot"/>
+                            <constraint firstItem="Tex-VR-egE" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="logo-cx"/>
+                            <constraint firstItem="Tex-VR-egE" firstAttribute="top" secondItem="DxR-Mr-D6T" secondAttribute="bottom" constant="8" id="logo-top"/>
+                        </constraints>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="iYj-Kq-Ea1" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -42,7 +54,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="Image 2" width="266.66665649414062" height="200"/>
         <image name="building4.png" width="534" height="548"/>
-        <image name="logo 5" width="800" height="600"/>
     </resources>
 </document>

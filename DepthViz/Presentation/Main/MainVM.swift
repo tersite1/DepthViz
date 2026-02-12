@@ -32,7 +32,7 @@ final class MainVM {
     @Published private(set) var scanData: ScanData?
     @Published private(set) var saveScanDataSuccess: Bool?
 
-    private let renderer: Renderer
+    let renderer: Renderer
     private var cancellables: Set<AnyCancellable> = []
 
     init(session: ARSession, device: MTLDevice, view: MTKView) {
@@ -57,7 +57,12 @@ extension MainVM {
             self.changeMode(to: .recording)
         case .recording:
             self.stopRecording()
-            self.changeMode(to: .loading)
+            // DV-SLAM: "최적화 수행 중..." 표시, ARKit: "처리 중..." 표시
+            if ScanSettings.shared.algorithm == .depthViz {
+                self.changeMode(to: .recordingTerminate)
+            } else {
+                self.changeMode(to: .loading)
+            }
         case .loading:
             self.changeMode(to: .uploading)
         case .uploading:
@@ -130,39 +135,101 @@ extension MainVM {
 extension MainVM {
     private func bindRenderer() {
         self.renderer.$currentPointCount
-            .receive(on: DispatchQueue.global())
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] count in
                 self?.pointCount = count
             }
             .store(in: &self.cancellables)
-        
+
+        // Handle binary Data from PointCloudExporter (new fast path)
+        self.renderer.$lidarRawData
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] rawData in
+                guard let self = self,
+                      let rawData = rawData else { return }
+
+                let pointCount = self.renderer.currentPointCount
+                let bcf = ByteCountFormatter()
+                bcf.allowedUnits = [.useMB]
+                bcf.countStyle = .file
+                let fileSize = bcf.string(fromByteCount: Int64(rawData.count))
+
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy_MMdd_HHmmss"
+                let timestamp = dateFormatter.string(from: Date())
+                let ext = ScanSettings.shared.fileFormat.fileExtension
+
+                let scan = ScanData(
+                    date: Date(),
+                    fileName: "\(timestamp)_Scan.\(ext)",
+                    lidarData: rawData,
+                    fileSize: fileSize,
+                    points: pointCount,
+                    project: "Default"
+                )
+                scan.startCameraTransform = self.renderer.getStartCameraTransform()
+                scan.trajectoryPoints = self.renderer.getTrajectoryPoints()
+                self.scanData = scan
+            }
+            .store(in: &self.cancellables)
+
+        // Legacy string path (fallback for ASCII formats)
         self.renderer.$lidarRawStringData
-            .receive(on: DispatchQueue.global())
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] rawStringData in
                 guard let self = self,
                       let rawStringData = rawStringData else { return }
-                
-                let pointCount = self.renderer.currentPointCount // 옵셔널 바인딩 제거
+
+                let pointCount = self.renderer.currentPointCount
                 let lidarData = LiDARData(rawStringData: rawStringData, pointCount: pointCount)
-                
-                self.scanData = ScanData(
+
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy_MMdd_HHmmss"
+                let timestamp = dateFormatter.string(from: Date())
+
+                let scan = ScanData(
                     date: Date(),
-                    fileName: "ExampleFileName",
+                    fileName: "\(timestamp)_Scan.ply",
                     lidarData: lidarData.lidarData,
                     fileSize: lidarData.lidarFileSize,
                     points: lidarData.pointCount,
-                    project: "ExampleProject"
+                    project: "Default"
                 )
+                scan.startCameraTransform = self.renderer.getStartCameraTransform()
+                scan.trajectoryPoints = self.renderer.getTrajectoryPoints()
+                self.scanData = scan
             }
             .store(in: &self.cancellables)
     }
 
     private func startRecording() {
+        // 녹화 직전 최신 설정 반영 (confidence, 알고리즘, 그리드 포인트 수)
+        self.renderer.applySettings()
         self.renderer.isRecording = true
+
+        let algorithm = ScanSettings.shared.algorithm
+        if algorithm == .depthViz {
+            // DV-SLAM: SLAM 엔진 + IMU 시작 (LIO = LiDAR-Inertial Odometry)
+            SLAMService.sharedInstance().reloadSettings()
+            SLAMService.sharedInstance().delegate = self.renderer
+            SLAMService.sharedInstance().start()
+            self.renderer.startIMUForSLAM()
+            print("🔬 DV-SLAM 엔진 + IMU(100Hz) 시작")
+        } else {
+            print("📱 ARKit 모드 (SLAM/IMU 비활성)")
+        }
     }
 
     private func stopRecording() {
         self.renderer.isRecording = false
-        self.renderer.savePointCloud()
+
+        let algorithm = ScanSettings.shared.algorithm
+        if algorithm == .depthViz {
+            self.renderer.stopIMUForSLAM()
+            SLAMService.sharedInstance().stop()
+        }
+
+        // 후처리 최적화 → 내보내기 (두 모드 공통)
+        self.renderer.optimizeAndExport(useSLAM: algorithm == .depthViz)
     }
 }

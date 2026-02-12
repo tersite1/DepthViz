@@ -45,11 +45,11 @@ final class LidarProcessStatusLabel: UIView {
     
     func updateStatus(to status: Status) {
         if status == .processing {
-            self.label.text = "처리중"
+            self.label.text = NSLocalizedString("process_processing", comment: "")
             self.label.textColor = .secondaryLabel
             self.layer.borderColor = UIColor.secondaryLabel.cgColor
         } else {
-            self.label.text = "완료"
+            self.label.text = NSLocalizedString("process_completed", comment: "")
             self.label.textColor = .tintColor
             self.layer.borderColor = UIColor.tintColor.cgColor
         }

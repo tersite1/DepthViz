@@ -9,6 +9,8 @@ struct ProjectListView: View {
     @State private var projects: [String] = ScanStorage.shared.getProjects()
     @State private var newProjectName: String = ""
     @State private var isAddingProject: Bool = false
+    @State private var projectToDelete: String?
+    @State private var showDeleteConfirm = false
 
     var body: some View {
         NavigationView {
@@ -20,7 +22,8 @@ struct ProjectListView: View {
                         }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
-                                deleteProject(project)
+                                projectToDelete = project
+                                showDeleteConfirm = true
                             } label: {
                                 Label("삭제", systemImage: "trash")
                             }
@@ -57,7 +60,7 @@ struct ProjectListView: View {
                 Button(action: {
                     showNewProjectNameAlert()
                 }) {
-                    Text("프로젝트 추가")
+                    Text(NSLocalizedString("add_project", comment: ""))
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.blue)
@@ -66,6 +69,19 @@ struct ProjectListView: View {
                         .padding(.horizontal)
                 }
             }
+        }
+        .alert(NSLocalizedString("delete_project", comment: ""), isPresented: $showDeleteConfirm) {
+            Button(NSLocalizedString("delete", comment: ""), role: .destructive) {
+                if let project = projectToDelete {
+                    deleteProject(project)
+                }
+                projectToDelete = nil
+            }
+            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) {
+                projectToDelete = nil
+            }
+        } message: {
+            Text(String(format: NSLocalizedString("delete_project_message", comment: ""), projectToDelete ?? ""))
         }
         .onAppear {
             projects = ScanStorage.shared.getProjects()
@@ -77,12 +93,12 @@ struct ProjectListView: View {
         if let window = UIApplication.shared.windows.first {
             let rootVC = window.rootViewController
 
-            let nameAlert = UIAlertController(title: "새 프로젝트 이름", message: "새 프로젝트 이름을 입력하세요.", preferredStyle: .alert)
+            let nameAlert = UIAlertController(title: NSLocalizedString("new_project_title", comment: ""), message: NSLocalizedString("new_project_message", comment: ""), preferredStyle: .alert)
             nameAlert.addTextField { textField in
-                textField.placeholder = "프로젝트 이름"
+                textField.placeholder = NSLocalizedString("new_project_placeholder", comment: "")
             }
 
-            let createAction = UIAlertAction(title: "생성", style: .default) { [weak rootVC] _ in
+            let createAction = UIAlertAction(title: NSLocalizedString("create", comment: ""), style: .default) { [weak rootVC] _ in
                 guard let newProjectName = nameAlert.textFields?.first?.text, !newProjectName.isEmpty else {
                     return
                 }
@@ -90,7 +106,7 @@ struct ProjectListView: View {
                 projects = ScanStorage.shared.getProjects()
             }
 
-            let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+            let cancelAction = UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel, handler: nil)
 
             nameAlert.addAction(createAction)
             nameAlert.addAction(cancelAction)

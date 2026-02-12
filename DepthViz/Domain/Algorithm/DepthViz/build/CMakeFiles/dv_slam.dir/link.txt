@@ -1,0 +1,2 @@
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar qc libdv_slam.a CMakeFiles/dv_slam.dir/src/DV_ESKF.cpp.o CMakeFiles/dv_slam.dir/src/DV_LIOBackend.cpp.o CMakeFiles/dv_slam.dir/src/DV_VIOManager.cpp.o CMakeFiles/dv_slam.dir/src/DepthVizEngine.cpp.o CMakeFiles/dv_slam.dir/src/DV_OfflineEvaluator.cpp.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib libdv_slam.a

@@ -43,15 +43,17 @@ static simd_float4 worldPoint(simd_float2 cameraPoint, float depth, matrix_float
 }
 
 ///  Vertex shader that takes in a 2D grid-point and infers its 3D position in world-space, along with RGB and confidence
+///  Voxel occupancy check: skip points that fall in already-occupied voxels to prevent duplicate accumulation
 vertex void unprojectVertex(uint vertexID [[vertex_id]],
                             constant PointCloudUniforms &uniforms [[buffer(kPointCloudUniforms)]],
                             device ParticleUniforms *particleUniforms [[buffer(kParticleUniforms)]],
                             constant float2 *gridPoints [[buffer(kGridPoints)]],
+                            device atomic_uint *voxelGrid [[buffer(kVoxelOccupancy)]],
                             texture2d<float, access::sample> capturedImageTextureY [[texture(kTextureY)]],
                             texture2d<float, access::sample> capturedImageTextureCbCr [[texture(kTextureCbCr)]],
                             texture2d<float, access::sample> depthTexture [[texture(kTextureDepth)]],
                             texture2d<unsigned int, access::sample> confidenceTexture [[texture(kTextureConfidence)]]) {
-    
+
     const auto gridPoint = gridPoints[vertexID];
     const auto currentPointIndex = (uniforms.pointCloudCurrentIndex + vertexID) % uniforms.maxPoints;
     const auto texCoord = gridPoint / uniforms.cameraResolution;
@@ -59,13 +61,26 @@ vertex void unprojectVertex(uint vertexID [[vertex_id]],
     const auto depth = depthTexture.sample(colorSampler, texCoord).r;
     // With a 2D point plus depth, we can now get its 3D position
     const auto position = worldPoint(gridPoint, depth, uniforms.cameraIntrinsicsInversed, uniforms.localToWorld);
-    
+
+    // Voxel occupancy check — hash world position to a voxel and skip if already occupied
+    const float vs = uniforms.voxelSize;
+    const int ix = int(floor(position.x / vs));
+    const int iy = int(floor(position.y / vs));
+    const int iz = int(floor(position.z / vs));
+    const uint hash = (uint(ix) * 73856093u ^ uint(iy) * 19349663u ^ uint(iz) * 83492791u) % uint(uniforms.voxelGridSize);
+    const uint prev = atomic_exchange_explicit(&voxelGrid[hash], 1u, memory_order_relaxed);
+    if (prev != 0u) {
+        // Voxel already occupied — mark point as invalid
+        particleUniforms[currentPointIndex].confidence = -1.0;
+        return;
+    }
+
     // Sample Y and CbCr textures to get the YCbCr color at the given texture coordinate
     const auto ycbcr = float4(capturedImageTextureY.sample(colorSampler, texCoord).r, capturedImageTextureCbCr.sample(colorSampler, texCoord.xy).rg, 1);
     const auto sampledColor = (yCbCrToRGB * ycbcr).rgb;
     // Sample the confidence map to get the confidence value
     const auto confidence = confidenceTexture.sample(colorSampler, texCoord).r;
-    
+
     // Write the data to the buffer
     particleUniforms[currentPointIndex].position = position.xyz;
     particleUniforms[currentPointIndex].color = sampledColor;

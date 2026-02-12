@@ -27,6 +27,8 @@ struct ProjectDetailView: View {
     @State private var newFileName = ""
     @State private var showFileView = false
     @State private var showSortPicker = false
+    @State private var fileToDelete: ScanInfo?
+    @State private var showDeleteConfirm = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -105,7 +107,8 @@ struct ProjectDetailView: View {
                         shareFile(file: selectedFile)
                     },
                     .destructive(Text("파일 삭제")) {
-                        deleteFile(file: selectedFile)
+                        fileToDelete = selectedFile
+                        showDeleteConfirm = true
                     },
                     .cancel()
                 ]
@@ -132,6 +135,17 @@ struct ProjectDetailView: View {
             if let fileURL = getFileURL(for: selectedFile) {
                 ActivityViewController(activityItems: [fileURL])
             }
+        }
+        .alert("파일 삭제", isPresented: $showDeleteConfirm) {
+            Button("삭제", role: .destructive) {
+                deleteFile(file: fileToDelete)
+                fileToDelete = nil
+            }
+            Button("취소", role: .cancel) {
+                fileToDelete = nil
+            }
+        } message: {
+            Text("'\(fileToDelete?.fileName ?? "")'을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")
         }
         .navigationTitle(project)
         .navigationBarTitleDisplayMode(.inline)
@@ -350,13 +364,14 @@ struct RenameFileView: View {
 
 struct ViewControllerWrapper: UIViewControllerRepresentable {
     var filePath: String
-    
+
     func makeUIViewController(context: Context) -> ViewController {
         let viewController = ViewController()
+        viewController.READFILE(from: filePath)
         return viewController
     }
 
     func updateUIViewController(_ uiViewController: ViewController, context: Context) {
-        uiViewController.READFILE(from: filePath)
+        // READFILE은 makeUIViewController에서 1회만 호출
     }
 }

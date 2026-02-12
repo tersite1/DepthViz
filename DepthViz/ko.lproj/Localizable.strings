@@ -1,0 +1,36 @@
+/* Premium Popup */
+"premium_title" = "이 앱을 재밌어하시는 거 같군요..";
+"premium_subtitle" = "개발자에게 두쫀쿠를 사줘보는건 어떨까요?";
+"premium_feature_imu" = "실시간 IMU 데이터 (Roll / Pitch / Yaw, Accel)";
+"premium_feature_odometry" = "Odometry 경로 시각화";
+"premium_feature_icon" = "프리미엄 앱 아이콘";
+"premium_unlock" = "프리미엄 잠금 해제";
+"premium_restore" = "이미 구매하셨나요? 복원하기";
+
+/* Status Labels */
+"status_ready" = "녹화를 시작하려면 탭하세요\n↓";
+"status_recording" = "녹화 중...";
+"status_processing" = "처리 중...";
+"status_optimizing" = "최적화 수행 중...";
+"status_uploading" = "업로드 중...";
+"status_need_gps" = "위치 권한이 필요합니다\n설정에서 위치 권한을 허용해주세요";
+"status_cant_record" = "LiDAR를 지원하지 않는 기기입니다\niPhone 12 Pro 이상이 필요합니다";
+"status_upload_progress" = "업로드 중\n%.1f%%";
+
+/* Process Status */
+"process_processing" = "처리중";
+"process_completed" = "완료";
+
+/* Save */
+"saving" = "저장 중...";
+
+/* Projects */
+"add_project" = "프로젝트 추가";
+"delete_project" = "프로젝트 삭제";
+"delete" = "삭제";
+"cancel" = "취소";
+"delete_project_message" = "'%@' 프로젝트와 포함된 모든 파일을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.";
+"new_project_title" = "새 프로젝트 이름";
+"new_project_message" = "새 프로젝트 이름을 입력하세요.";
+"new_project_placeholder" = "프로젝트 이름";
+"create" = "생성";

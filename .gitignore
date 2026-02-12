@@ -1,30 +1,75 @@
-# See LICENSE folder for this sample’s licensing information.
-#
-# Apple sample code gitignore configuration.
-
 # Finder
 .DS_Store
 
 # Xcode - User files
-# xcuserdata/
-
+xcuserdata/
 **/*.xcodeproj/project.xcworkspace/*
 !**/*.xcodeproj/project.xcworkspace/xcshareddata
-
 **/*.xcodeproj/project.xcworkspace/xcshareddata/*
 !**/*.xcodeproj/project.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
-
 **/*.playground/playground.xcworkspace/*
 !**/*.playground/playground.xcworkspace/xcshareddata
-
 **/*.playground/playground.xcworkspace/xcshareddata/*
 !**/*.playground/playground.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
 
 # environment
 env.xcconfig
 
-# AdMob guides and documentation
-*AdMob*.md
-*광고*.md
-README*.md
-*_가이드*.md
+# Apple private keys
+*.p8
+
+# CocoaPods
+Pods/
+Podfile.lock
+DepthViz.xcworkspace/
+
+# Large frameworks (install separately)
+opencv.framework/
+DepthViz/Frameworks/
+pcl-superbuild/
+
+# External SLAM repositories
+Super-LIO-ros1/
+fast-livo2/
+
+# Build artifacts & logs
+build.log
+build_check.log
+build_output*.txt
+*.backup.*
+
+# Scripts (dev only)
+add_cpp_sources.py
+add_slam_files.sh
+apply_build_settings.sh
+fix_xcode_paths.py
+setup_dependencies.sh
+verify_integration.sh
+
+# Documentation / notes (dev only)
+ARCHITECTURE_FIX.txt
+COMPLETION_REPORT.txt
+DEPLOYMENT_PROFILING_GUIDE.md
+DEPTHVIZ_TEST_SUITE.md
+FIX_LINKER_ERRORS.md
+IMPLEMENTATION_PLAN.md
+MANUAL_BUILD_SETUP.md
+NEXT_STEPS.md
+PHASE_0_COMPLETE.md
+QUICK_START.txt
+REFACTORING_SUMMARY.md
+SLAM_FIXES_SUMMARY.md
+TECHNICAL_ANALYSIS.md
+math.md
+*.txt
+!DepthViz/**/*.txt
+
+# Large media files
+imu.mov
+trajectory.mov
+
+# Misc
+appremium/
+DepthViz/logo_new.png
+DepthViz/Presentation/Extension/building4_new.png
+DepthViz/Presentation/Extension/building4_premium.png

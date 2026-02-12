@@ -1,4 +1,5 @@
 import Foundation
+import simd
 
 /// 스캔된 Point Cloud Data 저장소
 final class ScanStorage: ObservableObject {
@@ -150,15 +151,30 @@ final class ScanStorage: ObservableObject {
             FileManager.default.createFile(atPath: infoUrl.path, contents: infoData)
             updateInfos()
         } catch {
-            print("ㅋㅋㅋFailed to update info: \(error.localizedDescription)")
+            print("Failed to update info: \(error.localizedDescription)")
+        }
+    }
+
+    func hasEnoughStorage(for dataSize: Int) -> Bool {
+        let urls = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        guard let url = urls.first else { return false }
+        do {
+            let values = try url.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+            let available = values.volumeAvailableCapacityForImportantUsage ?? 0
+            return available > Int64(dataSize + 1_000_000)  // 1MB margin
+        } catch {
+            return true  // Allow save if we can't check
         }
     }
 
     func save(_ ply: ScanData) -> Bool {
+        guard hasEnoughStorage(for: ply.lidarData.count) else {
+            print("❌ 저장 공간 부족: \(ply.lidarData.count) bytes 필요")
+            return false
+        }
+
         let infoUrl = infosRoot.appendingPathComponent(ply.fileName)
         let fileUrl = filesRoot.appendingPathComponent(ply.fileName)
-        print("Saving ScanData to path: \(infoUrl.path)") // 디버그 로그 추가
-        print("Project Name: \(ply.project)") // 프로젝트 이름 로그 추가
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         encoder.dateEncodingStrategy = .iso8601
@@ -270,5 +286,21 @@ final class ScanStorage: ObservableObject {
         }
 
         updateInfos()
+    }
+
+    /// Decode a simd_float4x4 transform from a JSON file.
+    static func decodeTransform(from url: URL) -> simd_float4x4? {
+        guard FileManager.default.fileExists(atPath: url.path),
+              let data = try? Data(contentsOf: url),
+              let columns = try? JSONDecoder().decode([[Float]].self, from: data),
+              columns.count == 4 else {
+            return nil
+        }
+        return simd_float4x4(
+            SIMD4<Float>(columns[0][0], columns[0][1], columns[0][2], columns[0][3]),
+            SIMD4<Float>(columns[1][0], columns[1][1], columns[1][2], columns[1][3]),
+            SIMD4<Float>(columns[2][0], columns[2][1], columns[2][2], columns[2][3]),
+            SIMD4<Float>(columns[3][0], columns[3][1], columns[3][2], columns[3][3])
+        )
     }
 }

@@ -7,6 +7,7 @@
 //
 
 import SceneKit
+import simd
 
 class PointCloud: NSObject {
     
@@ -56,6 +57,62 @@ class PointCloud: NSObject {
         }
     }
     
+    /// Recenter all points relative to a reference transform (e.g. startCameraTransform).
+    func recenter(using referenceTransform: simd_float4x4) {
+        let inv = referenceTransform.inverse
+        pointCloud = pointCloud.map { v in
+            let pos = SIMD4<Float>(v.x, v.y, v.z, 1.0)
+            let recentered = inv * pos
+            return PointCloudVertex(x: recentered.x, y: recentered.y, z: recentered.z,
+                                    r: v.r, g: v.g, b: v.b)
+        }
+    }
+
+    /// Remove points farther than maxDistance from the origin.
+    func clampDistance(maxDistance: Float) {
+        pointCloud = pointCloud.filter { v in
+            let d = sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+            return d <= maxDistance
+        }
+    }
+
+    /// Extended getNode supporting color mode and point size.
+    func getNode(useColor: Bool = true, colorMode: PointColorMode, pointSize: CGFloat) -> SCNNode {
+        let vertices: [PointCloudVertex]
+        switch colorMode {
+        case .rgb:
+            vertices = useColor ? pointCloud : pointCloud.map {
+                PointCloudVertex(x: $0.x, y: $0.y, z: $0.z, r: 1, g: 1, b: 1)
+            }
+        case .intensity:
+            vertices = pointCloud.map { v in
+                let gray = 0.299 * v.r + 0.587 * v.g + 0.114 * v.b
+                return PointCloudVertex(x: v.x, y: v.y, z: v.z, r: gray, g: gray, b: gray)
+            }
+        case .height:
+            let ys = pointCloud.map { $0.y }
+            let minY = ys.min() ?? 0
+            let maxY = ys.max() ?? 1
+            let range = max(maxY - minY, 0.001)
+            vertices = pointCloud.map { v in
+                let t = (v.y - minY) / range
+                return PointCloudVertex(x: v.x, y: v.y, z: v.z,
+                                        r: t, g: 0.3, b: 1.0 - t)
+            }
+        case .mono:
+            vertices = pointCloud.map {
+                PointCloudVertex(x: $0.x, y: $0.y, z: $0.z, r: 0.8, g: 0.8, b: 0.8)
+            }
+        }
+        let node = buildNode(points: vertices)
+        if let geometry = node.geometry, let element = geometry.elements.first {
+            element.pointSize = pointSize
+            element.minimumPointScreenSpaceRadius = pointSize
+            element.maximumPointScreenSpaceRadius = pointSize * 4
+        }
+        return node
+    }
+
     // getNode에서 노드의 스케일 조정
     func getNode(useColor: Bool = true, scaleFactor: Float = 4.0) -> SCNNode {
         let vertices = pointCloud.map { (v: PointCloudVertex) -> PointCloudVertex in

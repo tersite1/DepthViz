@@ -1,8 +1,10 @@
 /*
-See LICENSE folder for this sample’s licensing information.
+See LICENSE folder for this sample's licensing information.
 
 Abstract:
 Bridging header for shared shader types.
 */
 
-#import "ShaderTypes.h"
+#import "../Domain/Metal/ShaderTypes.h"
+#import "../Domain/Algorithm/Bridge/SLAMService.h"
+

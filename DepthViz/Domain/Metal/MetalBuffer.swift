@@ -68,6 +68,13 @@ struct MetalBuffer<Element>: Resource {
         buffer.contents().copyMemory(from: array, byteCount: byteCount)
     }
     
+    /// Provides safe read-only access to the buffer's contents as an UnsafeBufferPointer.
+    func withUnsafeBufferPointer<R>(_ body: (UnsafeBufferPointer<Element>) -> R) -> R {
+        let ptr = buffer.contents().bindMemory(to: Element.self, capacity: count)
+        let bufferPtr = UnsafeBufferPointer(start: ptr, count: count)
+        return body(bufferPtr)
+    }
+
     /// Returns a copy of the value at the specified element index in the buffer.
     subscript(index: Int) -> Element {
         get {

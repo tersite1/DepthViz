@@ -23,6 +23,7 @@ enum BufferIndices {
     kPointCloudUniforms = 0,
     kParticleUniforms = 1,
     kGridPoints = 2,
+    kVoxelOccupancy = 3,
 };
 
 struct RGBUniforms {
@@ -38,9 +39,11 @@ struct PointCloudUniforms {
     simd_float2 cameraResolution;
     
     float particleSize;
+    float voxelSize;
     int maxPoints;
     int pointCloudCurrentIndex;
-    int confidenceThreshold;
+    float confidenceThreshold;
+    int voxelGridSize;
 };
 
 struct ParticleUniforms {

@@ -1,0 +1,36 @@
+/* Premium Popup */
+"premium_title" = "Enjoying the app?";
+"premium_subtitle" = "How about buying the developer a donut?";
+"premium_feature_imu" = "Real-time IMU Data (Roll / Pitch / Yaw, Accel)";
+"premium_feature_odometry" = "Odometry Path Visualization";
+"premium_feature_icon" = "Premium App Icon";
+"premium_unlock" = "Unlock Premium";
+"premium_restore" = "Already purchased? Restore";
+
+/* Status Labels */
+"status_ready" = "Tap to start scanning\n↓";
+"status_recording" = "Scanning...";
+"status_processing" = "Processing...";
+"status_optimizing" = "Optimizing...";
+"status_uploading" = "Uploading...";
+"status_need_gps" = "Location permission required\nPlease enable location access in Settings";
+"status_cant_record" = "LiDAR not supported on this device\niPhone 12 Pro or later required";
+"status_upload_progress" = "Uploading\n%.1f%%";
+
+/* Process Status */
+"process_processing" = "Processing";
+"process_completed" = "Done";
+
+/* Save */
+"saving" = "Saving...";
+
+/* Projects */
+"add_project" = "Add Project";
+"delete_project" = "Delete Project";
+"delete" = "Delete";
+"cancel" = "Cancel";
+"delete_project_message" = "Delete '%@' project and all its files? This cannot be undone.";
+"new_project_title" = "New Project Name";
+"new_project_message" = "Enter a name for the new project.";
+"new_project_placeholder" = "Project Name";
+"create" = "Create";

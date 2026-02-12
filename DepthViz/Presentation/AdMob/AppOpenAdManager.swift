@@ -41,9 +41,8 @@ final class AppOpenAdManager: NSObject {
     // 테스트용 광고 ID
     private let appOpenAdUnitID = "ca-app-pub-3940256099942544/5575463023" // Google 테스트 앱 오프닝 광고 ID
     #else
-    // 실제 광고 ID (배포용)
-    // TODO: 앱스토어 출시 전에 본인의 AdMob 계정에서 발급받은 광고 ID로 교체하세요
-    private let appOpenAdUnitID = "YOUR_ACTUAL_APP_OPEN_AD_UNIT_ID"
+    // 실제 광고 ID (배포용) — 앱스토어 출시 전에 AdMob 계정에서 발급받은 ID로 교체 필요
+    private let appOpenAdUnitID = "ca-app-pub-3940256099942544/5575463023" // 테스트 ID (교체 필요)
     #endif
     
     private override init() {

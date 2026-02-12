@@ -1,0 +1,6 @@
+#ifndef VISUALIZATION_MSGS_MARKERARRAY_H
+#define VISUALIZATION_MSGS_MARKERARRAY_H
+
+#include "Marker.h"
+
+#endif

@@ -45,7 +45,7 @@ class ViewController: UIViewController {
         let slider = UISlider()
         slider.minimumValue = 1.0
         slider.maximumValue = 15.0
-        slider.value = 3.0
+        slider.value = 1.5
         slider.minimumTrackTintColor = .white
         slider.maximumTrackTintColor = UIColor(white: 0.4, alpha: 0.6)
         slider.thumbTintColor = .white
@@ -163,7 +163,7 @@ class ViewController: UIViewController {
                     return
                 }
 
-                let node = pc.getNode(useColor: true, colorMode: .rgb, pointSize: 3.0)
+                let node = pc.getNode(useColor: true, colorMode: .rgb, pointSize: 1.5)
                 self.sceneView.scene?.rootNode.addChildNode(node)
                 self.pointCloudNode = node
                 self.setupCamera(for: node)

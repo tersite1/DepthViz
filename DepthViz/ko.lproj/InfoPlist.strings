@@ -1,0 +1,3 @@
+NSCameraUsageDescription = "3D 스캔을 위해 카메라와 LiDAR 센서 접근 권한이 필요합니다.";
+NSLocationWhenInUseUsageDescription = "스캔 데이터에 위치 정보를 저장하기 위해 위치 권한이 필요합니다.";
+NSFaceIDUsageDescription = "Face ID를 사용하여 인증합니다.";

@@ -20,6 +20,20 @@ struct IMUDisplayData {
     let gx: Float, gy: Float, gz: Float          // rad/s
 }
 
+/// IMU 로그 (CSV 내보내기용)
+struct IMULogEntry {
+    let timestamp: Double   // 녹화 시작부터 경과 시간 (초)
+    let roll: Float, pitch: Float, yaw: Float
+    let ax: Float, ay: Float, az: Float
+    let gx: Float, gy: Float, gz: Float
+}
+
+/// 트라젝토리 로그 (CSV 내보내기용)
+struct TrajectoryLogEntry {
+    let timestamp: Double
+    let x: Float, y: Float, z: Float
+}
+
 final class Renderer: NSObject, SLAMDelegate {
     // Maximum number of points we store in the point cloud
     // 시뮬레이터: 2백만, 실제 기기: 8백만
@@ -163,10 +177,24 @@ final class Renderer: NSObject, SLAMDelegate {
 
     // 트라젝토리 기록 (카메라 이동 경로)
     private var trajectoryPoses: [SIMD3<Float>] = []
+    // IMU + 트라젝토리 로그 (CSV 내보내기용)
+    private var imuLog: [IMULogEntry] = []
+    private var trajectoryLog: [TrajectoryLogEntry] = []
+    private var recordingStartTime: Date?
 
     /// 트라젝토리 포인트 반환
     func getTrajectoryPoints() -> [SIMD3<Float>] {
         return trajectoryPoses
+    }
+
+    /// IMU 로그 반환 (CSV용)
+    func getIMULog() -> [IMULogEntry] {
+        return imuLog
+    }
+
+    /// 트라젝토리 로그 반환 (CSV용)
+    func getTrajectoryLog() -> [TrajectoryLogEntry] {
+        return trajectoryLog
     }
 
     private static let absoluteMaxPoints = 50_000_000  // 50M hard cap
@@ -260,16 +288,29 @@ final class Renderer: NSObject, SLAMDelegate {
         imuQueue.maxConcurrentOperationCount = 1
         imuQueue.qualityOfService = .userInteractive
         motionManager.deviceMotionUpdateInterval = 1.0 / 100.0
+        recordingStartTime = Date()
         motionManager.startDeviceMotionUpdates(to: imuQueue) { [weak self] motion, error in
             guard let self = self, let motion = motion else { return }
             self.imuSampleCount += 1
             SLAMService.sharedInstance().processIMUData(motion)
 
-            // 10회에 1번만 UI 업데이트 (100Hz IMU → 10Hz display)
+            let att = motion.attitude
+            let acc = motion.userAcceleration
+            let rot = motion.rotationRate
+
+            // IMU 로그 축적 (10Hz — CSV용)
             if self.imuSampleCount % 10 == 0 {
-                let att = motion.attitude
-                let acc = motion.userAcceleration
-                let rot = motion.rotationRate
+                let elapsed = Date().timeIntervalSince(self.recordingStartTime ?? Date())
+                self.imuLog.append(IMULogEntry(
+                    timestamp: elapsed,
+                    roll: Float(att.roll * 180 / Double.pi),
+                    pitch: Float(att.pitch * 180 / Double.pi),
+                    yaw: Float(att.yaw * 180 / Double.pi),
+                    ax: Float(acc.x), ay: Float(acc.y), az: Float(acc.z),
+                    gx: Float(rot.x), gy: Float(rot.y), gz: Float(rot.z)
+                ))
+
+                // UI 업데이트
                 DispatchQueue.main.async {
                     self.imuDisplayData = IMUDisplayData(
                         roll: Float(att.roll * 180 / Double.pi),
@@ -349,7 +390,10 @@ final class Renderer: NSObject, SLAMDelegate {
 
         // 트라젝토리 기록 (녹화 중일 때)
         if isRecording {
-            trajectoryPoses.append(SIMD3<Float>(cameraTranslation.x, cameraTranslation.y, cameraTranslation.z))
+            let pos = SIMD3<Float>(cameraTranslation.x, cameraTranslation.y, cameraTranslation.z)
+            trajectoryPoses.append(pos)
+            let elapsed = Date().timeIntervalSince(recordingStartTime ?? Date())
+            trajectoryLog.append(TrajectoryLogEntry(timestamp: elapsed, x: pos.x, y: pos.y, z: pos.z))
         }
 
         // RGB uniforms 업데이트 (카메라 피드 렌더링용)
@@ -726,6 +770,9 @@ extension Renderer {
         self.lidarRawStringData = nil
         self.imuDisplayData = nil
         self.trajectoryPoses.removeAll()
+        self.imuLog.removeAll()
+        self.trajectoryLog.removeAll()
+        self.recordingStartTime = nil
 
         // 카메라/SLAM 상태 완전 초기화 (4000포인트 잔류 방지)
         self.lastCameraTransform = nil
@@ -843,11 +890,10 @@ extension Renderer {
                 print("🔬 DV-SLAM 최적화: \(originalCount) → \(p1)(SLAM맵) → \(p2)(표면씬닝) → \(p3)(복셀) → \(p4)(이상치) [\(String(format: "%.1f", elapsed))초]")
             } else {
                 // ═══════════════════════════════════════════
-                // ARKit: 기본 다운샘플링만 (비교 기준)
+                // ARKit: 최적화 없이 raw output (드리프트 그대로 노출)
                 // ═══════════════════════════════════════════
-                self.performVoxelDownsampling(voxelSize: 0.020)
                 let elapsed = CFAbsoluteTimeGetCurrent() - startTime
-                print("📱 ARKit 기본 처리: \(originalCount) → \(self.currentPointCount) [\(String(format: "%.1f", elapsed))초]")
+                print("📱 ARKit raw: \(originalCount)개 그대로 유지 (최적화 없음) [\(String(format: "%.1f", elapsed))초]")
             }
 
             // GPU 렌더 재개

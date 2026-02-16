@@ -167,14 +167,35 @@ struct AlgorithmSelectionView: View {
 
             if premiumManager.isPremium {
                 Toggle(isOn: $premiumManager.showOdometry) {
-                    Label("Odometry 시각화", systemImage: "point.topleft.down.curvedto.point.bottomright.up")
-                        .font(.system(size: 15))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label("Odometry 시각화", systemImage: "point.topleft.down.curvedto.point.bottomright.up")
+                            .font(.system(size: 15))
+                        Text("프리뷰 경로 표시 + trajectory CSV 저장")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
                 }
                 .tint(.blue)
 
                 Toggle(isOn: $premiumManager.showIMUData) {
-                    Label("IMU 데이터 표시", systemImage: "chart.bar.fill")
-                        .font(.system(size: 15))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label("IMU 데이터 표시", systemImage: "chart.bar.fill")
+                            .font(.system(size: 15))
+                        Text("스캔 중 Roll/Pitch/Yaw + IMU CSV 저장")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .tint(.blue)
+
+                Toggle(isOn: $premiumManager.saveVideo) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label("동영상 페어 저장", systemImage: "video.fill")
+                            .font(.system(size: 15))
+                        Text("스캔 중 카메라 미리보기 + 동영상 저장")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
                 }
                 .tint(.blue)
 
@@ -186,6 +207,18 @@ struct AlgorithmSelectionView: View {
                         .font(.system(size: 15))
                 }
                 .tint(.blue)
+
+                // 저장 경로 안내
+                HStack(spacing: 8) {
+                    Image(systemName: "folder.fill")
+                        .font(.system(size: 13))
+                        .foregroundColor(.blue)
+                    Text(NSLocalizedString("premium_export_path", comment: ""))
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.top, 4)
             } else {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("프리미엄 기능을 잠금 해제하세요")
@@ -222,47 +255,80 @@ struct AlgorithmSelectionView: View {
             sectionHeader("Developer", icon: "person.fill")
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("장민석")
+                Text(NSLocalizedString("developer_name", comment: ""))
                     .font(.system(size: 15, weight: .semibold))
-                Text("항상 피곤한 대학원생입니다.")
+                Text(NSLocalizedString("developer_bio", comment: ""))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
-                Text("소통 및 코웍 제안 환영합니다!")
+                Text(NSLocalizedString("developer_collab", comment: ""))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
             }
 
-            // 개발자에게 커피 사주기
-            Button(action: {
-                // 카카오뱅크 계좌 복사
-                UIPasteboard.general.string = "3333-10-0243235"
-            }) {
-                HStack(spacing: 12) {
-                    Image(systemName: "cup.and.saucer.fill")
-                        .font(.system(size: 20))
-                        .foregroundColor(.orange)
+            // 한국어: 카카오뱅크 계좌, 그 외: USDT
+            if Locale.current.language.languageCode?.identifier == "ko" {
+                // 카카오뱅크 계좌 (한국어만)
+                Button(action: {
+                    UIPasteboard.general.string = "3333-10-0243235"
+                }) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "cup.and.saucer.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(.orange)
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("개발자에게 커피 사주기")
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(.primary)
-                        Text("카카오뱅크 3333-10-0243235 장민석")
-                            .font(.system(size: 12))
-                            .foregroundColor(.secondary)
-                        Text("탭하면 계좌번호가 복사됩니다")
-                            .font(.system(size: 11))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(NSLocalizedString("developer_coffee", comment: ""))
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.primary)
+                            Text(NSLocalizedString("developer_account", comment: ""))
+                                .font(.system(size: 12))
+                                .foregroundColor(.secondary)
+                            Text(NSLocalizedString("developer_copy_hint", comment: ""))
+                                .font(.system(size: 11))
+                                .foregroundColor(.blue)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 14))
                             .foregroundColor(.blue)
                     }
-
-                    Spacer()
-
-                    Image(systemName: "doc.on.doc")
-                        .font(.system(size: 14))
-                        .foregroundColor(.blue)
+                    .padding(.vertical, 8)
                 }
-                .padding(.vertical, 8)
+                .buttonStyle(.plain)
+            } else {
+                // USDT 후원 (한국어 외 모든 언어)
+                Button(action: {
+                    UIPasteboard.general.string = "TFiuyB1iVbXfARsJzqp1YcMPfbWExZfC8a"
+                }) {
+                    HStack(spacing: 12) {
+                        Image("usdt")
+                            .resizable()
+                            .frame(width: 24, height: 24)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(NSLocalizedString("developer_usdt", comment: ""))
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(.primary)
+                            Text("TFiuyB1...fC8a")
+                                .font(.system(size: 12, design: .monospaced))
+                                .foregroundColor(.secondary)
+                            Text(NSLocalizedString("developer_copy_hint", comment: ""))
+                                .font(.system(size: 11))
+                                .foregroundColor(.blue)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 14))
+                            .foregroundColor(.blue)
+                    }
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
 
             // 개발자 웹사이트
             Button(action: {
@@ -276,7 +342,7 @@ struct AlgorithmSelectionView: View {
                         .foregroundColor(.blue)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("개발자 웹사이트")
+                        Text(NSLocalizedString("developer_website", comment: ""))
                             .font(.system(size: 15, weight: .medium))
                             .foregroundColor(.primary)
                         Text("tersite1.github.io")

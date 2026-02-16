@@ -15,6 +15,10 @@ import CoreLocation
 import CoreMotion
 import SwiftUI
 import MapKit
+#if canImport(GoogleMobileAds)
+import GoogleMobileAds
+#endif
+import AVFoundation
 
 /// 메인화면의 UI 및 UX 담당
 final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelegate, ScanPreviewDelegate {
@@ -22,6 +26,14 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
     private let recordingButton = RecordingButton()
     /// 현재 동작상태 표시 텍스트
     private let statusLabel = StatusIndicatorLabel()
+    /// 최적화/로딩 시 스피너
+    private let processingSpinner: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.color = .white
+        spinner.hidesWhenStopped = true
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        return spinner
+    }()
     /// 현재 측정중인 Point Cloud 개수 표시 뷰
     private let pointCloudCountView = PointCloudCountView()
     /// 측정이력창 표시 버튼
@@ -83,6 +95,15 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
         return stack
     }()
 
+    /// 카메라 미리보기 PiP (프리미엄 + 동영상 페어)
+    private var cameraPiPView: UIView?
+    private var cameraPiPLayer: AVCaptureVideoPreviewLayer?
+    private var videoWriter: AVAssetWriter?
+    private var videoWriterInput: AVAssetWriterInput?
+    private var videoAdaptor: AVAssetWriterInputPixelBufferAdaptor?
+    private var videoStartTime: CMTime?
+    private var videoOutputURL: URL?
+
     /// 마지막 카메라 움직임 시간
     private var lastMovementTime: Date?
     /// 움직임 감지 타이머
@@ -134,6 +155,9 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
             object: nil
         )
         
+        // 보상형 전면 광고 미리 로드 (20회 이상 미구매 대비)
+        Task { await InterstitialAdManager.shared.loadAd() }
+
         print("🎉 MainVC viewDidLoad 완료 🎉")
     }
 
@@ -207,6 +231,13 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
      override func viewWillAppear(_ animated: Bool) {
          super.viewWillAppear(animated)
 
+         // LiDAR 없는 기기: ARSession 시작하지 않음
+         guard ARWorldTrackingConfiguration.supportsFrameSemantics([.sceneDepth, .smoothedSceneDepth]) else {
+             self.viewModel?.cantRecording()
+             self.navigationController?.setNavigationBarHidden(true, animated: true)
+             return
+         }
+
          // 녹화 중이면 초기화하지 않음
          guard viewModel?.mode != .recording else {
              self.navigationController?.setNavigationBarHidden(true, animated: true)
@@ -251,6 +282,8 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
 
          // 9️⃣ 타이머 시작
          startMovementCheckTimer()
+
+         // 배너 광고는 프리뷰 화면(ScanPreviewVC)에서만 표시
      }
     
     /// 다른화면으로 전환시 ARSession 일시정지한다
@@ -354,6 +387,12 @@ extension MainVC {
     /// LiDAR 측정을 위한 ARSession 활성화 및 Configure 설정 부분
     private func configureARWorldTracking() {
         print("📷 configureARWorldTracking 시작")
+        // LiDAR 없는 기기에서 sceneDepth 요청 시 크래시 방지
+        guard ARWorldTrackingConfiguration.supportsFrameSemantics([.sceneDepth, .smoothedSceneDepth]) else {
+            print("⚠️ sceneDepth 미지원 기기 - ARSession 시작 안 함")
+            self.viewModel?.cantRecording()
+            return
+        }
         guard self.viewModel?.mode != .cantRecord else {
             print("⚠️ cantRecord 모드 - ARSession 시작 안 함")
             return
@@ -372,15 +411,37 @@ extension MainVC {
         // Run the view's session
         self.session.run(configuration, options: [.resetTracking, .removeExistingAnchors])
         print("✅ ARSession.run() 호출 완료")
-        
+
+        // AR 코칭 오버레이 (첫 화면 3D 가이드)
+        setupCoachingOverlay()
+
         // 사용자 설정 적용 (ARSession 시작 후)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
             self?.viewModel?.renderer.applySettings()
             print("✅ 사용자 설정 적용 완료")
         }
-        
+
         // The screen shouldn't dim during AR experiences.
         UIApplication.shared.isIdleTimerDisabled = true
+    }
+
+    private func setupCoachingOverlay() {
+        // 이미 추가되어 있으면 스킵
+        if view.subviews.contains(where: { $0 is ARCoachingOverlayView }) { return }
+
+        let coachingOverlay = ARCoachingOverlayView()
+        coachingOverlay.session = self.session
+        coachingOverlay.goal = .tracking
+        coachingOverlay.activatesAutomatically = true
+        coachingOverlay.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(coachingOverlay)
+
+        NSLayoutConstraint.activate([
+            coachingOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            coachingOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            coachingOverlay.topAnchor.constraint(equalTo: view.topAnchor),
+            coachingOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
     }
 }
 
@@ -434,6 +495,180 @@ final class MarkerButton: UIButton {
 // LocationMarker is defined in Domain/Entity/LocationMarker.swift
 // MarkerStorage is defined in Domain/Model/MarkerStorage.swift
 
+// MARK: - Camera PiP + Video Recording (Premium)
+extension MainVC {
+    func showCameraPiP() {
+        guard PremiumManager.shared.isPremium && PremiumManager.shared.saveVideo else { return }
+        guard cameraPiPView == nil else { return }
+
+        let pipSize = CGSize(width: 120, height: 160)
+        let pip = UIView(frame: CGRect(
+            x: 16,
+            y: view.safeAreaLayoutGuide.layoutFrame.maxY - pipSize.height - 80,
+            width: pipSize.width,
+            height: pipSize.height
+        ))
+        pip.backgroundColor = .black
+        pip.layer.cornerRadius = 10
+        pip.clipsToBounds = true
+        pip.layer.borderWidth = 1.5
+        pip.layer.borderColor = UIColor.white.withAlphaComponent(0.3).cgColor
+        pip.alpha = 0
+        view.addSubview(pip)
+
+        // "REC" 인디케이터
+        let recDot = UIView(frame: CGRect(x: 8, y: 8, width: 8, height: 8))
+        recDot.backgroundColor = .red
+        recDot.layer.cornerRadius = 4
+        pip.addSubview(recDot)
+
+        let recLabel = UILabel(frame: CGRect(x: 20, y: 4, width: 40, height: 16))
+        recLabel.text = "REC"
+        recLabel.font = .systemFont(ofSize: 10, weight: .bold)
+        recLabel.textColor = .red
+        pip.addSubview(recLabel)
+
+        cameraPiPView = pip
+        UIView.animate(withDuration: 0.3) { pip.alpha = 1 }
+    }
+
+    func hideCameraPiP() {
+        guard let pip = cameraPiPView else { return }
+        UIView.animate(withDuration: 0.3, animations: { pip.alpha = 0 }) { _ in
+            pip.removeFromSuperview()
+        }
+        cameraPiPView = nil
+        cameraPiPLayer = nil
+    }
+
+    /// ARFrame에서 카메라 이미지를 PiP에 표시 + 동영상 프레임 기록
+    func updateCameraPiP(with frame: ARFrame) {
+        guard PremiumManager.shared.isPremium && PremiumManager.shared.saveVideo else { return }
+
+        // PiP 업데이트 (30fps 간격, 3프레임마다)
+        let pixelBuffer = frame.capturedImage
+
+        // PiP 이미지 업데이트 (10fps)
+        if let pip = cameraPiPView, imuPiPFrameCount % 6 == 0 {
+            let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+            let context = CIContext()
+            if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
+                let uiImage = UIImage(cgImage: cgImage, scale: 1, orientation: .right)
+                DispatchQueue.main.async {
+                    if let existing = pip.subviews.compactMap({ $0 as? UIImageView }).first {
+                        existing.image = uiImage
+                    } else {
+                        let iv = UIImageView(frame: pip.bounds)
+                        iv.contentMode = .scaleAspectFill
+                        iv.clipsToBounds = true
+                        iv.image = uiImage
+                        pip.insertSubview(iv, at: 0)
+                    }
+                }
+            }
+        }
+        imuPiPFrameCount += 1
+
+        // 동영상 프레임 기록
+        writeVideoFrame(pixelBuffer: pixelBuffer, time: frame.timestamp)
+    }
+
+    private var imuPiPFrameCount: Int {
+        get { objc_getAssociatedObject(self, &pipFrameCountKey) as? Int ?? 0 }
+        set { objc_setAssociatedObject(self, &pipFrameCountKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+
+    func startVideoRecording() {
+        guard PremiumManager.shared.isPremium && PremiumManager.shared.saveVideo else { return }
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy_MMdd_HHmmss"
+        let timestamp = dateFormatter.string(from: Date())
+        let fileName = "\(timestamp)_Scan.mp4"
+        let url = ScanStorage.shared.exportRoot.appendingPathComponent(fileName)
+
+        // 이전 파일 정리
+        try? FileManager.default.removeItem(at: url)
+
+        do {
+            let writer = try AVAssetWriter(outputURL: url, fileType: .mp4)
+            let settings: [String: Any] = [
+                AVVideoCodecKey: AVVideoCodecType.h264,
+                AVVideoWidthKey: 1920,
+                AVVideoHeightKey: 1440,
+                AVVideoCompressionPropertiesKey: [
+                    AVVideoAverageBitRateKey: 6_000_000
+                ]
+            ]
+            let input = AVAssetWriterInput(mediaType: .video, outputSettings: settings)
+            input.expectsMediaDataInRealTime = true
+            input.transform = CGAffineTransform(rotationAngle: .pi / 2) // Portrait
+
+            let adaptor = AVAssetWriterInputPixelBufferAdaptor(
+                assetWriterInput: input,
+                sourcePixelBufferAttributes: [
+                    kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+                ]
+            )
+
+            writer.add(input)
+            writer.startWriting()
+
+            self.videoWriter = writer
+            self.videoWriterInput = input
+            self.videoAdaptor = adaptor
+            self.videoStartTime = nil
+            self.videoOutputURL = url
+            self.imuPiPFrameCount = 0
+
+            print("🎥 동영상 녹화 시작: \(fileName)")
+        } catch {
+            print("❌ 동영상 녹화 초기화 실패: \(error)")
+        }
+    }
+
+    func writeVideoFrame(pixelBuffer: CVPixelBuffer, time: TimeInterval) {
+        guard let writer = videoWriter, writer.status == .writing,
+              let input = videoWriterInput, input.isReadyForMoreMediaData else { return }
+
+        let cmTime = CMTime(seconds: time, preferredTimescale: 600)
+
+        if videoStartTime == nil {
+            videoStartTime = cmTime
+            writer.startSession(atSourceTime: .zero)
+        }
+
+        let presentationTime = CMTimeSubtract(cmTime, videoStartTime!)
+
+        // 15fps로 제한 (매 4번째 프레임만 기록, 60fps ARSession 기준)
+        guard imuPiPFrameCount % 4 == 0 else { return }
+
+        videoAdaptor?.append(pixelBuffer, withPresentationTime: presentationTime)
+    }
+
+    func stopVideoRecording() {
+        guard let writer = videoWriter, writer.status == .writing else {
+            videoWriter = nil
+            return
+        }
+
+        videoWriterInput?.markAsFinished()
+        writer.finishWriting { [weak self] in
+            if writer.status == .completed {
+                print("✅ 동영상 저장 완료: \(self?.videoOutputURL?.lastPathComponent ?? "")")
+            } else {
+                print("❌ 동영상 저장 실패: \(writer.error?.localizedDescription ?? "")")
+            }
+            self?.videoWriter = nil
+            self?.videoWriterInput = nil
+            self?.videoAdaptor = nil
+            self?.videoStartTime = nil
+        }
+    }
+}
+
+private var pipFrameCountKey: UInt8 = 0
+
 // MARK: - Configure
 extension MainVC {
     /// MainVC 표시할 UI 설정
@@ -453,6 +688,13 @@ extension MainVC {
         NSLayoutConstraint.activate([
             self.statusLabel.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             self.statusLabel.topAnchor.constraint(equalTo: self.recordingButton.topAnchor, constant: -60)
+        ])
+
+        // 최적화/로딩 스피너 (statusLabel 바로 위)
+        self.view.addSubview(self.processingSpinner)
+        NSLayoutConstraint.activate([
+            self.processingSpinner.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            self.processingSpinner.bottomAnchor.constraint(equalTo: self.statusLabel.topAnchor, constant: -12)
         ])
         
         // pointCloudCountView
@@ -566,6 +808,9 @@ extension MainVC {
                     self?.markerButton.isUserInteractionEnabled = false
                     self?.settingsButton.isEnabled = false
                     self?.settingsButton.alpha = 0.4
+                    // 프리미엄: 카메라 PiP + 동영상 녹화 시작
+                    self?.showCameraPiP()
+                    self?.startVideoRecording()
                 case .loading:
                     self?.locationManager.stopUpdatingLocation()
                     self?.stopIMUUpdates()
@@ -574,6 +819,8 @@ extension MainVC {
                     self?.markerButton.disappear()
                     self?.settingsButton.isEnabled = false
                     self?.settingsButton.alpha = 0.4
+                    self?.hideCameraPiP()
+                    self?.stopVideoRecording()
                 case .cantRecord:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
@@ -589,6 +836,8 @@ extension MainVC {
                     self?.settingsButton.isEnabled = false
                     self?.settingsButton.alpha = 0.4
                     self?.imuOverlayStack.alpha = 0
+                    self?.hideCameraPiP()
+                    self?.stopVideoRecording()
                 case .cantGetGPS:
                     self?.locationManager.stopUpdatingLocation()
                     self?.recordingButton.changeStatus(to: .cantRecording)
@@ -685,13 +934,12 @@ extension MainVC {
 
         let previewVC = ScanPreviewVC()
         previewVC.scanData = scanData
-        previewVC.renderer = self.viewModel?.renderer  // Renderer 전달 (초고속 렌더링!)
+        previewVC.renderer = self.viewModel?.renderer
         previewVC.delegate = self
-        previewVC.currentMarker = self.currentMarker  // 마커 정보 전달 (프로젝트 자동 생성용)
+        previewVC.currentMarker = self.currentMarker
         previewVC.modalPresentationStyle = UIModalPresentationStyle.fullScreen
         self.present(previewVC, animated: true) {
             print("✅ 스캔 프리뷰 표시 완료 (초고속 모드)")
-            // 마커 정보 초기화
             self.currentMarker = nil
         }
     }
@@ -820,24 +1068,32 @@ extension MainVC {
         switch mode {
         case .ready:
             self.statusLabel.changeText(to: .readyForRecording)
+            self.processingSpinner.stopAnimating()
         case .recording:
             self.statusLabel.changeText(to: .recording)
+            self.processingSpinner.stopAnimating()
         case .recordingTerminate:
             if ScanSettings.shared.algorithm == .depthViz {
                 self.statusLabel.changeText(to: .optimizing)
             } else {
                 self.statusLabel.changeText(to: .loading)
             }
+            self.processingSpinner.startAnimating()
         case .loading:
             self.statusLabel.changeText(to: .loading)
+            self.processingSpinner.startAnimating()
         case .uploading:
             self.statusLabel.changeText(to: .uploading)
+            self.processingSpinner.startAnimating()
         case .uploadingTerminate:
             self.statusLabel.changeText(to: .loading)
+            self.processingSpinner.startAnimating()
         case .cantGetGPS:
             self.statusLabel.changeText(to: .needGPS)
+            self.processingSpinner.stopAnimating()
         case .cantRecord:
             self.statusLabel.changeText(to: .cantRecord)
+            self.processingSpinner.stopAnimating()
         }
     }
     
@@ -938,6 +1194,8 @@ extension MainVC {
         // Feed ARFrame to DV-SLAM engine during recording
         if viewModel?.mode == .recording {
             SLAMService.sharedInstance().processARFrame(frame)
+            // 프리미엄: 카메라 PiP + 동영상 프레임 기록
+            updateCameraPiP(with: frame)
         }
     }
     
@@ -1711,7 +1969,13 @@ extension MainVC {
             guard let self = self else { return }
 
             // 프리미엄 팝업 표시 (조건 충족 시)
-            if ScanCountManager.shared.shouldShowPremiumPrompt {
+            #if DEBUG
+            let showPopup = ScanCountManager.shared.shouldShowPremiumPrompt
+            #else
+            let showPopup = ScanCountManager.shared.shouldShowPremiumPrompt
+                && !ScanCountManager.shared.shouldShowInterstitialAd
+            #endif
+            if showPopup {
                 ScanCountManager.shared.markPromptShown()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
                     guard let self = self else { return }

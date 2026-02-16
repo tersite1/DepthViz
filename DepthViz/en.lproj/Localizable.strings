@@ -4,6 +4,8 @@
 "premium_feature_imu" = "Real-time IMU Data (Roll / Pitch / Yaw, Accel)";
 "premium_feature_odometry" = "Odometry Path Visualization";
 "premium_feature_icon" = "Premium App Icon";
+"premium_feature_no_ads" = "Remove All Ads";
+"premium_feature_export" = "IMU, Trajectory & Video Export";
 "premium_unlock" = "Unlock Premium";
 "premium_restore" = "Already purchased? Restore";
 
@@ -34,3 +36,16 @@
 "new_project_message" = "Enter a name for the new project.";
 "new_project_placeholder" = "Project Name";
 "create" = "Create";
+
+/* Developer Section */
+"developer_name" = "Minsuk Jang";
+"developer_bio" = "A perpetually tired grad student.";
+"developer_collab" = "Open to communication and collaboration!";
+"developer_coffee" = "Buy the developer a coffee";
+"developer_account" = "KakaoBank 3333-10-0243235 Minsuk Jang";
+"developer_copy_hint" = "Tap to copy account number";
+"developer_usdt" = "Donate via USDT (TRC-20)";
+"developer_website" = "Developer Website";
+
+/* Premium Export Path */
+"premium_export_path" = "CSV and video files are saved to Files app > On My iPhone > DepthViz";

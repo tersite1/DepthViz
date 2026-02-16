@@ -1,0 +1,3 @@
+NSCameraUsageDescription = "Camera and LiDAR sensor access is required for 3D scanning.";
+NSLocationWhenInUseUsageDescription = "Location access is needed to tag scan data with GPS coordinates.";
+NSFaceIDUsageDescription = "Face ID is used for authentication.";

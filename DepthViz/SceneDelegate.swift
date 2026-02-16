@@ -20,24 +20,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         self.window = UIWindow(windowScene: windowScene)
-        
+
         // 로그인 화면 제거 - 직접 MainVC로 이동
         let mainVC = MainVC()
         self.window?.rootViewController = UINavigationController(rootViewController: mainVC)
         self.window?.makeKeyAndVisible()
 
-        // 프리미엄 사용자: 불 켜진 건물 런치 오버레이
-        if PremiumManager.shared.isPremium {
-            showPremiumLaunchOverlay()
-        }
-
-        // AppOpenAdManager 델리게이트 설정
-        // TODO: AdMob API key를 등록한 후 주석 해제하세요
-        /*
-        #if canImport(GoogleMobileAds)
-        AppOpenAdManager.shared.delegate = self
-        #endif
-        */
+        // 업데이트 확인
+        checkForAppUpdate()
     }
     
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -81,61 +71,53 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 }
 
-// MARK: - Premium Launch Overlay
+// MARK: - App Update Check
 extension SceneDelegate {
-    private func showPremiumLaunchOverlay() {
-        guard let window = self.window else { return }
+    private func checkForAppUpdate() {
+        guard let bundleId = Bundle.main.bundleIdentifier,
+              let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+              let url = URL(string: "https://itunes.apple.com/lookup?bundleId=\(bundleId)&country=kr") else { return }
 
-        let overlay = UIView(frame: window.bounds)
-        overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        overlay.backgroundColor = UIColor(red: 0.125, green: 0.125, blue: 0.125, alpha: 1)
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            guard error == nil,
+                  let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let results = json["results"] as? [[String: Any]],
+                  let storeInfo = results.first,
+                  let storeVersion = storeInfo["version"] as? String else { return }
 
-        // 불 켜진 건물 이미지
-        let buildingView = UIImageView(image: UIImage(named: "building4_premium"))
-        buildingView.contentMode = .scaleAspectFit
-        buildingView.translatesAutoresizingMaskIntoConstraints = false
-        overlay.addSubview(buildingView)
-
-        // "Powered by" 라벨
-        let poweredLabel = UILabel()
-        poweredLabel.text = "Powered by"
-        poweredLabel.font = .systemFont(ofSize: 15, weight: .heavy)
-        poweredLabel.textColor = .white
-        poweredLabel.textAlignment = .center
-        poweredLabel.translatesAutoresizingMaskIntoConstraints = false
-        overlay.addSubview(poweredLabel)
-
-        // 로고 이미지
-        let logoView = UIImageView(image: UIImage(named: "Image 2"))
-        logoView.contentMode = .scaleAspectFit
-        logoView.translatesAutoresizingMaskIntoConstraints = false
-        overlay.addSubview(logoView)
-
-        NSLayoutConstraint.activate([
-            buildingView.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
-            buildingView.centerYAnchor.constraint(equalTo: overlay.centerYAnchor, constant: -90),
-            buildingView.widthAnchor.constraint(equalToConstant: 320),
-            buildingView.heightAnchor.constraint(equalToConstant: 218),
-
-            poweredLabel.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
-            poweredLabel.bottomAnchor.constraint(equalTo: overlay.safeAreaLayoutGuide.bottomAnchor, constant: -128),
-
-            logoView.centerXAnchor.constraint(equalTo: overlay.centerXAnchor),
-            logoView.topAnchor.constraint(equalTo: poweredLabel.bottomAnchor, constant: 8),
-            logoView.widthAnchor.constraint(equalToConstant: 171),
-            logoView.heightAnchor.constraint(equalToConstant: 100),
-        ])
-
-        window.addSubview(overlay)
-
-        // 페이드아웃
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            UIView.animate(withDuration: 0.4, animations: {
-                overlay.alpha = 0
-            }) { _ in
-                overlay.removeFromSuperview()
+            // 현재 버전이 스토어 버전보다 낮으면 업데이트 권장
+            if currentVersion.compare(storeVersion, options: .numeric) == .orderedAscending {
+                DispatchQueue.main.async { [weak self] in
+                    self?.showUpdateAlert(storeVersion: storeVersion)
+                }
             }
-        }
+        }.resume()
+    }
+
+    private func showUpdateAlert(storeVersion: String) {
+        guard let rootVC = window?.rootViewController else { return }
+
+        // 이미 alert이 표시 중이면 무시
+        if rootVC.presentedViewController is UIAlertController { return }
+
+        let alert = UIAlertController(
+            title: "새 버전 출시 (v\(storeVersion))",
+            message: "더 나은 스캔 품질과 새로운 기능이 추가되었습니다.\n최신 버전으로 업데이트해주세요.",
+            preferredStyle: .alert
+        )
+
+        alert.addAction(UIAlertAction(title: "업데이트", style: .default) { _ in
+            if let bundleId = Bundle.main.bundleIdentifier,
+               let url = URL(string: "https://apps.apple.com/app/id\(bundleId)") {
+                // App Store 앱 ID를 사용하는 게 정확하지만, bundleId로도 리다이렉트됨
+                UIApplication.shared.open(url)
+            }
+        })
+
+        alert.addAction(UIAlertAction(title: "나중에", style: .cancel))
+
+        rootVC.present(alert, animated: true)
     }
 }
 

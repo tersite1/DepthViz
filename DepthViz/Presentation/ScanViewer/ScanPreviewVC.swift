@@ -10,6 +10,9 @@ import SceneKit
 import CoreLocation
 import simd
 import SwiftUI
+#if canImport(GoogleMobileAds)
+import GoogleMobileAds
+#endif
 
 protocol ScanPreviewDelegate: AnyObject {
     func scanPreviewDidSave(_ preview: ScanPreviewVC, scanData: ScanData)
@@ -37,6 +40,11 @@ class ScanPreviewVC: UIViewController {
     /// Pre-export: 프리뷰 로드 시 백그라운드에서 미리 내보내기
     private var preExportedData: Data?
     private var preExportFormat: FileFormat?
+
+    /// 배너 광고 (20회 이상 미구매 시)
+    #if canImport(GoogleMobileAds)
+    private var bannerView: GADBannerView?
+    #endif
 
     // MARK: - UI Elements
 
@@ -148,6 +156,37 @@ class ScanPreviewVC: UIViewController {
             loadPointCloud(from: renderer)
             startPreExport(renderer: renderer)
         }
+
+        // 20회 이상 미구매 → 하단 배너 광고
+        if ScanCountManager.shared.shouldShowInterstitialAd {
+            setupBannerAd()
+        }
+    }
+
+    // MARK: - Banner Ad
+
+    private func setupBannerAd() {
+        #if canImport(GoogleMobileAds)
+        let banner = GADBannerView(adSize: GADAdSizeBanner)
+        #if DEBUG
+        banner.adUnitID = "ca-app-pub-3940256099942544/2934735716"
+        #else
+        banner.adUnitID = "ca-app-pub-2516597008794244/6421361743"
+        #endif
+        banner.rootViewController = self
+        banner.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(banner)
+
+        NSLayoutConstraint.activate([
+            banner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            banner.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            banner.widthAnchor.constraint(equalToConstant: GADAdSizeBanner.size.width),
+            banner.heightAnchor.constraint(equalToConstant: GADAdSizeBanner.size.height)
+        ])
+
+        banner.load(GADRequest())
+        self.bannerView = banner
+        #endif
     }
 
     // MARK: - Pre-Export (백그라운드에서 미리 내보내기)
@@ -568,7 +607,9 @@ class ScanPreviewVC: UIViewController {
             infoLabel.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -12),
 
             saveButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            // 배너 광고 표시 시 버튼을 위로 올림
+            saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                                                constant: ScanCountManager.shared.shouldShowInterstitialAd ? -70 : -20),
             saveButton.widthAnchor.constraint(equalToConstant: 140),
             saveButton.heightAnchor.constraint(equalToConstant: 50)
         ])
@@ -662,7 +703,15 @@ class ScanPreviewVC: UIViewController {
 
     @objc func saveButtonTapped() {
         guard let scanData = scanData, let renderer = renderer else { return }
-        showProjectSelection(scanData: scanData, renderer: renderer)
+
+        // 20회 이상 미구매 → 보상형 전면 광고 시청 후 저장
+        if ScanCountManager.shared.shouldShowInterstitialAd {
+            InterstitialAdManager.shared.showAd(from: self) { [weak self] in
+                self?.showProjectSelection(scanData: scanData, renderer: renderer)
+            }
+        } else {
+            showProjectSelection(scanData: scanData, renderer: renderer)
+        }
     }
 
     // MARK: - Project Selection & Save Flow
@@ -742,6 +791,12 @@ class ScanPreviewVC: UIViewController {
             // ScanStorage에 저장
             let success = ScanStorage.shared.save(scanData)
 
+            // 프리미엄: IMU + Trajectory CSV 저장 (같은 경로)
+            if PremiumManager.shared.isPremium, let renderer = self.renderer {
+                let baseName = (fileName as NSString).deletingPathExtension
+                self.saveCSVData(baseName: baseName, renderer: renderer)
+            }
+
             DispatchQueue.main.async {
                 loadingOverlay.removeFromSuperview()
 
@@ -754,6 +809,43 @@ class ScanPreviewVC: UIViewController {
                     alert.addAction(UIAlertAction(title: "OK", style: .default))
                     self.present(alert, animated: true)
                 }
+            }
+        }
+    }
+
+    // MARK: - CSV Export (Premium)
+
+    private func saveCSVData(baseName: String, renderer: Renderer) {
+        let exportDir = ScanStorage.shared.exportRoot
+
+        // IMU CSV
+        if PremiumManager.shared.showIMUData {
+            let imuLog = renderer.getIMULog()
+            if !imuLog.isEmpty {
+                var csv = "timestamp,roll,pitch,yaw,acc_x,acc_y,acc_z,gyro_x,gyro_y,gyro_z\n"
+                for e in imuLog {
+                    csv += String(format: "%.4f,%.4f,%.4f,%.4f,%.6f,%.6f,%.6f,%.6f,%.6f,%.6f\n",
+                                  e.timestamp, e.roll, e.pitch, e.yaw,
+                                  e.ax, e.ay, e.az, e.gx, e.gy, e.gz)
+                }
+                let url = exportDir.appendingPathComponent("\(baseName)_imu.csv")
+                try? csv.write(to: url, atomically: true, encoding: .utf8)
+                print("📊 IMU CSV 저장: \(imuLog.count)개 → 파일 앱/DepthViz/\(url.lastPathComponent)")
+            }
+        }
+
+        // Trajectory CSV
+        if PremiumManager.shared.showOdometry {
+            let trajLog = renderer.getTrajectoryLog()
+            if !trajLog.isEmpty {
+                var csv = "timestamp,x,y,z\n"
+                for e in trajLog {
+                    csv += String(format: "%.4f,%.6f,%.6f,%.6f\n",
+                                  e.timestamp, e.x, e.y, e.z)
+                }
+                let url = exportDir.appendingPathComponent("\(baseName)_trajectory.csv")
+                try? csv.write(to: url, atomically: true, encoding: .utf8)
+                print("🗺️ Trajectory CSV 저장: \(trajLog.count)개 → 파일 앱/DepthViz/\(url.lastPathComponent)")
             }
         }
     }

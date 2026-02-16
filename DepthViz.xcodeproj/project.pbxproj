@@ -7,13 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6697C8D22F42B000006E4917 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 6697C8D12F42B000006E4917 /* GoogleMobileAds */; };
 		6653E8962C8D0AA60007E24A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6653E8952C8D0AA60007E24A /* LaunchScreen.storyboard */; };
 		6653E8982C8D0C430007E24A /* building4.png in Resources */ = {isa = PBXBuildFile; fileRef = 6653E8972C8D0C430007E24A /* building4.png */; };
 		6666DEE32C8F46B900D21424 /* a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 6666DEE22C8F46B900D21424 /* a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4 */; };
 		66689B492C8C702200DB20E9 /* UserModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B482C8C702200DB20E9 /* UserModel.swift */; };
 		66689B4C2C8C70BD00DB20E9 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4B2C8C70A700DB20E9 /* LoginViewController.swift */; };
-	66689B4E2C8C70E900DB20E9 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4D2C8C70E500DB20E9 /* AuthManager.swift */; };
-	666BA4A92EAD4CD6001372FE /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 666BA4A82EAD4CD6001372FE /* logo.png */; };
+		66689B4E2C8C70E900DB20E9 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4D2C8C70E500DB20E9 /* AuthManager.swift */; };
+		666BA4A92EAD4CD6001372FE /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 666BA4A82EAD4CD6001372FE /* logo.png */; };
+		6697C8CA2F42A86B006E4917 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6697C8C92F42A86B006E4917 /* StoreKit.framework */; };
 		669A6F0C2C7F35B100F8BDAC /* MatrixMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A6F0B2C7F35A700F8BDAC /* MatrixMath.swift */; };
 		669A6F0E2C7F47F100F8BDAC /* PointCloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A6F0D2C7F47F100F8BDAC /* PointCloud.swift */; };
 		66B1C0172C22B9E5003CDAD8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */; };
@@ -51,8 +53,16 @@
 		87FA5D732A35C4D800E04B4D /* DownloadStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FA5D722A35C4D800E04B4D /* DownloadStorage.swift */; };
 		87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1A29EE270A00D90D02 /* MainVM.swift */; };
 		87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */; };
+		ADDMARKERVIEW_BUILD /* AddMarkerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDMARKERVIEW_REF /* AddMarkerView.swift */; };
+		ALGOVIEW_BUILD_ID /* AlgorithmSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ALGOVIEW_ID_123456 /* AlgorithmSelectionView.swift */; };
+		BLDPREMIUM_BUILD /* building4_premium.png in Resources */ = {isa = PBXBuildFile; fileRef = BLDPREMIUM_REF /* building4_premium.png */; };
 		DB255B972C21EF8B00209FD8 /* launchicon2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DB255B962C21EF8B00209FD8 /* launchicon2x.png */; };
 		DBFC96332C1C1765009B5AEC /* ScanViewerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFC96322C1C1765009B5AEC /* ScanViewerVC.swift */; };
+		DVENGINE_BUILD_ID /* DepthVizEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DVENGINE_ID_123456 /* DepthVizEngine.cpp */; };
+		DVESKF_BUILD_ID /* DV_ESKF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DVESKF_ID_123456 /* DV_ESKF.cpp */; };
+		DVLIO_BUILD_ID /* DV_LIOBackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DVLIO_ID_123456 /* DV_LIOBackend.cpp */; };
+		DVVIO_BUILD_ID /* DV_VIOManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DVVIO_ID_123456 /* DV_VIOManager.cpp */; };
+		DVWRAPPER_BUILD_ID /* DepthVizWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = DVWRAPPER_ID_123456 /* DepthVizWrapper.mm */; };
 		E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13024636FEF00D77039 /* AppDelegate.swift */; };
 		E73DD13324636FEF00D77039 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13224636FEF00D77039 /* Shaders.metal */; };
 		E73DD13624636FEF00D77039 /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73DD13524636FEF00D77039 /* Renderer.swift */; };
@@ -60,40 +70,37 @@
 		E73DD13B24636FEF00D77039 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E73DD13924636FEF00D77039 /* Main.storyboard */; };
 		E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */; };
 		E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B7223C24809D1E002E43E8 /* Helpers.swift */; };
-
-		SLAMSERVICE_MM_BUILD_ID /* SLAMService.mm in Sources */ = {isa = PBXBuildFile; fileRef = SLAMSERVICE_MM_ID_123456 /* SLAMService.mm */; };
-		SCANPREVIEWVC_BUILD_ID /* ScanPreviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANPREVIEWVC_ID_123456 /* ScanPreviewVC.swift */; };
-		SLAMPOINT_BUILD_ID /* SLAMPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = SLAMPOINT_ID_123456 /* SLAMPoint.swift */; };
-		ALGOVIEW_BUILD_ID /* AlgorithmSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ALGOVIEW_ID_123456 /* AlgorithmSelectionView.swift */; };
-		DVWRAPPER_BUILD_ID /* DepthVizWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = DVWRAPPER_ID_123456 /* DepthVizWrapper.mm */; };
-		DVENGINE_BUILD_ID /* DepthVizEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DVENGINE_ID_123456 /* DepthVizEngine.cpp */; };
-		DVLIO_BUILD_ID /* DV_LIOBackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DVLIO_ID_123456 /* DV_LIOBackend.cpp */; };
-		DVVIO_BUILD_ID /* DV_VIOManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DVVIO_ID_123456 /* DV_VIOManager.cpp */; };
-		DVESKF_BUILD_ID /* DV_ESKF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DVESKF_ID_123456 /* DV_ESKF.cpp */; };
-		SCANSETTINGS_BUILD /* ScanSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANSETTINGS_REF /* ScanSettings.swift */; };
+		IMUDEMO_BUILD /* imu_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = IMUDEMO_REF /* imu_demo.mp4 */; };
+		LOCALIZABLE_BUILD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = LOCALIZABLE_REF /* Localizable.strings */; };
+		INFOPLIST_STR_BUILD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = INFOPLIST_STR_REF /* InfoPlist.strings */; };
+		STOREKIT_BUILD /* DepthVizProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = STOREKIT_REF /* DepthVizProducts.storekit */; };
 		LOCMARKER_BUILD /* LocationMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = LOCMARKER_REF /* LocationMarker.swift */; };
-		PROJECT_ENTITY_BUILD /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJECT_ENTITY_REF /* Project.swift */; };
+		LOCSCANSVC_BUILD /* LocationScansViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = LOCSCANSVC_REF /* LocationScansViewController.swift */; };
+		MAPVC_BUILD /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = MAPVC_REF /* MapViewController.swift */; };
+		MARKERDETAIL_BUILD /* MarkerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MARKERDETAIL_REF /* MarkerDetailView.swift */; };
 		MARKERSTORAGE_BUILD /* MarkerStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = MARKERSTORAGE_REF /* MarkerStorage.swift */; };
 		PCLEXPORTER_BUILD /* PointCloudExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = PCLEXPORTER_REF /* PointCloudExporter.swift */; };
+		PCLSCENEVC_BUILD /* PointCloudSceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = PCLSCENEVC_REF /* PointCloudSceneViewController.swift */; };
 		PREMIUMMGR_BUILD /* PremiumManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PREMIUMMGR_REF /* PremiumManager.swift */; };
 		PREMIUMPURCH_BUILD /* PremiumPurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PREMIUMPURCH_REF /* PremiumPurchaseManager.swift */; };
 		PREMIUMVIDEO_BUILD /* PremiumVideoPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = PREMIUMVIDEO_REF /* PremiumVideoPopup.swift */; };
 		PROJECTMGR_BUILD /* ProjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJECTMGR_REF /* ProjectManager.swift */; };
-		STUBCLASSES_BUILD /* StubClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = STUBCLASSES_REF /* StubClasses.swift */; };
-		SCANSETTINGSVIEW_BUILD /* ScanSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANSETTINGSVIEW_REF /* ScanSettingsView.swift */; };
-		ADDMARKERVIEW_BUILD /* AddMarkerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDMARKERVIEW_REF /* AddMarkerView.swift */; };
-		LOCSCANSVC_BUILD /* LocationScansViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = LOCSCANSVC_REF /* LocationScansViewController.swift */; };
-		MAPVC_BUILD /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = MAPVC_REF /* MapViewController.swift */; };
-		MARKERDETAIL_BUILD /* MarkerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MARKERDETAIL_REF /* MarkerDetailView.swift */; };
-		SETTINGSVIEW_BUILD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SETTINGSVIEW_REF /* SettingsView.swift */; };
-		PCLSCENEVC_BUILD /* PointCloudSceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = PCLSCENEVC_REF /* PointCloudSceneViewController.swift */; };
-		SPLASHVC_BUILD /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPLASHVC_REF /* SplashViewController.swift */; };
+		PROJECT_ENTITY_BUILD /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJECT_ENTITY_REF /* Project.swift */; };
 		PROJSELVIEW_BUILD /* ProjectSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJSELVIEW_REF /* ProjectSelectionView.swift */; };
 		SCANCOUNTMGR_BUILD /* ScanCountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANCOUNTMGR_REF /* ScanCountManager.swift */; };
-		IMUDEMO_BUILD /* imu_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = IMUDEMO_REF /* imu_demo.mp4 */; };
+		ADMOBMGR_BUILD /* AdMobManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADMOBMGR_REF /* AdMobManager.swift */; };
+		APPOPENAD_BUILD /* AppOpenAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = APPOPENAD_REF /* AppOpenAdManager.swift */; };
+		REWARDEDAD_BUILD /* RewardedAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = REWARDEDAD_REF /* RewardedAdManager.swift */; };
+		INTERSTITIALAD_BUILD /* InterstitialAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = INTERSTITIALAD_REF /* InterstitialAdManager.swift */; };
+		SCANPREVIEWVC_BUILD_ID /* ScanPreviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANPREVIEWVC_ID_123456 /* ScanPreviewVC.swift */; };
+		SCANSETTINGSVIEW_BUILD /* ScanSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANSETTINGSVIEW_REF /* ScanSettingsView.swift */; };
+		SCANSETTINGS_BUILD /* ScanSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANSETTINGS_REF /* ScanSettings.swift */; };
+		SETTINGSVIEW_BUILD /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SETTINGSVIEW_REF /* SettingsView.swift */; };
+		SLAMPOINT_BUILD_ID /* SLAMPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = SLAMPOINT_ID_123456 /* SLAMPoint.swift */; };
+		SLAMSERVICE_MM_BUILD_ID /* SLAMService.mm in Sources */ = {isa = PBXBuildFile; fileRef = SLAMSERVICE_MM_ID_123456 /* SLAMService.mm */; };
+		SPLASHVC_BUILD /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPLASHVC_REF /* SplashViewController.swift */; };
+		STUBCLASSES_BUILD /* StubClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = STUBCLASSES_REF /* StubClasses.swift */; };
 		TRAJDEMO_BUILD /* trajectory_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = TRAJDEMO_REF /* trajectory_demo.mp4 */; };
-		LOCALIZABLE_BUILD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = LOCALIZABLE_REF /* Localizable.strings */; };
-		BLDPREMIUM_BUILD /* building4_premium.png in Resources */ = {isa = PBXBuildFile; fileRef = BLDPREMIUM_REF /* building4_premium.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -102,9 +109,10 @@
 		6666DEE22C8F46B900D21424 /* a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4"; sourceTree = "<group>"; };
 		66689B482C8C702200DB20E9 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
 		66689B4B2C8C70A700DB20E9 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
-	66689B4D2C8C70E500DB20E9 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
-	666BA4A82EAD4CD6001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
+		66689B4D2C8C70E500DB20E9 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		666BA4A82EAD4CD6001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		666BA4AA2EAD4D32001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
+		6697C8C92F42A86B006E4917 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		669A6F0B2C7F35A700F8BDAC /* MatrixMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixMath.swift; sourceTree = "<group>"; };
 		669A6F0D2C7F47F100F8BDAC /* PointCloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloud.swift; sourceTree = "<group>"; };
 		66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -142,9 +150,17 @@
 		87FA5D722A35C4D800E04B4D /* DownloadStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadStorage.swift; sourceTree = "<group>"; };
 		87FDBC1A29EE270A00D90D02 /* MainVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVM.swift; sourceTree = "<group>"; };
 		87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARData.swift; sourceTree = "<group>"; };
+		ADDMARKERVIEW_REF /* AddMarkerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddMarkerView.swift; path = DepthViz/Presentation/Map/AddMarkerView.swift; sourceTree = SOURCE_ROOT; };
+		ALGOVIEW_ID_123456 /* AlgorithmSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AlgorithmSelectionView.swift; path = DepthViz/Presentation/Settings/AlgorithmSelectionView.swift; sourceTree = SOURCE_ROOT; };
+		BLDPREMIUM_REF /* building4_premium.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = building4_premium.png; path = DepthViz/Presentation/Extension/building4_premium.png; sourceTree = SOURCE_ROOT; };
 		DB23EE222C08398500FC4167 /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
 		DB255B962C21EF8B00209FD8 /* launchicon2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchicon2x.png; sourceTree = "<group>"; };
 		DBFC96322C1C1765009B5AEC /* ScanViewerVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanViewerVC.swift; sourceTree = "<group>"; };
+		DVENGINE_ID_123456 /* DepthVizEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DepthVizEngine.cpp; path = DepthViz/Domain/Algorithm/DepthViz/src/DepthVizEngine.cpp; sourceTree = SOURCE_ROOT; };
+		DVESKF_ID_123456 /* DV_ESKF.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DV_ESKF.cpp; path = DepthViz/Domain/Algorithm/DepthViz/src/DV_ESKF.cpp; sourceTree = SOURCE_ROOT; };
+		DVLIO_ID_123456 /* DV_LIOBackend.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DV_LIOBackend.cpp; path = DepthViz/Domain/Algorithm/DepthViz/src/DV_LIOBackend.cpp; sourceTree = SOURCE_ROOT; };
+		DVVIO_ID_123456 /* DV_VIOManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DV_VIOManager.cpp; path = DepthViz/Domain/Algorithm/DepthViz/src/DV_VIOManager.cpp; sourceTree = SOURCE_ROOT; };
+		DVWRAPPER_ID_123456 /* DepthVizWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = DepthVizWrapper.mm; path = DepthViz/Domain/Algorithm/DepthViz/include/DepthVizWrapper.mm; sourceTree = SOURCE_ROOT; };
 		E73DD12D24636FEF00D77039 /* Point Cloud.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Point Cloud.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E73DD13024636FEF00D77039 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E73DD13224636FEF00D77039 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
@@ -157,42 +173,40 @@
 		E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalBuffer.swift; sourceTree = "<group>"; };
 		E7B7223C24809D1E002E43E8 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		E7E2ED6F1473F1FD1E9543FA /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
-
-		SLAMSERVICE_H_ID_123456 /* SLAMService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SLAMService.h; path = DepthViz/Domain/Algorithm/Bridge/SLAMService.h; sourceTree = SOURCE_ROOT; };
-		SLAMSERVICE_MM_ID_123456 /* SLAMService.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SLAMService.mm; path = DepthViz/Domain/Algorithm/Bridge/SLAMService.mm; sourceTree = SOURCE_ROOT; };
-		SCANPREVIEWVC_ID_123456 /* ScanPreviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanPreviewVC.swift; path = DepthViz/Presentation/ScanViewer/ScanPreviewVC.swift; sourceTree = SOURCE_ROOT; };
-		SLAMPOINT_ID_123456 /* SLAMPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SLAMPoint.swift; path = DepthViz/Domain/Entity/SLAMPoint.swift; sourceTree = SOURCE_ROOT; };
-		ALGOVIEW_ID_123456 /* AlgorithmSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AlgorithmSelectionView.swift; path = DepthViz/Presentation/Settings/AlgorithmSelectionView.swift; sourceTree = SOURCE_ROOT; };
-		DVWRAPPER_ID_123456 /* DepthVizWrapper.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = DepthVizWrapper.mm; path = DepthViz/Domain/Algorithm/DepthViz/include/DepthVizWrapper.mm; sourceTree = SOURCE_ROOT; };
-		DVENGINE_ID_123456 /* DepthVizEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DepthVizEngine.cpp; path = DepthViz/Domain/Algorithm/DepthViz/src/DepthVizEngine.cpp; sourceTree = SOURCE_ROOT; };
-		DVLIO_ID_123456 /* DV_LIOBackend.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DV_LIOBackend.cpp; path = DepthViz/Domain/Algorithm/DepthViz/src/DV_LIOBackend.cpp; sourceTree = SOURCE_ROOT; };
-		DVVIO_ID_123456 /* DV_VIOManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DV_VIOManager.cpp; path = DepthViz/Domain/Algorithm/DepthViz/src/DV_VIOManager.cpp; sourceTree = SOURCE_ROOT; };
-		DVESKF_ID_123456 /* DV_ESKF.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DV_ESKF.cpp; path = DepthViz/Domain/Algorithm/DepthViz/src/DV_ESKF.cpp; sourceTree = SOURCE_ROOT; };
-		SCANSETTINGS_REF /* ScanSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanSettings.swift; path = DepthViz/Domain/Entity/ScanSettings.swift; sourceTree = SOURCE_ROOT; };
+		IMUDEMO_REF /* imu_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = imu_demo.mp4; path = DepthViz/Resources/imu_demo.mp4; sourceTree = SOURCE_ROOT; };
+		LOCALIZABLE_EN /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		LOCALIZABLE_KO /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
+		INFOPLIST_STR_EN /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		INFOPLIST_STR_KO /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		STOREKIT_REF /* DepthVizProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = DepthVizProducts.storekit; path = DepthViz/Configuration/DepthVizProducts.storekit; sourceTree = SOURCE_ROOT; };
 		LOCMARKER_REF /* LocationMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocationMarker.swift; path = DepthViz/Domain/Entity/LocationMarker.swift; sourceTree = SOURCE_ROOT; };
-		PROJECT_ENTITY_REF /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Project.swift; path = DepthViz/Domain/Entity/Project.swift; sourceTree = SOURCE_ROOT; };
+		LOCSCANSVC_REF /* LocationScansViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocationScansViewController.swift; path = DepthViz/Presentation/Map/LocationScansViewController.swift; sourceTree = SOURCE_ROOT; };
+		MAPVC_REF /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MapViewController.swift; path = DepthViz/Presentation/Map/MapViewController.swift; sourceTree = SOURCE_ROOT; };
+		MARKERDETAIL_REF /* MarkerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MarkerDetailView.swift; path = DepthViz/Presentation/Map/MarkerDetailView.swift; sourceTree = SOURCE_ROOT; };
 		MARKERSTORAGE_REF /* MarkerStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MarkerStorage.swift; path = DepthViz/Domain/Model/MarkerStorage.swift; sourceTree = SOURCE_ROOT; };
 		PCLEXPORTER_REF /* PointCloudExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PointCloudExporter.swift; path = DepthViz/Domain/PointCloudExporter.swift; sourceTree = SOURCE_ROOT; };
+		PCLSCENEVC_REF /* PointCloudSceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PointCloudSceneViewController.swift; path = DepthViz/Presentation/Shared/PointCloudSceneViewController.swift; sourceTree = SOURCE_ROOT; };
 		PREMIUMMGR_REF /* PremiumManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PremiumManager.swift; path = DepthViz/Domain/Premium/PremiumManager.swift; sourceTree = SOURCE_ROOT; };
 		PREMIUMPURCH_REF /* PremiumPurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PremiumPurchaseManager.swift; path = DepthViz/Domain/Premium/PremiumPurchaseManager.swift; sourceTree = SOURCE_ROOT; };
 		PREMIUMVIDEO_REF /* PremiumVideoPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PremiumVideoPopup.swift; path = DepthViz/Domain/Premium/PremiumVideoPopup.swift; sourceTree = SOURCE_ROOT; };
 		PROJECTMGR_REF /* ProjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProjectManager.swift; path = DepthViz/Domain/Storage/ProjectManager.swift; sourceTree = SOURCE_ROOT; };
-		STUBCLASSES_REF /* StubClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StubClasses.swift; path = DepthViz/Presentation/Main/StubClasses.swift; sourceTree = SOURCE_ROOT; };
-		SCANSETTINGSVIEW_REF /* ScanSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanSettingsView.swift; path = DepthViz/Presentation/Main/View/ScanSettingsView.swift; sourceTree = SOURCE_ROOT; };
-		ADDMARKERVIEW_REF /* AddMarkerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddMarkerView.swift; path = DepthViz/Presentation/Map/AddMarkerView.swift; sourceTree = SOURCE_ROOT; };
-		LOCSCANSVC_REF /* LocationScansViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocationScansViewController.swift; path = DepthViz/Presentation/Map/LocationScansViewController.swift; sourceTree = SOURCE_ROOT; };
-		MAPVC_REF /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MapViewController.swift; path = DepthViz/Presentation/Map/MapViewController.swift; sourceTree = SOURCE_ROOT; };
-		MARKERDETAIL_REF /* MarkerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MarkerDetailView.swift; path = DepthViz/Presentation/Map/MarkerDetailView.swift; sourceTree = SOURCE_ROOT; };
-		SETTINGSVIEW_REF /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = DepthViz/Presentation/Settings/SettingsView.swift; sourceTree = SOURCE_ROOT; };
-		PCLSCENEVC_REF /* PointCloudSceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PointCloudSceneViewController.swift; path = DepthViz/Presentation/Shared/PointCloudSceneViewController.swift; sourceTree = SOURCE_ROOT; };
-		SPLASHVC_REF /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SplashViewController.swift; path = DepthViz/Presentation/Shared/SplashViewController.swift; sourceTree = SOURCE_ROOT; };
+		PROJECT_ENTITY_REF /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Project.swift; path = DepthViz/Domain/Entity/Project.swift; sourceTree = SOURCE_ROOT; };
 		PROJSELVIEW_REF /* ProjectSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProjectSelectionView.swift; path = DepthViz/Presentation/Shared/ProjectSelectionView.swift; sourceTree = SOURCE_ROOT; };
 		SCANCOUNTMGR_REF /* ScanCountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanCountManager.swift; path = DepthViz/Data/Settings/ScanCountManager.swift; sourceTree = SOURCE_ROOT; };
-		IMUDEMO_REF /* imu_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = imu_demo.mp4; path = DepthViz/Resources/imu_demo.mp4; sourceTree = SOURCE_ROOT; };
+		ADMOBMGR_REF /* AdMobManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AdMobManager.swift; path = DepthViz/Presentation/AdMob/AdMobManager.swift; sourceTree = SOURCE_ROOT; };
+		APPOPENAD_REF /* AppOpenAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppOpenAdManager.swift; path = DepthViz/Presentation/AdMob/AppOpenAdManager.swift; sourceTree = SOURCE_ROOT; };
+		REWARDEDAD_REF /* RewardedAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RewardedAdManager.swift; path = DepthViz/Presentation/AdMob/RewardedAdManager.swift; sourceTree = SOURCE_ROOT; };
+		INTERSTITIALAD_REF /* InterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InterstitialAdManager.swift; path = DepthViz/Presentation/AdMob/InterstitialAdManager.swift; sourceTree = SOURCE_ROOT; };
+		SCANPREVIEWVC_ID_123456 /* ScanPreviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanPreviewVC.swift; path = DepthViz/Presentation/ScanViewer/ScanPreviewVC.swift; sourceTree = SOURCE_ROOT; };
+		SCANSETTINGSVIEW_REF /* ScanSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanSettingsView.swift; path = DepthViz/Presentation/Main/View/ScanSettingsView.swift; sourceTree = SOURCE_ROOT; };
+		SCANSETTINGS_REF /* ScanSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanSettings.swift; path = DepthViz/Domain/Entity/ScanSettings.swift; sourceTree = SOURCE_ROOT; };
+		SETTINGSVIEW_REF /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SettingsView.swift; path = DepthViz/Presentation/Settings/SettingsView.swift; sourceTree = SOURCE_ROOT; };
+		SLAMPOINT_ID_123456 /* SLAMPoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SLAMPoint.swift; path = DepthViz/Domain/Entity/SLAMPoint.swift; sourceTree = SOURCE_ROOT; };
+		SLAMSERVICE_H_ID_123456 /* SLAMService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SLAMService.h; path = DepthViz/Domain/Algorithm/Bridge/SLAMService.h; sourceTree = SOURCE_ROOT; };
+		SLAMSERVICE_MM_ID_123456 /* SLAMService.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SLAMService.mm; path = DepthViz/Domain/Algorithm/Bridge/SLAMService.mm; sourceTree = SOURCE_ROOT; };
+		SPLASHVC_REF /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SplashViewController.swift; path = DepthViz/Presentation/Shared/SplashViewController.swift; sourceTree = SOURCE_ROOT; };
+		STUBCLASSES_REF /* StubClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StubClasses.swift; path = DepthViz/Presentation/Main/StubClasses.swift; sourceTree = SOURCE_ROOT; };
 		TRAJDEMO_REF /* trajectory_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = trajectory_demo.mp4; path = DepthViz/Resources/trajectory_demo.mp4; sourceTree = SOURCE_ROOT; };
-		LOCALIZABLE_EN /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		LOCALIZABLE_KO /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
-		BLDPREMIUM_REF /* building4_premium.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = building4_premium.png; path = DepthViz/Presentation/Extension/building4_premium.png; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,6 +214,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6697C8CA2F42A86B006E4917 /* StoreKit.framework in Frameworks */,
+				6697C8D22F42B000006E4917 /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -212,10 +228,18 @@
 				66689B4D2C8C70E500DB20E9 /* AuthManager.swift */,
 				66689B4B2C8C70A700DB20E9 /* LoginViewController.swift */,
 			);
-		path = Login;
-		sourceTree = "<group>";
-	};
-	870959422A24572400021125 /* Storage */ = {
+			path = Login;
+			sourceTree = "<group>";
+		};
+		6697C8C82F42A86B006E4917 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6697C8C92F42A86B006E4917 /* StoreKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		870959422A24572400021125 /* Storage */ = {
 			isa = PBXGroup;
 			children = (
 				870959432A24573700021125 /* LidarStorage.swift */,
@@ -225,11 +249,11 @@
 			path = Storage;
 			sourceTree = "<group>";
 		};
-	8711C71529D1322A00F6D5CC /* Presentation */ = {
-		isa = PBXGroup;
-		children = (
-			66689B4A2C8C70A000DB20E9 /* Login */,
-			DBFC96312C1C1744009B5AEC /* ScanViewer */,
+		8711C71529D1322A00F6D5CC /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				66689B4A2C8C70A000DB20E9 /* Login */,
+				DBFC96312C1C1744009B5AEC /* ScanViewer */,
 				87F6F0972A613F5800CE6679 /* ScanStorageVC */,
 				87ABC86529D1945200881FFB /* Extension */,
 				87ABC86829D2805300881FFB /* Main */,
@@ -288,10 +312,10 @@
 			path = View;
 			sourceTree = "<group>";
 		};
-	8749E16829EEE2720093F7A7 /* View */ = {
-		isa = PBXGroup;
-		children = (
-			87ABC86B29D290E900881FFB /* RecordingButton.swift */,
+		8749E16829EEE2720093F7A7 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				87ABC86B29D290E900881FFB /* RecordingButton.swift */,
 				87ABC86D29D3041100881FFB /* StatusIndicatorLabel.swift */,
 				8749E16929EEE2940093F7A7 /* PointCloudCountView.swift */,
 				87295C932A0386B30067392D /* ScansButton.swift */,
@@ -376,6 +400,7 @@
 			children = (
 				666BA4AA2EAD4D32001372FE /* logo.png */,
 				E73DD12F24636FEF00D77039 /* DepthViz */,
+				6697C8C82F42A86B006E4917 /* Frameworks */,
 				E73DD12E24636FEF00D77039 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -404,7 +429,7 @@
 				66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */,
 				E73DD14124636FF100D77039 /* Info.plist */,
 				DB255B962C21EF8B00209FD8 /* launchicon2x.png */,
-							SLAMSERVICE_H_ID_123456 /* SLAMService.h */,
+				SLAMSERVICE_H_ID_123456 /* SLAMService.h */,
 				SLAMSERVICE_MM_ID_123456 /* SLAMService.mm */,
 				SCANPREVIEWVC_ID_123456 /* ScanPreviewVC.swift */,
 				SLAMPOINT_ID_123456 /* SLAMPoint.swift */,
@@ -437,8 +462,14 @@
 				IMUDEMO_REF /* imu_demo.mp4 */,
 				TRAJDEMO_REF /* trajectory_demo.mp4 */,
 				LOCALIZABLE_REF /* Localizable.strings */,
+				INFOPLIST_STR_REF /* InfoPlist.strings */,
+				STOREKIT_REF /* DepthVizProducts.storekit */,
 				BLDPREMIUM_REF /* building4_premium.png */,
-);
+				ADMOBMGR_REF /* AdMobManager.swift */,
+				APPOPENAD_REF /* AppOpenAdManager.swift */,
+				REWARDEDAD_REF /* RewardedAdManager.swift */,
+				INTERSTITIALAD_REF /* InterstitialAdManager.swift */,
+			);
 			path = DepthViz;
 			sourceTree = "<group>";
 		};
@@ -459,6 +490,7 @@
 			);
 			name = DepthViz;
 			packageProductDependencies = (
+				6697C8D12F42B000006E4917 /* GoogleMobileAds */,
 			);
 			productName = SceneDepthDemo;
 			productReference = E73DD12D24636FEF00D77039 /* Point Cloud.app */;
@@ -491,6 +523,7 @@
 			);
 			mainGroup = E73DD12424636FEF00D77039;
 			packageReferences = (
+				6697C8D02F42B000006E4917 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			productRefGroup = E73DD12E24636FEF00D77039 /* Products */;
 			projectDirPath = "";
@@ -516,6 +549,8 @@
 				IMUDEMO_BUILD /* imu_demo.mp4 in Resources */,
 				TRAJDEMO_BUILD /* trajectory_demo.mp4 in Resources */,
 				LOCALIZABLE_BUILD /* Localizable.strings in Resources */,
+				INFOPLIST_STR_BUILD /* InfoPlist.strings in Resources */,
+				STOREKIT_BUILD /* DepthVizProducts.storekit in Resources */,
 				BLDPREMIUM_BUILD /* building4_premium.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -549,14 +584,14 @@
 				66689B4C2C8C70BD00DB20E9 /* LoginViewController.swift in Sources */,
 				87F6F09D2A61793600CE6679 /* ScanInfoRow.swift in Sources */,
 				E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */,
-			87D842B62A61353000032711 /* ScanInfo.swift in Sources */,
-			87295C942A0386B30067392D /* ScansButton.swift in Sources */,
-			DBFC96332C1C1765009B5AEC /* ScanViewerVC.swift in Sources */,
+				87D842B62A61353000032711 /* ScanInfo.swift in Sources */,
+				87295C942A0386B30067392D /* ScansButton.swift in Sources */,
+				DBFC96332C1C1765009B5AEC /* ScanViewerVC.swift in Sources */,
 				87295C9E2A03ACF40067392D /* ScansVM.swift in Sources */,
 				66E374612C7EE053002BBE77 /* ViewController.swift in Sources */,
-			87F6F0992A613F8900CE6679 /* ScanStorageVC.swift in Sources */,
-			66689B492C8C702200DB20E9 /* UserModel.swift in Sources */,
-			870959442A24573700021125 /* LidarStorage.swift in Sources */,
+				87F6F0992A613F8900CE6679 /* ScanStorageVC.swift in Sources */,
+				66689B492C8C702200DB20E9 /* UserModel.swift in Sources */,
+				870959442A24573700021125 /* LidarStorage.swift in Sources */,
 				66E374672C7F31F3002BBE77 /* Shaders.metal in Sources */,
 				87D842B42A6120BD00032711 /* Data+Extension.swift in Sources */,
 				8749E16A29EEE2940093F7A7 /* PointCloudCountView.swift in Sources */,
@@ -573,7 +608,7 @@
 				877F534B29F69D1600A0F931 /* UIView+Extension.swift in Sources */,
 				87D842B02A611F0000032711 /* ScanData.swift in Sources */,
 				E73DD13124636FEF00D77039 /* AppDelegate.swift in Sources */,
-							SLAMSERVICE_MM_BUILD_ID /* SLAMService.mm in Sources */,
+				SLAMSERVICE_MM_BUILD_ID /* SLAMService.mm in Sources */,
 				SCANPREVIEWVC_BUILD_ID /* ScanPreviewVC.swift in Sources */,
 				SLAMPOINT_BUILD_ID /* SLAMPoint.swift in Sources */,
 				ALGOVIEW_BUILD_ID /* AlgorithmSelectionView.swift in Sources */,
@@ -602,7 +637,11 @@
 				SPLASHVC_BUILD /* SplashViewController.swift in Sources */,
 				PROJSELVIEW_BUILD /* ProjectSelectionView.swift in Sources */,
 				SCANCOUNTMGR_BUILD /* ScanCountManager.swift in Sources */,
-);
+				ADMOBMGR_BUILD /* AdMobManager.swift in Sources */,
+				APPOPENAD_BUILD /* AppOpenAdManager.swift in Sources */,
+				REWARDEDAD_BUILD /* RewardedAdManager.swift in Sources */,
+				INTERSTITIALAD_BUILD /* InterstitialAdManager.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -623,6 +662,15 @@
 				LOCALIZABLE_KO /* ko */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		INFOPLIST_STR_REF /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				INFOPLIST_STR_EN /* en */,
+				INFOPLIST_STR_KO /* ko */,
+			);
+			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -681,6 +729,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
+					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -688,25 +743,9 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-			
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
-					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
-				);
 			};
 			name = Debug;
-		
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
-					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
-				);
-			};
+		};
 		E73DD14424636FF100D77039 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -754,6 +793,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
+					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -761,25 +807,9 @@
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
-			
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
-					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
-				);
 			};
 			name = Release;
-		
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
-					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
-				);
-			};
+		};
 		E73DD14624636FF100D77039 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -789,8 +819,15 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D9WJV9698J;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
+					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
+				);
 				INFOPLIST_FILE = DepthViz/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DepthViz;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -799,8 +836,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = DepthViz-Kaist;
+				MARKETING_VERSION = 2.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "DepthViz-Kaist";
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -810,14 +847,6 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DepthViz/Configuration/DepthViz-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
-
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
-					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
-				);
 			};
 			name = Debug;
 		};
@@ -829,8 +858,15 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D9WJV9698J;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
+					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
+					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
+				);
 				INFOPLIST_FILE = DepthViz/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DepthViz;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -839,8 +875,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
-				PRODUCT_BUNDLE_IDENTIFIER = DepthViz-Kaist;
+				MARKETING_VERSION = 2.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "DepthViz-Kaist";
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
@@ -850,14 +886,6 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "DepthViz/Configuration/DepthViz-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
-			
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/Common/include",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/ThirdParty/Eigen",
-					"$(PROJECT_DIR)/DepthViz/Domain/Algorithm/DepthViz/include",
-					"$(PROJECT_DIR)/DepthViz/Frameworks/opencv.framework/Headers",
-				);
 			};
 			name = Release;
 		};
@@ -883,6 +911,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6697C8D02F42B000006E4917 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6697C8D12F42B000006E4917 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6697C8D02F42B000006E4917 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E73DD12524636FEF00D77039 /* Project object */;
 }

@@ -216,7 +216,13 @@ extension MainVM {
             self.renderer.startIMUForSLAM()
             print("🔬 DV-SLAM 엔진 + IMU(100Hz) 시작")
         } else {
-            print("📱 ARKit 모드 (SLAM/IMU 비활성)")
+            // ARKit 모드: 프리미엄 IMU 표시/CSV 로깅을 위해 IMU는 시작
+            if PremiumManager.shared.isPremium {
+                self.renderer.startIMUForSLAM()
+                print("📱 ARKit 모드 + 프리미엄 IMU(100Hz) 시작")
+            } else {
+                print("📱 ARKit 모드 (SLAM/IMU 비활성)")
+            }
         }
     }
 
@@ -224,8 +230,9 @@ extension MainVM {
         self.renderer.isRecording = false
 
         let algorithm = ScanSettings.shared.algorithm
+        // IMU는 DV-SLAM, ARKit+프리미엄 둘 다 시작하므로 항상 정지
+        self.renderer.stopIMUForSLAM()
         if algorithm == .depthViz {
-            self.renderer.stopIMUForSLAM()
             SLAMService.sharedInstance().stop()
         }
 

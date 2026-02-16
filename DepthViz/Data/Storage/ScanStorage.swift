@@ -8,6 +8,9 @@ final class ScanStorage: ObservableObject {
     let infosRoot = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("scanInfos", isDirectory: true)
     let filesRoot = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("scanFiles", isDirectory: true)
 
+    /// 아이폰 파일 앱에서 접근 가능한 공유 폴더 (Documents/DepthViz/)
+    let exportRoot = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("DepthViz", isDirectory: true)
+
     @Published var infos: [ScanInfo] = [] {
         didSet {
             print("Infos count updated: \(infos.count)")
@@ -45,6 +48,16 @@ final class ScanStorage: ObservableObject {
             }
         } else {
             print("Directory already exists at: \(filesRoot.path)")
+        }
+
+        // DepthViz 공유 폴더 (아이폰 파일 앱에서 접근 가능)
+        if !fileManager.fileExists(atPath: exportRoot.path) {
+            do {
+                try fileManager.createDirectory(at: exportRoot, withIntermediateDirectories: true, attributes: nil)
+                print("Created export directory at: \(exportRoot.path)")
+            } catch {
+                print("Failed to create export directory: \(error.localizedDescription)")
+            }
         }
     }
 

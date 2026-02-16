@@ -4,6 +4,8 @@
 "premium_feature_imu" = "실시간 IMU 데이터 (Roll / Pitch / Yaw, Accel)";
 "premium_feature_odometry" = "Odometry 경로 시각화";
 "premium_feature_icon" = "프리미엄 앱 아이콘";
+"premium_feature_no_ads" = "모든 광고 제거";
+"premium_feature_export" = "IMU, Trajectory, 동영상 내보내기";
 "premium_unlock" = "프리미엄 잠금 해제";
 "premium_restore" = "이미 구매하셨나요? 복원하기";
 
@@ -34,3 +36,16 @@
 "new_project_message" = "새 프로젝트 이름을 입력하세요.";
 "new_project_placeholder" = "프로젝트 이름";
 "create" = "생성";
+
+/* Developer Section */
+"developer_name" = "장민석";
+"developer_bio" = "항상 피곤한 대학원생입니다.";
+"developer_collab" = "소통 및 코웍 제안 환영합니다!";
+"developer_coffee" = "개발자에게 커피 사주기";
+"developer_account" = "카카오뱅크 3333-10-0243235 장민석";
+"developer_copy_hint" = "탭하면 계좌번호가 복사됩니다";
+"developer_usdt" = "USDT로 후원하기 (TRC-20)";
+"developer_website" = "개발자 웹사이트";
+
+/* Premium Export Path */
+"premium_export_path" = "CSV, 동영상 파일은 파일 앱 > 나의 iPhone > DepthViz 폴더에 저장됩니다";

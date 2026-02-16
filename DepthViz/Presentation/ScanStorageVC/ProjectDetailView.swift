@@ -126,9 +126,10 @@ struct ProjectDetailView: View {
                 }
             )
         }
-        .sheet(isPresented: $showFileView) {
+        .fullScreenCover(isPresented: $showFileView) {
             if let filePath = getFileURL(for: selectedFile)?.path {
                 ViewControllerWrapper(filePath: filePath)
+                    .ignoresSafeArea()
             }
         }
         .sheet(isPresented: $showShareSheet) {

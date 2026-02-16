@@ -29,9 +29,27 @@ class PremiumPurchaseManager: ObservableObject {
     func loadProduct() async {
         do {
             let products = try await Product.products(for: [Self.productID])
-            self.product = products.first
+            if let p = products.first {
+                self.product = p
+                print("✅ 상품 로드 성공: \(p.displayName) (\(p.displayPrice))")
+            } else {
+                print("⚠️ 상품 ID '\(Self.productID)'에 해당하는 상품 없음 — App Store Connect 확인 필요")
+                print("   체크리스트:")
+                print("   1. Xcode > Signing & Capabilities > + In-App Purchase 추가")
+                print("   2. App Store Connect > 수익 창출 > 인앱 구매 > 상품 등록")
+                print("   3. 상품 ID가 '\(Self.productID)'과 정확히 일치하는지 확인")
+                print("   4. 유료 앱 계약(Paid Applications Agreement) 서명 완료 확인")
+                // 3초 후 재시도
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                let retry = try await Product.products(for: [Self.productID])
+                if let p = retry.first {
+                    self.product = p
+                    print("✅ 재시도 성공: \(p.displayName)")
+                }
+            }
         } catch {
             print("❌ 상품 로드 실패: \(error.localizedDescription)")
+            errorMessage = "상품을 불러올 수 없습니다. 네트워크를 확인해주세요."
         }
     }
 

@@ -1,0 +1,59 @@
+{
+  "identifier" : "DepthVizProducts",
+  "nonRenewableSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "1",
+      "localizations" : [
+        {
+          "description" : "Unlock IMU data, odometry visualization, and premium icon.",
+          "displayName" : "DepthViz Premium",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "IMU 데이터, Odometry 시각화, 프리미엄 아이콘을 잠금 해제합니다.",
+          "displayName" : "DepthViz 프리미엄",
+          "locale" : "ko"
+        },
+        {
+          "description" : "IMUデータ、Odometry可視化、プレミアムアイコンをアンロック。",
+          "displayName" : "DepthViz プレミアム",
+          "locale" : "ja"
+        },
+        {
+          "description" : "Schalte IMU-Daten, Odometry-Visualisierung und Premium-Icon frei.",
+          "displayName" : "DepthViz Premium",
+          "locale" : "de"
+        }
+      ],
+      "productID" : "depthviz.kaist",
+      "referenceName" : "DepthViz Premium",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "1",
+    "_developerTeamID" : "",
+    "_lastSynchronizedDate" : "",
+    "_storeKitErrors" : [
+      {
+        "current" : {
+          "index" : 0,
+          "type" : "generic"
+        },
+        "enabled" : false
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

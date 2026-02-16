@@ -2,12 +2,19 @@
 
 import UIKit
 import SceneKit
+#if canImport(GoogleMobileAds)
+import GoogleMobileAds
+#endif
 
 class ViewController: UIViewController {
 
     var sceneView: SCNView!
     var pointCloud: PointCloud?
     var pointCloudNode: SCNNode?
+
+    private let showAds = ScanCountManager.shared.shouldShowInterstitialAd
+    /// 배너 높이 (광고 있을 때 50pt, 없으면 0)
+    private var bannerHeight: CGFloat { showAds ? 50 : 0 }
 
     // MARK: - UI Elements
 
@@ -73,8 +80,10 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .black
         setupSceneView()
         setupUI()
+        if showAds { setupBannerAd() }
     }
 
     // MARK: - Setup
@@ -119,16 +128,19 @@ class ViewController: UIViewController {
         view.addSubview(pointSizeLargeDot)
         pointSizeSlider.addTarget(self, action: #selector(pointSizeChanged(_:)), for: .valueChanged)
 
+        // 배너 광고가 있으면 UI를 배너 위로 올림
+        let bottomOffset: CGFloat = showAds ? -(bannerHeight + 12) : -24
+
         NSLayoutConstraint.activate([
             // 닫기 버튼 (좌상단)
             backButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
             backButton.widthAnchor.constraint(equalToConstant: 40),
             backButton.heightAnchor.constraint(equalToConstant: 40),
 
-            // 포인트 수 (좌하단)
+            // 포인트 수 (좌하단 — 배너 위)
             infoLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            infoLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -24),
+            infoLabel.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: bottomOffset),
 
             // 포인트 크기 슬라이더 (하단 가로: ● ——— ⬤)
             pointSizeSmallDot.leadingAnchor.constraint(equalTo: infoLabel.trailingAnchor, constant: 20),
@@ -141,6 +153,31 @@ class ViewController: UIViewController {
             pointSizeLargeDot.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             pointSizeLargeDot.centerYAnchor.constraint(equalTo: infoLabel.centerYAnchor)
         ])
+    }
+
+    // MARK: - Banner Ad
+
+    private func setupBannerAd() {
+        #if canImport(GoogleMobileAds)
+        let banner = GADBannerView(adSize: GADAdSizeBanner)
+        #if DEBUG
+        banner.adUnitID = "ca-app-pub-3940256099942544/2934735716"
+        #else
+        banner.adUnitID = "ca-app-pub-2516597008794244/6421361743"
+        #endif
+        banner.rootViewController = self
+        banner.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(banner)
+
+        NSLayoutConstraint.activate([
+            banner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            banner.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            banner.widthAnchor.constraint(equalToConstant: GADAdSizeBanner.size.width),
+            banner.heightAnchor.constraint(equalToConstant: GADAdSizeBanner.size.height)
+        ])
+
+        banner.load(GADRequest())
+        #endif
     }
 
     // MARK: - Load Point Cloud

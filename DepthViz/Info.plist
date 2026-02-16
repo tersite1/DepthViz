@@ -122,9 +122,11 @@
 	</array>
 	<key>WEB_URL</key>
 	<string>$(WEB_URL)</string>
-	<key>CFBundleGetInfoString</key>
-	<string>&lt;key&gt;NSFaceIDUsageDescription&lt;/key&gt;
-&lt;string&gt;Face ID를 사용하여 로그인하려고 합니다.&lt;/string&gt;
-</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID is used for authentication.</string>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 </dict>
 </plist>

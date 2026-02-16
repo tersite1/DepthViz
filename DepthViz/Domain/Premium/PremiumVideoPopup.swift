@@ -127,7 +127,9 @@ struct PremiumVideoPopup: View {
                 VStack(alignment: .leading, spacing: 6) {
                     featureRow(NSLocalizedString("premium_feature_imu", comment: ""))
                     featureRow(NSLocalizedString("premium_feature_odometry", comment: ""))
+                    featureRow(NSLocalizedString("premium_feature_export", comment: ""))
                     featureRow(NSLocalizedString("premium_feature_icon", comment: ""))
+                    featureRow(NSLocalizedString("premium_feature_no_ads", comment: ""))
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
@@ -140,10 +142,18 @@ struct PremiumVideoPopup: View {
                         if purchaseManager.isPurchasing {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else {
-                            Text(purchaseManager.product?.displayPrice ?? "$4.99")
+                        } else if let product = purchaseManager.product {
+                            Text(product.displayPrice)
                                 .fontWeight(.bold)
                             Text(NSLocalizedString("premium_unlock", comment: ""))
+                        } else {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .frame(width: 16, height: 16)
+                            Text(NSLocalizedString("premium_unlock", comment: ""))
+                                .onAppear {
+                                    Task { await purchaseManager.loadProduct() }
+                                }
                         }
                     }
                     .font(.system(size: 16, weight: .semibold))

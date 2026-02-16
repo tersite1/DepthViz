@@ -27,6 +27,13 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
     private var lastSuggestedName: String?
     private var lastSuggestedDescription: String?
     private var lastSuggestedAddress: String?
+
+    // 검색 UI
+    private var searchBar: UISearchBar!
+    private var searchResultsTable: UITableView!
+    private var searchCompleter = MKLocalSearchCompleter()
+    private var searchResults: [MKLocalSearchCompletion] = []
+    private var searchTableHeightConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +41,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
         navigationController?.setNavigationBarHidden(true, animated: false)
         
         setupMapView()
+        setupSearchBar()
         loadMarkers()
         addMarkers()
         setupGestures()
@@ -205,6 +213,67 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
         setupFloatingControls()
     }
     
+    private func setupSearchBar() {
+        // 검색바
+        searchBar = UISearchBar()
+        searchBar.placeholder = "장소 검색..."
+        searchBar.delegate = self
+        searchBar.searchBarStyle = .minimal
+        searchBar.backgroundImage = UIImage()
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+
+        let searchContainer = UIView()
+        searchContainer.backgroundColor = .systemBackground.withAlphaComponent(0.9)
+        searchContainer.layer.cornerRadius = 12
+        searchContainer.layer.shadowColor = UIColor.black.cgColor
+        searchContainer.layer.shadowOpacity = 0.15
+        searchContainer.layer.shadowOffset = CGSize(width: 0, height: 2)
+        searchContainer.layer.shadowRadius = 6
+        searchContainer.clipsToBounds = false
+        searchContainer.translatesAutoresizingMaskIntoConstraints = false
+        searchContainer.addSubview(searchBar)
+        view.addSubview(searchContainer)
+
+        // 검색 결과 테이블
+        searchResultsTable = UITableView()
+        searchResultsTable.delegate = self
+        searchResultsTable.dataSource = self
+        searchResultsTable.register(UITableViewCell.self, forCellReuseIdentifier: "SearchCell")
+        searchResultsTable.backgroundColor = .systemBackground.withAlphaComponent(0.95)
+        searchResultsTable.layer.cornerRadius = 12
+        searchResultsTable.layer.shadowColor = UIColor.black.cgColor
+        searchResultsTable.layer.shadowOpacity = 0.1
+        searchResultsTable.layer.shadowOffset = CGSize(width: 0, height: 2)
+        searchResultsTable.layer.shadowRadius = 4
+        searchResultsTable.clipsToBounds = true
+        searchResultsTable.isHidden = true
+        searchResultsTable.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(searchResultsTable)
+
+        searchTableHeightConstraint = searchResultsTable.heightAnchor.constraint(equalToConstant: 0)
+
+        NSLayoutConstraint.activate([
+            searchContainer.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            searchContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 60),
+            searchContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            searchContainer.heightAnchor.constraint(equalToConstant: 44),
+
+            searchBar.topAnchor.constraint(equalTo: searchContainer.topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: searchContainer.leadingAnchor, constant: 4),
+            searchBar.trailingAnchor.constraint(equalTo: searchContainer.trailingAnchor, constant: -4),
+            searchBar.bottomAnchor.constraint(equalTo: searchContainer.bottomAnchor),
+
+            searchResultsTable.topAnchor.constraint(equalTo: searchContainer.bottomAnchor, constant: 4),
+            searchResultsTable.leadingAnchor.constraint(equalTo: searchContainer.leadingAnchor),
+            searchResultsTable.trailingAnchor.constraint(equalTo: searchContainer.trailingAnchor),
+            searchTableHeightConstraint
+        ])
+
+        // 자동완성
+        searchCompleter.delegate = self
+        searchCompleter.resultTypes = [.address, .pointOfInterest]
+    }
+
     private func setupFloatingControls() {
         // Close Button
         let closeButton = UIButton(type: .custom)
@@ -775,6 +844,115 @@ private extension MapViewController {
 extension MapViewController {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
+    }
+}
+
+// MARK: - UISearchBarDelegate
+extension MapViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            searchResults.removeAll()
+            searchResultsTable.isHidden = true
+            searchTableHeightConstraint.constant = 0
+        } else {
+            searchCompleter.queryFragment = searchText
+        }
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        guard let query = searchBar.text, !query.isEmpty else { return }
+
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = query
+        request.region = mapView.region
+
+        MKLocalSearch(request: request).start { [weak self] response, _ in
+            guard let self = self, let item = response?.mapItems.first else { return }
+            let region = MKCoordinateRegion(
+                center: item.placemark.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+            )
+            self.mapView.setRegion(region, animated: true)
+            self.placeTemporaryAnnotation(at: item.placemark.coordinate, feedbackStyle: .medium)
+            self.prepareSuggestion(from: item)
+            self.hideSearchResults()
+        }
+    }
+
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        hideSearchResults()
+    }
+
+    private func hideSearchResults() {
+        searchResults.removeAll()
+        searchResultsTable.isHidden = true
+        searchTableHeightConstraint.constant = 0
+        searchBar.resignFirstResponder()
+    }
+}
+
+// MARK: - MKLocalSearchCompleterDelegate
+extension MapViewController: MKLocalSearchCompleterDelegate {
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        searchResults = Array(completer.results.prefix(5))
+        searchResultsTable.reloadData()
+        let rowHeight: CGFloat = 50
+        let height = min(CGFloat(searchResults.count) * rowHeight, 250)
+        searchTableHeightConstraint.constant = height
+        searchResultsTable.isHidden = searchResults.isEmpty
+    }
+
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
+        print("⚠️ 검색 자동완성 실패: \(error.localizedDescription)")
+    }
+}
+
+// MARK: - UITableViewDelegate, UITableViewDataSource
+extension MapViewController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        searchResults.count
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "SearchCell", for: indexPath)
+        let result = searchResults[indexPath.row]
+        var config = cell.defaultContentConfiguration()
+        config.text = result.title
+        config.secondaryText = result.subtitle
+        config.textProperties.font = .systemFont(ofSize: 15, weight: .medium)
+        config.secondaryTextProperties.font = .systemFont(ofSize: 12)
+        config.secondaryTextProperties.color = .secondaryLabel
+        config.image = UIImage(systemName: "mappin.and.ellipse")
+        config.imageProperties.tintColor = .systemBlue
+        cell.contentConfiguration = config
+        cell.backgroundColor = .clear
+        return cell
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        50
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let completion = searchResults[indexPath.row]
+
+        let request = MKLocalSearch.Request(completion: completion)
+        MKLocalSearch(request: request).start { [weak self] response, _ in
+            guard let self = self, let item = response?.mapItems.first else { return }
+            let region = MKCoordinateRegion(
+                center: item.placemark.coordinate,
+                span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
+            )
+            self.mapView.setRegion(region, animated: true)
+            self.placeTemporaryAnnotation(at: item.placemark.coordinate, feedbackStyle: .medium)
+            self.prepareSuggestion(from: item)
+            self.hideSearchResults()
+            self.searchBar.text = completion.title
+        }
     }
 }
 

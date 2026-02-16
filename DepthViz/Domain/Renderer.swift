@@ -127,9 +127,15 @@ final class Renderer: NSObject, SLAMDelegate {
     var particlesBuffer: MetalBuffer<ParticleUniforms>  // internal로 변경 (ScanPreviewVC에서 접근 필요)
     private var currentPointIndex = 0
     @Published private(set) var currentPointCount = 0
-    // Voxel occupancy grid for deduplication (20mm resolution)
-    private let voxelGridSize = 1 << 21  // 2,097,152 entries
-    private let voxelSize: Float = 0.020  // 20mm per voxel
+    // Voxel occupancy grid for deduplication
+    // DV-SLAM: 10mm + 8M 해시 (SLAM 보정으로 중복 적음 → 작은 복셀로 풍부한 취득)
+    // ARKit: 20mm + 2M 해시 (드리프트 있어서 보수적)
+    private var voxelGridSize: Int {
+        ScanSettings.shared.algorithm == .depthViz ? (1 << 23) : (1 << 21)  // 8M vs 2M
+    }
+    private var voxelSize: Float {
+        ScanSettings.shared.algorithm == .depthViz ? 0.010 : 0.020  // 10mm vs 20mm
+    }
     private var voxelGridBuffer: MTLBuffer!
     // Camera data
     private var cameraResolution: Float2?
@@ -246,8 +252,9 @@ final class Renderer: NSObject, SLAMDelegate {
         print("🔧 Particles 버퍼 생성 중... (가장 큰 버퍼)")
         particlesBuffer = .init(device: device, count: maxPoints, index: kParticleUniforms.rawValue)
 
-        // Voxel occupancy grid (zeroed = all voxels empty)
-        voxelGridBuffer = device.makeBuffer(length: voxelGridSize * MemoryLayout<UInt32>.size, options: .storageModeShared)!
+        // Voxel occupancy grid (최대 크기인 DV-SLAM 기준으로 할당)
+        let maxVoxelGridSize = 1 << 23  // 8M (DV-SLAM용, ARKit은 일부만 사용)
+        voxelGridBuffer = device.makeBuffer(length: maxVoxelGridSize * MemoryLayout<UInt32>.size, options: .storageModeShared)!
 
         // rbg does not need to read/write depth
         let relaxedStateDescriptor = MTLDepthStencilDescriptor()
@@ -801,8 +808,9 @@ extension Renderer {
             self.pointCloudUniformsBuffers.append(.init(device: device, count: 1, index: kPointCloudUniforms.rawValue))
         }
         self.particlesBuffer = .init(device: device, count: maxPoints, index: kParticleUniforms.rawValue)
-        // Voxel grid 초기화 (0으로 채움 = 모든 복셀 비어있음)
-        memset(voxelGridBuffer.contents(), 0, voxelGridSize * MemoryLayout<UInt32>.size)
+        // Voxel grid 초기화 (0으로 채움 = 모든 복셀 비어있음, 최대 크기로 리셋)
+        let maxVoxelGridSize = 1 << 23
+        memset(voxelGridBuffer.contents(), 0, maxVoxelGridSize * MemoryLayout<UInt32>.size)
         // 알고리즘에 맞게 그리드 포인트 재생성 (DV-SLAM: 4096, ARKit: 2048)
         self.rebuildGridPointsBuffer()
 
@@ -867,27 +875,21 @@ extension Renderer {
 
             if useSLAM {
                 // ═══════════════════════════════════════════
-                // DV-SLAM 전용 고급 최적화 파이프라인
+                // DV-SLAM 경량 파이프라인 (10mm GPU 복셀 → 2단계)
+                // GPU 단계에서 10mm 복셀 + 8M 해시로 풍부하게 취득했으므로
+                // 표면씬닝/복셀다운샘플 불필요 → SLAM맵 로드 + 이상치 제거만
                 // ═══════════════════════════════════════════
 
                 // Phase 1: SLAM 엔진의 최적화 맵 로드
                 self.loadSLAMMapToParticleBuffer()
                 let p1 = self.currentPointCount
 
-                // Phase 2: 중복 표면 제거 (drift로 인한 벽 겹침 제거)
-                self.performSurfaceThinning()
+                // Phase 2: 통계적 이상치 제거 (고립 노이즈 포인트)
+                self.removeStatisticalOutliers()
                 let p2 = self.currentPointCount
 
-                // Phase 3: 12mm 정밀 복셀 다운샘플링 + 위치/색상 평균화
-                self.performVoxelDownsampling(voxelSize: 0.012)
-                let p3 = self.currentPointCount
-
-                // Phase 4: 통계적 이상치 제거 (고립 노이즈 포인트)
-                self.removeStatisticalOutliers()
-                let p4 = self.currentPointCount
-
                 let elapsed = CFAbsoluteTimeGetCurrent() - startTime
-                print("🔬 DV-SLAM 최적화: \(originalCount) → \(p1)(SLAM맵) → \(p2)(표면씬닝) → \(p3)(복셀) → \(p4)(이상치) [\(String(format: "%.1f", elapsed))초]")
+                print("🔬 DV-SLAM 최적화: \(originalCount) → \(p1)(SLAM맵) → \(p2)(이상치) [\(String(format: "%.1f", elapsed))초]")
             } else {
                 // ═══════════════════════════════════════════
                 // ARKit: 최적화 없이 raw output (드리프트 그대로 노출)

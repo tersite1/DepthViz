@@ -157,10 +157,12 @@ class ScanPreviewVC: UIViewController {
             startPreExport(renderer: renderer)
         }
 
-        // 20회 이상 미구매 → 하단 배너 광고
+        // 20회 이상 미구매 → 하단 배너 광고 (DEBUG에서는 비활성화)
+        #if !DEBUG
         if ScanCountManager.shared.shouldShowInterstitialAd {
             setupBannerAd()
         }
+        #endif
     }
 
     // MARK: - Banner Ad
@@ -294,6 +296,10 @@ class ScanPreviewVC: UIViewController {
             colorData.deallocate()
         }
 
+        // 원점 기준 구형 거리 필터 (maxDistance)
+        let maxDist = ScanSettings.shared.distanceLimit.distanceValue
+        let maxDistSq = maxDist * maxDist
+
         var actualCount = 0
         renderer.particlesBuffer.withUnsafeBufferPointer { buffer in
             let bufferCount = min(totalPoints, buffer.count)
@@ -301,11 +307,16 @@ class ScanPreviewVC: UIViewController {
             var i = 0
             while i < bufferCount {
                 let particle = buffer[i]
-                // 회전 없이 위치 이동만 (월드 좌표 방향 유지)
-                positionData[outIdx] = particle.position - originOffset
+                i += stride
+
+                // 원점(스캔 시작 위치) 기준 거리 계산
+                let pos = particle.position - originOffset
+                let distSq = pos.x * pos.x + pos.y * pos.y + pos.z * pos.z
+                if distSq > maxDistSq { continue }
+
+                positionData[outIdx] = pos
                 colorData[outIdx] = SIMD4<Float>(particle.color.x, particle.color.y, particle.color.z, 1.0)
                 outIdx += 1
-                i += stride
             }
             actualCount = outIdx
         }
@@ -384,34 +395,28 @@ class ScanPreviewVC: UIViewController {
             maxBound.z - minBound.z
         )
         let maxDimension = max(size.x, max(size.y, size.z))
-        let cameraDistance = Float(maxDimension) * 3.5
 
-        // 카메라를 스캔 시작 위치(원점) 근처에서 포인트 클라우드를 바라보도록 배치
-        // ARKit 월드 좌표: Y = 중력 위쪽, 포인트 클라우드는 원점 기준으로 이동됨
-        // 스캔 시작 시 카메라가 보던 방향(-Z)에서 약간 뒤로 빠져서 전체를 봄
+        // 카메라: 스캔 시작 위치(원점)에서 포인트클라우드 중심을 바라봄
         let cameraNode = SCNNode()
         cameraNode.camera = SCNCamera()
         cameraNode.camera?.zNear = 0.01
         cameraNode.camera?.zFar = Double(maxDimension) * 10
         cameraNode.camera?.fieldOfView = 60
 
-        // 원점(스캔 시작 위치)에서 뒤로 빠진 위치에 카메라 배치
-        // 원점에서 center를 향한 방향의 반대쪽으로 cameraDistance만큼 떨어짐
-        let dx = center.x
-        let dy = center.y
-        let dz = center.z
+        // 원점 = 스캔 시작 위치. 원점에서 약간 뒤로 빠져서 전체를 봄
+        let dx = center.x, dy = center.y, dz = center.z
         let distToCenter = sqrt(dx*dx + dy*dy + dz*dz)
         if distToCenter > 0.01 {
-            // 원점→중심 방향의 반대쪽으로 카메라 배치 (스캔 시작 위치에서 보는 느낌)
-            let scale = cameraDistance / distToCenter
+            let dir = SIMD3<Float>(dx, dy, dz) / distToCenter
+            // 원점에서 중심 반대 방향으로 후퇴
+            let pullBack = maxDimension * 2.5
             cameraNode.position = SCNVector3(
-                center.x - dx * scale,
-                center.y - dy * scale + cameraDistance * 0.1, // 약간 위에서
-                center.z - dz * scale
+                -dir.x * pullBack,
+                -dir.y * pullBack + maxDimension * 0.3,
+                -dir.z * pullBack
             )
         } else {
-            // 중심이 원점에 가까우면 +Z 방향에서 봄
-            cameraNode.position = SCNVector3(center.x, center.y + cameraDistance * 0.2, center.z + cameraDistance)
+            cameraNode.position = SCNVector3(0, maxDimension * 0.5, maxDimension * 3.0)
         }
         cameraNode.look(at: center, up: SCNVector3(0, 1, 0), localFront: SCNVector3(0, 0, -1))
         scene.rootNode.addChildNode(cameraNode)
@@ -511,13 +516,13 @@ class ScanPreviewVC: UIViewController {
         }
 
         // 시작/끝 지점에 큰 구체 마커
-        let startSphere = SCNSphere(radius: Self.tubeRadius * 3)
+        let startSphere = SCNSphere(radius: Self.tubeRadius * 1.5)
         startSphere.materials = [material]
         let startNode = SCNNode(geometry: startSphere)
         startNode.position = transformed.first!
         containerNode.addChildNode(startNode)
 
-        let endSphere = SCNSphere(radius: Self.tubeRadius * 3)
+        let endSphere = SCNSphere(radius: Self.tubeRadius * 1.5)
         endSphere.materials = [material]
         let endNode = SCNNode(geometry: endSphere)
         endNode.position = transformed.last!
@@ -547,13 +552,16 @@ class ScanPreviewVC: UIViewController {
     }
 
     private func setupGestures() {
-        let swipeGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeLeft))
-        swipeGesture.direction = .left
-        view.addGestureRecognizer(swipeGesture)
+        // 화면 왼쪽 가장자리에서만 뒤로가기 (orbit 회전과 충돌 방지)
+        let edgePan = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleEdgePan))
+        edgePan.edges = .left
+        view.addGestureRecognizer(edgePan)
     }
 
-    @objc private func handleSwipeLeft() {
-        backButtonTapped()
+    @objc private func handleEdgePan(_ gesture: UIScreenEdgePanGestureRecognizer) {
+        if gesture.state == .ended {
+            backButtonTapped()
+        }
     }
 
     private func setupButtons() {
@@ -607,9 +615,7 @@ class ScanPreviewVC: UIViewController {
             infoLabel.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -12),
 
             saveButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            // 배너 광고 표시 시 버튼을 위로 올림
-            saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
-                                                constant: ScanCountManager.shared.shouldShowInterstitialAd ? -70 : -20),
+            saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             saveButton.widthAnchor.constraint(equalToConstant: 140),
             saveButton.heightAnchor.constraint(equalToConstant: 50)
         ])
@@ -643,11 +649,11 @@ class ScanPreviewVC: UIViewController {
         }
         scanData = nil
 
-        delegate?.scanPreviewDidDelete(self)
-
-        if navigationController != nil {
-            navigationController?.popViewController(animated: true)
+        if delegate != nil {
+            // delegate가 dismiss + 팝업 처리
+            delegate?.scanPreviewDidDelete(self)
         } else {
+            // fallback: delegate 없으면 자체 dismiss
             dismiss(animated: true)
         }
     }
@@ -704,7 +710,10 @@ class ScanPreviewVC: UIViewController {
     @objc func saveButtonTapped() {
         guard let scanData = scanData, let renderer = renderer else { return }
 
-        // 20회 이상 미구매 → 보상형 전면 광고 시청 후 저장
+        // 20회 이상 미구매 → 보상형 전면 광고 시청 후 저장 (DEBUG에서는 스킵)
+        #if DEBUG
+        showProjectSelection(scanData: scanData, renderer: renderer)
+        #else
         if ScanCountManager.shared.shouldShowInterstitialAd {
             InterstitialAdManager.shared.showAd(from: self) { [weak self] in
                 self?.showProjectSelection(scanData: scanData, renderer: renderer)
@@ -712,13 +721,12 @@ class ScanPreviewVC: UIViewController {
         } else {
             showProjectSelection(scanData: scanData, renderer: renderer)
         }
+        #endif
     }
 
     // MARK: - Project Selection & Save Flow
 
     private func showProjectSelection(scanData: ScanData, renderer: Renderer) {
-        let format = ScanSettings.shared.fileFormat
-        let fileExtension = format.fileExtension
         let pointCount = renderer.currentPointCount
         let markerName = currentMarker?.name
 
@@ -728,6 +736,9 @@ class ScanPreviewVC: UIViewController {
             markerProjectName: markerName,
             onSave: { [weak self] project, fileName in
                 guard let self = self else { return }
+                // 시트에서 변경된 최신 format 읽기
+                let format = ScanSettings.shared.fileFormat
+                let fileExtension = format.fileExtension
                 // 시트 닫기 → 저장 실행
                 self.presentedViewController?.dismiss(animated: true) {
                     self.executeSave(
@@ -747,7 +758,7 @@ class ScanPreviewVC: UIViewController {
 
         let hostingController = UIHostingController(rootView: selectionView)
         if let sheet = hostingController.sheetPresentationController {
-            sheet.detents = [.medium(), .large()]
+            sheet.detents = [.large()]
             sheet.prefersGrabberVisible = true
         }
         present(hostingController, animated: true)
@@ -803,8 +814,10 @@ class ScanPreviewVC: UIViewController {
                 if success {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     // delegate에 저장 완료 알림
+                    print("📊 [SaveFlow] 저장 성공 — delegate 호출 (delegate=\(String(describing: self.delegate)))")
                     self.delegate?.scanPreviewDidSave(self, scanData: scanData)
                 } else {
+                    print("📊 [SaveFlow] ⚠️ 저장 실패!")
                     let alert = UIAlertController(title: "Save Failed", message: "Failed to save data.", preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .default))
                     self.present(alert, animated: true)

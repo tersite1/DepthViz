@@ -16,14 +16,14 @@ public enum SLAMAlgorithm: String, CaseIterable, Codable {
 
     public var description: String {
         switch self {
-        case .depthViz: return "DV-SLAM: LIO optimization + Bundle & Discard."
+        case .depthViz: return "LIO Optimization, Bundle & Discard"
         case .arkit: return "ARKit pose as-is, confidence filtering only."
         }
     }
 
     public var badge: String {
         switch self {
-        case .depthViz: return "DV-SLAM"
+        case .depthViz: return "Mobile-LIO"
         case .arkit: return "ARKit"
         }
     }
@@ -48,9 +48,31 @@ public enum ConfidenceLevel: String, CaseIterable, Codable {
     /// ARKit confidence: 0=low, 1=medium, 2=high.
     public var shaderThreshold: Float {
         switch self {
-        case .low:    return -0.5  // allow all confidence levels
-        case .medium: return 0.5   // admit medium(1) and above
-        case .high:   return 1.5   // admit high(2) only
+        case .low:    return 0.5   // admit medium(1) + high(2) — 무난한 품질
+        case .medium: return 1.5   // admit high(2) only — 엄격한 품질
+        case .high:   return 1.5   // admit high(2) only + depth edge rejection — 최고 품질
+        }
+    }
+
+    /// Depth edge rejection threshold (meters).
+    /// Rejects points where neighboring depth differs sharply — multipath artifact hotspot.
+    /// 0 = disabled.
+    public var depthEdgeThreshold: Float {
+        switch self {
+        case .low:    return 0      // 비활성화
+        case .medium: return 0.10   // 10cm — 극심한 depth edge만 거부
+        case .high:   return 0.04   // 4cm — 공격적 edge 거부 (multipath 최소화)
+        }
+    }
+
+    /// Temporal voting threshold: number of observations in same voxel before accepting.
+    /// Ghost points jitter between voxels (multipath instability) → never confirmed.
+    /// Real surfaces stay stable → quickly confirmed.
+    public var temporalThreshold: Int {
+        switch self {
+        case .low:    return 1   // 즉시 수용 (기존 동작)
+        case .medium: return 2   // 2회 관측 확인
+        case .high:   return 3   // 3회 관측 확인 (TSDF식 temporal voting)
         }
     }
 

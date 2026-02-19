@@ -12,7 +12,11 @@ class ViewController: UIViewController {
     var pointCloud: PointCloud?
     var pointCloudNode: SCNNode?
 
+    #if DEBUG
+    private let showAds = false
+    #else
     private let showAds = ScanCountManager.shared.shouldShowInterstitialAd
+    #endif
     /// 배너 높이 (광고 있을 때 50pt, 없으면 0)
     private var bannerHeight: CGFloat { showAds ? 50 : 0 }
 
@@ -76,6 +80,65 @@ class ViewController: UIViewController {
         return iv
     }()
 
+    // 가로 모드 가이던스
+    private let landscapeGuide: UIView = {
+        let container = UIView()
+        container.backgroundColor = UIColor.black.withAlphaComponent(0.75)
+        container.layer.cornerRadius = 14
+        container.translatesAutoresizingMaskIntoConstraints = false
+
+        let isKorean = Locale.current.language.languageCode?.identifier == "ko"
+
+        // 세로 폰 아이콘
+        let phoneIcon = UIImageView(image: UIImage(systemName: "iphone"))
+        phoneIcon.tintColor = UIColor(white: 0.6, alpha: 1)
+        phoneIcon.contentMode = .scaleAspectFit
+        phoneIcon.translatesAutoresizingMaskIntoConstraints = false
+
+        // 회전 화살표
+        let arrowIcon = UIImageView(image: UIImage(systemName: "arrow.turn.right.down"))
+        arrowIcon.tintColor = .white
+        arrowIcon.contentMode = .scaleAspectFit
+        arrowIcon.translatesAutoresizingMaskIntoConstraints = false
+
+        // 가로 폰 아이콘
+        let phoneLandIcon = UIImageView(image: UIImage(systemName: "iphone.landscape"))
+        phoneLandIcon.tintColor = .white
+        phoneLandIcon.contentMode = .scaleAspectFit
+        phoneLandIcon.translatesAutoresizingMaskIntoConstraints = false
+
+        let iconStack = UIStackView(arrangedSubviews: [phoneIcon, arrowIcon, phoneLandIcon])
+        iconStack.axis = .horizontal
+        iconStack.spacing = 10
+        iconStack.alignment = .center
+        iconStack.translatesAutoresizingMaskIntoConstraints = false
+
+        let label = UILabel()
+        label.text = isKorean ? "90° 회전하면 더 잘 보여요" : "Rotate 90° for best view"
+        label.font = .systemFont(ofSize: 18, weight: .semibold)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+
+        container.addSubview(iconStack)
+        container.addSubview(label)
+        NSLayoutConstraint.activate([
+            phoneIcon.widthAnchor.constraint(equalToConstant: 30),
+            phoneIcon.heightAnchor.constraint(equalToConstant: 38),
+            arrowIcon.widthAnchor.constraint(equalToConstant: 28),
+            arrowIcon.heightAnchor.constraint(equalToConstant: 28),
+            phoneLandIcon.widthAnchor.constraint(equalToConstant: 38),
+            phoneLandIcon.heightAnchor.constraint(equalToConstant: 30),
+            iconStack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            iconStack.topAnchor.constraint(equalTo: container.topAnchor, constant: 18),
+            label.topAnchor.constraint(equalTo: iconStack.bottomAnchor, constant: 12),
+            label.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            label.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
+            label.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -18)
+        ])
+        return container
+    }()
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
@@ -84,6 +147,17 @@ class ViewController: UIViewController {
         setupSceneView()
         setupUI()
         if showAds { setupBannerAd() }
+        setupLandscapeGuide()
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        // 가로 전환 시 가이던스 즉시 숨김
+        if size.width > size.height {
+            coordinator.animate(alongsideTransition: { _ in
+                self.landscapeGuide.alpha = 0
+            })
+        }
     }
 
     // MARK: - Setup
@@ -281,5 +355,25 @@ class ViewController: UIViewController {
 
     @objc func closeButtonTapped() {
         dismiss(animated: true)
+    }
+
+    // MARK: - Landscape Guide
+
+    private func setupLandscapeGuide() {
+        // 이미 가로면 표시 안 함
+        if view.bounds.width > view.bounds.height { return }
+
+        view.addSubview(landscapeGuide)
+        NSLayoutConstraint.activate([
+            landscapeGuide.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            landscapeGuide.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60)
+        ])
+
+        // 3초 후 자동 fade out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            UIView.animate(withDuration: 0.5) {
+                self?.landscapeGuide.alpha = 0
+            }
+        }
     }
 }

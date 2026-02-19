@@ -155,8 +155,10 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
             object: nil
         )
         
-        // 보상형 전면 광고 미리 로드 (20회 이상 미구매 대비)
+        // 보상형 전면 광고 미리 로드 (20회 이상 미구매 대비, DEBUG에서는 스킵)
+        #if !DEBUG
         Task { await InterstitialAdManager.shared.loadAd() }
+        #endif
 
         print("🎉 MainVC viewDidLoad 완료 🎉")
     }
@@ -926,6 +928,7 @@ extension MainVC {
     private func showScanPreview(with scanData: ScanData) {
         // 스캔 횟수 증가
         ScanCountManager.shared.increment()
+        print("📊 [ScanFlow] showScanPreview — scanCount=\(ScanCountManager.shared.currentCount)")
 
         // 프리뷰 전환 시 상태 UI 숨기기
         self.statusLabel.changeText(to: .removed)
@@ -1963,36 +1966,47 @@ struct AddMarkerView: View {
 // MARK: - ScanPreviewDelegate
 extension MainVC {
     func scanPreviewDidSave(_ preview: ScanPreviewVC, scanData: ScanData) {
-        // ScanPreviewVC에서 이미 ScanStorage에 저장 완료됨
-        // 프리뷰 닫기 → viewWillAppear에서 AR 세션 재시작
+        print("📊 [SaveFlow] scanPreviewDidSave 호출됨 — scanCount=\(ScanCountManager.shared.currentCount)")
         preview.dismiss(animated: true) { [weak self] in
             guard let self = self else { return }
+            self.showPremiumPopupIfNeeded()
+        }
+    }
 
-            // 프리미엄 팝업 표시 (조건 충족 시)
-            #if DEBUG
-            let showPopup = ScanCountManager.shared.shouldShowPremiumPrompt
-            #else
-            let showPopup = ScanCountManager.shared.shouldShowPremiumPrompt
-                && !ScanCountManager.shared.shouldShowInterstitialAd
-            #endif
-            if showPopup {
-                ScanCountManager.shared.markPromptShown()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
-                    guard let self = self else { return }
-                    let popup = UIHostingController(rootView: PremiumVideoPopup())
-                    popup.modalPresentationStyle = .overCurrentContext
-                    popup.modalTransitionStyle = .crossDissolve
-                    popup.view.backgroundColor = .clear
-                    popup.view.isOpaque = false
-                    self.present(popup, animated: true)
-                }
-            }
+    /// 프리미엄 팝업 표시 (저장/삭제 공통)
+    private func showPremiumPopupIfNeeded() {
+        // 녹화 중이면 팝업 표시하지 않음
+        guard viewModel?.mode == .ready else {
+            print("📊 [Popup] 스킵 — 현재 모드: \(String(describing: viewModel?.mode))")
+            return
+        }
+
+        #if DEBUG
+        let showPopup = ScanCountManager.shared.shouldShowPremiumPrompt
+        #else
+        let showPopup = ScanCountManager.shared.shouldShowPremiumPrompt
+            && !ScanCountManager.shared.shouldShowInterstitialAd
+        #endif
+
+        print("📊 [Popup] showPopup=\(showPopup), count=\(ScanCountManager.shared.currentCount)")
+
+        if showPopup {
+            ScanCountManager.shared.markPromptShown()
+            let popup = UIHostingController(rootView: PremiumVideoPopup())
+            popup.modalPresentationStyle = .overCurrentContext
+            popup.modalTransitionStyle = .crossDissolve
+            popup.view.backgroundColor = .clear
+            popup.view.isOpaque = false
+            self.present(popup, animated: true)
         }
     }
 
     func scanPreviewDidDelete(_ preview: ScanPreviewVC) {
-        // ScanPreviewVC.backButtonTapped에서 자체 dismiss 처리함
-        // viewWillAppear에서 전체 초기화됨 (renderDestination 복원 + clearParticles)
+        print("📊 [DeleteFlow] scanPreviewDidDelete 호출됨 — scanCount=\(ScanCountManager.shared.currentCount)")
+        preview.dismiss(animated: true) { [weak self] in
+            guard let self = self else { return }
+            self.showPremiumPopupIfNeeded()
+        }
     }
 }
 

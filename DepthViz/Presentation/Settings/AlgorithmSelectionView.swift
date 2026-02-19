@@ -13,7 +13,7 @@ import UIKit
 private extension SLAMAlgorithm {
     var displayName: String {
         switch self {
-        case .depthViz: return "DV-SLAM (Recommended)"
+        case .depthViz: return "Mobile-LIO (Recommended)"
         case .arkit: return "ARKit (Apple Default)"
         }
     }

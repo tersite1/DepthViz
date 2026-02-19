@@ -59,6 +59,13 @@ vertex void unprojectVertex(uint vertexID [[vertex_id]],
     const auto texCoord = gridPoint / uniforms.cameraResolution;
     // Sample the depth map to get the depth value
     const auto depth = depthTexture.sample(colorSampler, texCoord).r;
+
+    // Distance limit — reject invalid or out-of-range depth
+    if (depth <= 0.0 || depth > uniforms.maxDistance) {
+        particleUniforms[currentPointIndex].confidence = -1.0;
+        return;
+    }
+
     // With a 2D point plus depth, we can now get its 3D position
     const auto position = worldPoint(gridPoint, depth, uniforms.cameraIntrinsicsInversed, uniforms.localToWorld);
 

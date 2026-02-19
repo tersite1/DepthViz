@@ -44,12 +44,25 @@ struct PointCloudUniforms {
     int pointCloudCurrentIndex;
     float confidenceThreshold;
     int voxelGridSize;
+    float depthEdgeThreshold;
+    float maxDistance;
+    int temporalThreshold;
 };
 
 struct ParticleUniforms {
     simd_float3 position;
     simd_float3 color;
     float confidence;
+};
+
+struct FreeSpaceCarveUniforms {
+    matrix_float4x4 worldToCamera;
+    matrix_float3x3 cameraIntrinsics;
+    simd_float2 cameraResolution;
+    float carveMargin;
+    int particleCount;
+    float voxelSize;
+    int voxelGridSize;
 };
 
 #endif /* ShaderTypes_h */

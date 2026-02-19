@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6697C8D22F42B000006E4917 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 6697C8D12F42B000006E4917 /* GoogleMobileAds */; };
 		6653E8962C8D0AA60007E24A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 6653E8952C8D0AA60007E24A /* LaunchScreen.storyboard */; };
 		6653E8982C8D0C430007E24A /* building4.png in Resources */ = {isa = PBXBuildFile; fileRef = 6653E8972C8D0C430007E24A /* building4.png */; };
 		6666DEE32C8F46B900D21424 /* a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 6666DEE22C8F46B900D21424 /* a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4 */; };
@@ -16,6 +15,7 @@
 		66689B4E2C8C70E900DB20E9 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4D2C8C70E500DB20E9 /* AuthManager.swift */; };
 		666BA4A92EAD4CD6001372FE /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 666BA4A82EAD4CD6001372FE /* logo.png */; };
 		6697C8CA2F42A86B006E4917 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6697C8C92F42A86B006E4917 /* StoreKit.framework */; };
+		6697C8D22F42B000006E4917 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 6697C8D12F42B000006E4917 /* GoogleMobileAds */; };
 		669A6F0C2C7F35B100F8BDAC /* MatrixMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A6F0B2C7F35A700F8BDAC /* MatrixMath.swift */; };
 		669A6F0E2C7F47F100F8BDAC /* PointCloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A6F0D2C7F47F100F8BDAC /* PointCloud.swift */; };
 		66B1C0172C22B9E5003CDAD8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */; };
@@ -54,7 +54,9 @@
 		87FDBC1B29EE270A00D90D02 /* MainVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1A29EE270A00D90D02 /* MainVM.swift */; };
 		87FDBC1E29EEA53C00D90D02 /* LiDARData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */; };
 		ADDMARKERVIEW_BUILD /* AddMarkerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDMARKERVIEW_REF /* AddMarkerView.swift */; };
+		ADMOBMGR_BUILD /* AdMobManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADMOBMGR_REF /* AdMobManager.swift */; };
 		ALGOVIEW_BUILD_ID /* AlgorithmSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ALGOVIEW_ID_123456 /* AlgorithmSelectionView.swift */; };
+		APPOPENAD_BUILD /* AppOpenAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = APPOPENAD_REF /* AppOpenAdManager.swift */; };
 		BLDPREMIUM_BUILD /* building4_premium.png in Resources */ = {isa = PBXBuildFile; fileRef = BLDPREMIUM_REF /* building4_premium.png */; };
 		DB255B972C21EF8B00209FD8 /* launchicon2x.png in Resources */ = {isa = PBXBuildFile; fileRef = DB255B962C21EF8B00209FD8 /* launchicon2x.png */; };
 		DBFC96332C1C1765009B5AEC /* ScanViewerVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFC96322C1C1765009B5AEC /* ScanViewerVC.swift */; };
@@ -71,9 +73,9 @@
 		E7B7223B24807ACA002E43E8 /* MetalBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B7223A24807ACA002E43E8 /* MetalBuffer.swift */; };
 		E7B7223D24809D1E002E43E8 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7B7223C24809D1E002E43E8 /* Helpers.swift */; };
 		IMUDEMO_BUILD /* imu_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = IMUDEMO_REF /* imu_demo.mp4 */; };
-		LOCALIZABLE_BUILD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = LOCALIZABLE_REF /* Localizable.strings */; };
 		INFOPLIST_STR_BUILD /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = INFOPLIST_STR_REF /* InfoPlist.strings */; };
-		STOREKIT_BUILD /* DepthVizProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = STOREKIT_REF /* DepthVizProducts.storekit */; };
+		INTERSTITIALAD_BUILD /* InterstitialAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = INTERSTITIALAD_REF /* InterstitialAdManager.swift */; };
+		LOCALIZABLE_BUILD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = LOCALIZABLE_REF /* Localizable.strings */; };
 		LOCMARKER_BUILD /* LocationMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = LOCMARKER_REF /* LocationMarker.swift */; };
 		LOCSCANSVC_BUILD /* LocationScansViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = LOCSCANSVC_REF /* LocationScansViewController.swift */; };
 		MAPVC_BUILD /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = MAPVC_REF /* MapViewController.swift */; };
@@ -87,11 +89,8 @@
 		PROJECTMGR_BUILD /* ProjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJECTMGR_REF /* ProjectManager.swift */; };
 		PROJECT_ENTITY_BUILD /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJECT_ENTITY_REF /* Project.swift */; };
 		PROJSELVIEW_BUILD /* ProjectSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJSELVIEW_REF /* ProjectSelectionView.swift */; };
-		SCANCOUNTMGR_BUILD /* ScanCountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANCOUNTMGR_REF /* ScanCountManager.swift */; };
-		ADMOBMGR_BUILD /* AdMobManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADMOBMGR_REF /* AdMobManager.swift */; };
-		APPOPENAD_BUILD /* AppOpenAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = APPOPENAD_REF /* AppOpenAdManager.swift */; };
 		REWARDEDAD_BUILD /* RewardedAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = REWARDEDAD_REF /* RewardedAdManager.swift */; };
-		INTERSTITIALAD_BUILD /* InterstitialAdManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = INTERSTITIALAD_REF /* InterstitialAdManager.swift */; };
+		SCANCOUNTMGR_BUILD /* ScanCountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANCOUNTMGR_REF /* ScanCountManager.swift */; };
 		SCANPREVIEWVC_BUILD_ID /* ScanPreviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANPREVIEWVC_ID_123456 /* ScanPreviewVC.swift */; };
 		SCANSETTINGSVIEW_BUILD /* ScanSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANSETTINGSVIEW_REF /* ScanSettingsView.swift */; };
 		SCANSETTINGS_BUILD /* ScanSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = SCANSETTINGS_REF /* ScanSettings.swift */; };
@@ -99,6 +98,7 @@
 		SLAMPOINT_BUILD_ID /* SLAMPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = SLAMPOINT_ID_123456 /* SLAMPoint.swift */; };
 		SLAMSERVICE_MM_BUILD_ID /* SLAMService.mm in Sources */ = {isa = PBXBuildFile; fileRef = SLAMSERVICE_MM_ID_123456 /* SLAMService.mm */; };
 		SPLASHVC_BUILD /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPLASHVC_REF /* SplashViewController.swift */; };
+		STOREKIT_BUILD /* DepthVizProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = STOREKIT_REF /* DepthVizProducts.storekit */; };
 		STUBCLASSES_BUILD /* StubClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = STUBCLASSES_REF /* StubClasses.swift */; };
 		TRAJDEMO_BUILD /* trajectory_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = TRAJDEMO_REF /* trajectory_demo.mp4 */; };
 /* End PBXBuildFile section */
@@ -151,7 +151,9 @@
 		87FDBC1A29EE270A00D90D02 /* MainVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainVM.swift; sourceTree = "<group>"; };
 		87FDBC1D29EEA53C00D90D02 /* LiDARData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiDARData.swift; sourceTree = "<group>"; };
 		ADDMARKERVIEW_REF /* AddMarkerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AddMarkerView.swift; path = DepthViz/Presentation/Map/AddMarkerView.swift; sourceTree = SOURCE_ROOT; };
+		ADMOBMGR_REF /* AdMobManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AdMobManager.swift; path = DepthViz/Presentation/AdMob/AdMobManager.swift; sourceTree = SOURCE_ROOT; };
 		ALGOVIEW_ID_123456 /* AlgorithmSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AlgorithmSelectionView.swift; path = DepthViz/Presentation/Settings/AlgorithmSelectionView.swift; sourceTree = SOURCE_ROOT; };
+		APPOPENAD_REF /* AppOpenAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppOpenAdManager.swift; path = DepthViz/Presentation/AdMob/AppOpenAdManager.swift; sourceTree = SOURCE_ROOT; };
 		BLDPREMIUM_REF /* building4_premium.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = building4_premium.png; path = DepthViz/Presentation/Extension/building4_premium.png; sourceTree = SOURCE_ROOT; };
 		DB23EE222C08398500FC4167 /* env.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = env.xcconfig; sourceTree = "<group>"; };
 		DB255B962C21EF8B00209FD8 /* launchicon2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = launchicon2x.png; sourceTree = "<group>"; };
@@ -174,11 +176,11 @@
 		E7B7223C24809D1E002E43E8 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		E7E2ED6F1473F1FD1E9543FA /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		IMUDEMO_REF /* imu_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = imu_demo.mp4; path = DepthViz/Resources/imu_demo.mp4; sourceTree = SOURCE_ROOT; };
-		LOCALIZABLE_EN /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		LOCALIZABLE_KO /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		INFOPLIST_STR_EN /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		INFOPLIST_STR_KO /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		STOREKIT_REF /* DepthVizProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = DepthVizProducts.storekit; path = DepthViz/Configuration/DepthVizProducts.storekit; sourceTree = SOURCE_ROOT; };
+		INTERSTITIALAD_REF /* InterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InterstitialAdManager.swift; path = DepthViz/Presentation/AdMob/InterstitialAdManager.swift; sourceTree = SOURCE_ROOT; };
+		LOCALIZABLE_EN /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		LOCALIZABLE_KO /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		LOCMARKER_REF /* LocationMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocationMarker.swift; path = DepthViz/Domain/Entity/LocationMarker.swift; sourceTree = SOURCE_ROOT; };
 		LOCSCANSVC_REF /* LocationScansViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LocationScansViewController.swift; path = DepthViz/Presentation/Map/LocationScansViewController.swift; sourceTree = SOURCE_ROOT; };
 		MAPVC_REF /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MapViewController.swift; path = DepthViz/Presentation/Map/MapViewController.swift; sourceTree = SOURCE_ROOT; };
@@ -192,11 +194,8 @@
 		PROJECTMGR_REF /* ProjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProjectManager.swift; path = DepthViz/Domain/Storage/ProjectManager.swift; sourceTree = SOURCE_ROOT; };
 		PROJECT_ENTITY_REF /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Project.swift; path = DepthViz/Domain/Entity/Project.swift; sourceTree = SOURCE_ROOT; };
 		PROJSELVIEW_REF /* ProjectSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProjectSelectionView.swift; path = DepthViz/Presentation/Shared/ProjectSelectionView.swift; sourceTree = SOURCE_ROOT; };
-		SCANCOUNTMGR_REF /* ScanCountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanCountManager.swift; path = DepthViz/Data/Settings/ScanCountManager.swift; sourceTree = SOURCE_ROOT; };
-		ADMOBMGR_REF /* AdMobManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AdMobManager.swift; path = DepthViz/Presentation/AdMob/AdMobManager.swift; sourceTree = SOURCE_ROOT; };
-		APPOPENAD_REF /* AppOpenAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppOpenAdManager.swift; path = DepthViz/Presentation/AdMob/AppOpenAdManager.swift; sourceTree = SOURCE_ROOT; };
 		REWARDEDAD_REF /* RewardedAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RewardedAdManager.swift; path = DepthViz/Presentation/AdMob/RewardedAdManager.swift; sourceTree = SOURCE_ROOT; };
-		INTERSTITIALAD_REF /* InterstitialAdManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = InterstitialAdManager.swift; path = DepthViz/Presentation/AdMob/InterstitialAdManager.swift; sourceTree = SOURCE_ROOT; };
+		SCANCOUNTMGR_REF /* ScanCountManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanCountManager.swift; path = DepthViz/Data/Settings/ScanCountManager.swift; sourceTree = SOURCE_ROOT; };
 		SCANPREVIEWVC_ID_123456 /* ScanPreviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanPreviewVC.swift; path = DepthViz/Presentation/ScanViewer/ScanPreviewVC.swift; sourceTree = SOURCE_ROOT; };
 		SCANSETTINGSVIEW_REF /* ScanSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanSettingsView.swift; path = DepthViz/Presentation/Main/View/ScanSettingsView.swift; sourceTree = SOURCE_ROOT; };
 		SCANSETTINGS_REF /* ScanSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScanSettings.swift; path = DepthViz/Domain/Entity/ScanSettings.swift; sourceTree = SOURCE_ROOT; };
@@ -205,6 +204,7 @@
 		SLAMSERVICE_H_ID_123456 /* SLAMService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SLAMService.h; path = DepthViz/Domain/Algorithm/Bridge/SLAMService.h; sourceTree = SOURCE_ROOT; };
 		SLAMSERVICE_MM_ID_123456 /* SLAMService.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SLAMService.mm; path = DepthViz/Domain/Algorithm/Bridge/SLAMService.mm; sourceTree = SOURCE_ROOT; };
 		SPLASHVC_REF /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SplashViewController.swift; path = DepthViz/Presentation/Shared/SplashViewController.swift; sourceTree = SOURCE_ROOT; };
+		STOREKIT_REF /* DepthVizProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = DepthVizProducts.storekit; path = DepthViz/Configuration/DepthVizProducts.storekit; sourceTree = SOURCE_ROOT; };
 		STUBCLASSES_REF /* StubClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StubClasses.swift; path = DepthViz/Presentation/Main/StubClasses.swift; sourceTree = SOURCE_ROOT; };
 		TRAJDEMO_REF /* trajectory_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = trajectory_demo.mp4; path = DepthViz/Resources/trajectory_demo.mp4; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -655,15 +655,6 @@
 			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
-		LOCALIZABLE_REF /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				LOCALIZABLE_EN /* en */,
-				LOCALIZABLE_KO /* ko */,
-			);
-			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
 		INFOPLIST_STR_REF /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -671,6 +662,15 @@
 				INFOPLIST_STR_KO /* ko */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		LOCALIZABLE_REF /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				LOCALIZABLE_EN /* en */,
+				LOCALIZABLE_KO /* ko */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -819,7 +819,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = D9WJV9698J;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -858,7 +858,7 @@
 				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = D9WJV9698J;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",

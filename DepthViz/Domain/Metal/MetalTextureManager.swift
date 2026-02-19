@@ -39,15 +39,19 @@ final class MetalTextureManager {
     }
     
     /// Update depth and confidence textures from AR frame
+    /// smoothedSceneDepth 우선 사용 — Apple temporal filtering으로 multipath ghost 억제
     func updateDepthTextures(frame: ARFrame) -> Bool {
-        guard let depthMap = frame.sceneDepth?.depthMap,
-              let confidenceMap = frame.sceneDepth?.confidenceMap else {
+        // smoothedSceneDepth: 여러 프레임 temporal 평균 → multipath 노이즈 감소
+        // fallback: sceneDepth (raw, 첫 몇 프레임에서 smoothed 아직 미준비 시)
+        let depthData = frame.smoothedSceneDepth ?? frame.sceneDepth
+        guard let depthMap = depthData?.depthMap,
+              let confidenceMap = depthData?.confidenceMap else {
             return false
         }
-        
+
         depthTexture = makeTexture(fromPixelBuffer: depthMap, pixelFormat: .r32Float, planeIndex: 0)
         confidenceTexture = makeTexture(fromPixelBuffer: confidenceMap, pixelFormat: .r8Uint, planeIndex: 0)
-        
+
         return true
     }
     

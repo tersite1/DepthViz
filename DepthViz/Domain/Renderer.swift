@@ -119,6 +119,7 @@ final class Renderer: NSObject, SLAMDelegate {
         uniforms.cameraResolution = Float2(1920, 1440)
         uniforms.voxelSize = voxelSize
         uniforms.voxelGridSize = Int32(voxelGridSize)
+        uniforms.maxDistance = ScanSettings.shared.distanceLimit.distanceValue
         return uniforms
     }()
     private var pointCloudUniformsBuffers = [MetalBuffer<PointCloudUniforms>]()
@@ -274,11 +275,13 @@ final class Renderer: NSObject, SLAMDelegate {
     /// 사용자 설정 적용 (ARSession이 시작된 후, 녹화 시작 전에 호출)
     func applySettings() {
         let settings = ScanSettings.shared
-        // Confidence → 셰이더 uniform (float: -0.5, 0.5, 1.5)
+        // Confidence → 셰이더 uniform
         confidenceThreshold = settings.confidenceLevel.shaderThreshold
+        // Distance limit → 셰이더에서 초과 거리 즉시 거부
+        pointCloudUniforms.maxDistance = settings.distanceLimit.distanceValue
         // 알고리즘에 맞게 그리드 포인트 버퍼 재생성 (DV-SLAM: 4096, ARKit: 2048)
         rebuildGridPointsBuffer()
-        print("⚙️ 설정 적용: 알고리즘=\(settings.algorithm.badge), 신뢰도=\(settings.confidenceLevel.rawValue)(threshold=\(confidenceThreshold)), 거리=\(settings.distanceLimit.displayName), 포맷=\(settings.fileFormat.displayName)")
+        print("⚙️ 설정 적용: 알고리즘=\(settings.algorithm.badge), 신뢰도=\(settings.confidenceLevel.rawValue)(threshold=\(confidenceThreshold)), 거리=\(settings.distanceLimit.displayName)(max=\(settings.distanceLimit.distanceValue)m)")
     }
     
     /// DV-SLAM용 IMU 데이터 공급 시작 (100Hz — LIO 필수)
@@ -875,21 +878,28 @@ extension Renderer {
 
             if useSLAM {
                 // ═══════════════════════════════════════════
-                // DV-SLAM 경량 파이프라인 (10mm GPU 복셀 → 2단계)
-                // GPU 단계에서 10mm 복셀 + 8M 해시로 풍부하게 취득했으므로
-                // 표면씬닝/복셀다운샘플 불필요 → SLAM맵 로드 + 이상치 제거만
+                // Mobile-LIO 4단계 파이프라인
+                // SLAM맵 → 표면씬닝 → 복셀평균화 → 이상치제거
                 // ═══════════════════════════════════════════
 
                 // Phase 1: SLAM 엔진의 최적화 맵 로드
                 self.loadSLAMMapToParticleBuffer()
                 let p1 = self.currentPointCount
 
-                // Phase 2: 통계적 이상치 제거 (고립 노이즈 포인트)
-                self.removeStatisticalOutliers()
+                // Phase 2: 표면 씬닝 (드리프트로 겹친 중복 벽 제거)
+                self.performSurfaceThinning()
                 let p2 = self.currentPointCount
 
+                // Phase 3: 복셀 다운샘플링 (12mm 위치/색상 평균화 → 노이즈 저감)
+                self.performVoxelDownsampling(voxelSize: 0.012)
+                let p3 = self.currentPointCount
+
+                // Phase 4: 통계적 이상치 제거 (고립 노이즈 포인트)
+                self.removeStatisticalOutliers()
+                let p4 = self.currentPointCount
+
                 let elapsed = CFAbsoluteTimeGetCurrent() - startTime
-                print("🔬 DV-SLAM 최적화: \(originalCount) → \(p1)(SLAM맵) → \(p2)(이상치) [\(String(format: "%.1f", elapsed))초]")
+                print("🔬 Mobile-LIO 최적화: \(originalCount) → \(p1)(SLAM맵) → \(p2)(씬닝) → \(p3)(복셀) → \(p4)(이상치) [\(String(format: "%.1f", elapsed))초]")
             } else {
                 // ═══════════════════════════════════════════
                 // ARKit: 최적화 없이 raw output (드리프트 그대로 노출)
@@ -980,20 +990,20 @@ extension Renderer {
 
     // MARK: Phase 2 — 중복 표면 제거 (Surface Thinning)
     //
-    // 드리프트로 인해 같은 벽이 여러 번 겹쳐 나타나는 문제를 해결
-    // 50mm 영역마다 포인트 분포를 분석하여 가장 밀집된 단일 표면층만 유지
+    // 드리프트/multipath로 인해 벽 뒤로 길쭉하게 늘어나는 고스트 제거
+    // 30mm 영역마다 포인트 분포를 분석하여 가장 밀집된 단일 표면층만 유지
     // Gap(빈 공간)이 감지된 경우에만 적용 → 모서리/코너 보존
 
     private func performSurfaceThinning() {
         let count = currentPointCount
         guard count > 1000 else { return }
 
-        let coarseSize: Float = 0.050   // 50mm 분석 영역
-        let binSize: Float = 0.005      // 5mm 히스토그램 빈
-        let minSpread: Float = 0.030    // 30mm 미만 두께 = 정상 표면, 스킵
-        let gapThreshold: Float = 0.015 // 15mm 이상 빈 공간 = 확실한 중복 레이어만
-        let keepWindow: Float = 0.025   // 25mm 윈도우 = 유지할 표면 두께
-        let maxRemoveRatio: Float = 0.40 // 안전장치: 최대 40%만 제거
+        let coarseSize: Float = 0.030   // 30mm 분석 영역 (더 세밀)
+        let binSize: Float = 0.003      // 3mm 히스토그램 빈
+        let minSpread: Float = 0.015    // 15mm 미만 두께 = 정상 표면, 스킵
+        let gapThreshold: Float = 0.008 // 8mm 이상 빈 공간 = 중복/고스트 감지
+        let keepWindow: Float = 0.015   // 15mm 윈도우 = 유지할 표면 두께
+        let maxRemoveRatio: Float = 0.50 // 안전장치: 최대 50%까지 제거
 
         struct CKey: Hashable { let x: Int32, y: Int32, z: Int32 }
 

@@ -19,6 +19,7 @@ struct ProjectSelectionView: View {
     @State private var isCreatingNew = false
     @State private var newProjectName: String = ""
     @State private var projects: [String] = []
+    @State private var selectedFormat: FileFormat = .plyAscii
 
     var body: some View {
         NavigationView {
@@ -44,65 +45,68 @@ struct ProjectSelectionView: View {
                                 .font(.headline)
                                 .padding(.horizontal, 20)
 
-                            VStack(spacing: 0) {
+                            // 프로젝트 그리드 (2열)
+                            let columns = [
+                                GridItem(.flexible(), spacing: 10),
+                                GridItem(.flexible(), spacing: 10)
+                            ]
+                            LazyVGrid(columns: columns, spacing: 10) {
                                 ForEach(projects, id: \.self) { project in
+                                    let isSelected = selectedProject == project && !isCreatingNew
                                     Button(action: {
                                         selectedProject = project
                                         isCreatingNew = false
                                     }) {
-                                        HStack {
+                                        VStack(spacing: 6) {
+                                            Image(systemName: isSelected ? "folder.fill" : "folder")
+                                                .font(.system(size: 24))
+                                                .foregroundColor(isSelected ? .blue : .gray)
                                             Text(project)
-                                                .foregroundColor(.primary)
+                                                .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                                                .foregroundColor(isSelected ? .blue : .primary)
                                                 .lineLimit(1)
-                                            Spacer()
-                                            if selectedProject == project && !isCreatingNew {
-                                                Image(systemName: "checkmark")
-                                                    .foregroundColor(.blue)
-                                                    .fontWeight(.semibold)
-                                            }
+                                                .truncationMode(.tail)
                                         }
-                                        .padding(.horizontal, 16)
-                                        .padding(.vertical, 13)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 14)
                                         .background(
-                                            (selectedProject == project && !isCreatingNew)
-                                                ? Color.blue.opacity(0.08)
-                                                : Color.clear
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(isSelected ? Color.blue.opacity(0.1) : Color(.secondarySystemGroupedBackground))
+                                        )
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(isSelected ? Color.blue.opacity(0.5) : Color.clear, lineWidth: 1.5)
                                         )
                                     }
-                                    if project != projects.last {
-                                        Divider().padding(.leading, 16)
-                                    }
+                                    .buttonStyle(.plain)
                                 }
 
-                                if !projects.isEmpty {
-                                    Divider().padding(.leading, 16)
-                                }
-
-                                // 새 프로젝트 행
+                                // 새 프로젝트
                                 Button(action: {
                                     isCreatingNew = true
                                     selectedProject = ""
                                 }) {
-                                    HStack(spacing: 8) {
-                                        Image(systemName: "plus.circle.fill")
-                                            .foregroundColor(.blue)
-                                        Text("New Project")
-                                            .foregroundColor(.blue)
-                                            .fontWeight(.medium)
-                                        Spacer()
-                                        if isCreatingNew {
-                                            Image(systemName: "checkmark")
-                                                .foregroundColor(.blue)
-                                                .fontWeight(.semibold)
-                                        }
+                                    VStack(spacing: 6) {
+                                        Image(systemName: isCreatingNew ? "folder.fill.badge.plus" : "folder.badge.plus")
+                                            .font(.system(size: 24))
+                                            .foregroundColor(isCreatingNew ? .blue : .gray)
+                                        Text("New")
+                                            .font(.system(size: 13, weight: isCreatingNew ? .semibold : .regular))
+                                            .foregroundColor(isCreatingNew ? .blue : .secondary)
                                     }
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 13)
-                                    .background(isCreatingNew ? Color.blue.opacity(0.08) : Color.clear)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(isCreatingNew ? Color.blue.opacity(0.1) : Color(.secondarySystemGroupedBackground))
+                                    )
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(isCreatingNew ? Color.blue.opacity(0.5) : Color.clear, lineWidth: 1.5)
+                                    )
                                 }
+                                .buttonStyle(.plain)
                             }
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .cornerRadius(12)
                             .padding(.horizontal, 16)
 
                             // 새 프로젝트명 입력
@@ -123,8 +127,63 @@ struct ProjectSelectionView: View {
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .padding(.horizontal, 20)
                         }
+
+                        // 저장 형식 선택
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Format")
+                                .font(.headline)
+                                .padding(.horizontal, 20)
+
+                            let formatColumns = [
+                                GridItem(.flexible(), spacing: 8),
+                                GridItem(.flexible(), spacing: 8),
+                                GridItem(.flexible(), spacing: 8),
+                                GridItem(.flexible(), spacing: 8)
+                            ]
+                            LazyVGrid(columns: formatColumns, spacing: 8) {
+                                ForEach(FileFormat.allCases, id: \.self) { format in
+                                    let isSelected = selectedFormat == format
+                                    let isRecommended = format == .plyBinary
+                                    Button(action: {
+                                        selectedFormat = format
+                                        ScanSettings.shared.fileFormat = format
+                                    }) {
+                                        VStack(spacing: 4) {
+                                            Image(systemName: "doc.fill")
+                                                .font(.system(size: 18))
+                                                .foregroundColor(isSelected ? .white : .gray)
+                                            Text(format.displayName)
+                                                .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
+                                                .foregroundColor(isSelected ? .white : .primary)
+                                                .lineLimit(1)
+                                                .minimumScaleFactor(0.8)
+                                            if isRecommended {
+                                                Text("Recommended")
+                                                    .font(.system(size: 8, weight: .medium))
+                                                    .foregroundColor(isSelected ? .white.opacity(0.8) : .blue)
+                                            } else {
+                                                Text(" ")
+                                                    .font(.system(size: 8))
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 10)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(isSelected ? Color.blue : Color(.secondarySystemGroupedBackground))
+                                        )
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(isSelected ? Color.blue.opacity(0.5) : Color.clear, lineWidth: 1.5)
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                        }
                     }
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 100)
                 }
 
                 // 하단 버튼 영역
@@ -166,6 +225,7 @@ struct ProjectSelectionView: View {
         .onAppear {
             projects = ScanStorage.shared.getProjects()
             fileName = defaultFileName
+            selectedFormat = ScanSettings.shared.fileFormat
 
             if let markerName = markerProjectName {
                 // 마커 프로젝트 자동 선택

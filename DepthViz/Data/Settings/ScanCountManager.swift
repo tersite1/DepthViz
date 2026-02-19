@@ -14,9 +14,9 @@ final class ScanCountManager {
     private let scanCountKey = "scan_count_total"
     private let lastPromptCountKey = "last_premium_prompt_count"
     #if DEBUG
-    private let premiumThreshold = 1   // 디버그: 1회부터 팝업
-    private let repeatInterval = 1     // 디버그: 매회 반복
-    private let adThreshold = 1        // 디버그: 1회부터 광고
+    private let premiumThreshold = 3   // 디버그: 3회부터 팝업
+    private let repeatInterval = 3     // 디버그: 3회마다 반복
+    private let adThreshold = 10       // 디버그: 10회부터 광고
     #else
     private let premiumThreshold = 3   // 첫 팝업 기준 (3회)
     private let repeatInterval = 3     // 이후 3회마다 반복
@@ -40,20 +40,34 @@ final class ScanCountManager {
     /// 프리미엄 구매 제안 팝업을 표시해야 하는지 확인
     /// - 3회 이상 && 미구매 && (첫 번째 또는 마지막 팝업 이후 3회 이상)
     var shouldShowPremiumPrompt: Bool {
-        #if !DEBUG
-        guard !PremiumManager.shared.isPremium else { return false }
-        #endif
-        guard currentCount >= premiumThreshold else { return false }
-
+        let count = currentCount
         let lastPromptCount = UserDefaults.standard.integer(forKey: lastPromptCountKey)
+        let isPremium = PremiumManager.shared.isPremium
+
+        print("📊 [PremiumCheck] count=\(count), threshold=\(premiumThreshold), lastPrompt=\(lastPromptCount), interval=\(repeatInterval), isPremium=\(isPremium)")
+
+        #if !DEBUG
+        guard !isPremium else {
+            print("📊 [PremiumCheck] → false (이미 프리미엄)")
+            return false
+        }
+        #endif
+        guard count >= premiumThreshold else {
+            print("📊 [PremiumCheck] → false (count \(count) < threshold \(premiumThreshold))")
+            return false
+        }
 
         // 한 번도 팝업을 보여준 적 없으면 → 표시
         if lastPromptCount == 0 {
+            print("📊 [PremiumCheck] → true (첫 팝업)")
             return true
         }
 
         // 마지막 팝업 이후 3회 이상 스캔했으면 → 표시
-        return (currentCount - lastPromptCount) >= repeatInterval
+        let diff = count - lastPromptCount
+        let result = diff >= repeatInterval
+        print("📊 [PremiumCheck] → \(result) (diff=\(diff), interval=\(repeatInterval))")
+        return result
     }
 
     /// 팝업 표시 완료 시 호출 — 현재 스캔 횟수 기록

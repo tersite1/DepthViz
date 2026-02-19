@@ -247,13 +247,19 @@ final class MainVC: UIViewController, ARSessionDelegate, CLLocationManagerDelega
              return
          }
 
+         // 방어: 모드가 recording이 아닌데 isRecording이 true면 강제 리셋
+         if viewModel?.renderer.isRecording == true {
+             print("⚠️ 모드 불일치 감지: mode=\(String(describing: viewModel?.mode)) but isRecording=true → 강제 리셋")
+             viewModel?.renderer.isRecording = false
+         }
+
          // 1️⃣ MTKView 즉시 정지 (clearParticles 중 draw() 방지)
          if let mtkView = self.view as? MTKView {
              mtkView.isPaused = true
          }
 
-         // 2️⃣ SLAM 엔진 완전 정지
-         SLAMService.sharedInstance().stop()
+         // 2️⃣ SLAM 엔진 완전 초기화 (이전 맵 데이터 제거)
+         SLAMService.sharedInstance().reset()
 
          // 3️⃣ 렌더러 완전 정리 (commandQueue 재생성 포함 — GPU 에러 복구)
          self.viewModel?.resetRenderer()
@@ -941,9 +947,21 @@ extension MainVC {
         previewVC.delegate = self
         previewVC.currentMarker = self.currentMarker
         previewVC.modalPresentationStyle = UIModalPresentationStyle.fullScreen
-        self.present(previewVC, animated: true) {
-            print("✅ 스캔 프리뷰 표시 완료 (초고속 모드)")
-            self.currentMarker = nil
+
+        // 기존에 표시 중인 VC(PremiumVideoPopup 등)가 있으면 먼저 dismiss
+        if self.presentedViewController != nil {
+            self.dismiss(animated: false) { [weak self] in
+                guard let self = self else { return }
+                self.present(previewVC, animated: true) {
+                    print("✅ 스캔 프리뷰 표시 완료 (기존 VC dismiss 후)")
+                    self.currentMarker = nil
+                }
+            }
+        } else {
+            self.present(previewVC, animated: true) {
+                print("✅ 스캔 프리뷰 표시 완료")
+                self.currentMarker = nil
+            }
         }
     }
     

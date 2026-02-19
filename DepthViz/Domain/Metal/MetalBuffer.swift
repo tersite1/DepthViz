@@ -121,9 +121,15 @@ extension MTLRenderCommandEncoder {
     }
 }
 
+extension MTLComputeCommandEncoder {
+    func setBuffer<T>(_ buffer: MetalBuffer<T>, offset: Int = 0, index: Int) {
+        setBuffer(buffer.buffer, offset: offset, index: index)
+    }
+}
+
 struct Texture: Resource {
     typealias Element = Any
-    
+
     let texture: MTLTexture
     let index: Int
 }

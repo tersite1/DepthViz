@@ -333,6 +333,13 @@ public:
     NSLog(@"[SLAMService] Engine Stopped");
 }
 
+- (void)reset {
+    [self stop];
+    _currentSystem.reset();
+    _currentSystem = nullptr;
+    NSLog(@"[SLAMService] Engine Reset — map data cleared");
+}
+
 - (void)processIMUData:(CMDeviceMotion *)motion {
     if (!_isRunning || !_currentSystem) return;
 
@@ -418,7 +425,7 @@ public:
                 float depth = depthRow[col];
                 uint8_t confidence = confRow[col];
 
-                // Skip invalid depth
+                // Skip invalid or out-of-range depth
                 if (depth <= 0.0f || depth > _distanceLimit || std::isnan(depth)) continue;
 
                 // Apply confidence threshold filtering

@@ -65,8 +65,14 @@ struct AlgorithmSelectionView: View {
     private func loadSettings() {
         selectedAlgorithm = ScanSettings.shared.algorithm
         confidenceThreshold = Double(ScanSettings.shared.confidenceLevel.slamThreshold)
-        maxDistance = Double(ScanSettings.shared.distanceLimit.distanceValue)
-        if maxDistance > 10 { maxDistance = 10 }
+        let savedDist = UserDefaults.standard.double(forKey: "ScanDistanceLimit")
+        if savedDist > 10 {
+            maxDistance = 10.5  // No Limit 위치
+        } else if savedDist > 0 {
+            maxDistance = savedDist
+        } else {
+            maxDistance = 3.0
+        }
         selectedFormat = ScanSettings.shared.fileFormat
     }
 
@@ -118,14 +124,14 @@ struct AlgorithmSelectionView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack {
-                Slider(value: $maxDistance, in: 1...10, step: 0.5)
+                Slider(value: $maxDistance, in: 1...10.5, step: 0.5)
                     .accentColor(.blue)
                     .onChange(of: maxDistance) { _ in saveSettings() }
 
-                Text(String(format: "%.1f m", maxDistance))
+                Text(maxDistance > 10 ? "No Limit" : String(format: "%.1f m", maxDistance))
                     .font(.system(size: 15, design: .monospaced))
                     .foregroundColor(.primary)
-                    .frame(width: 70, alignment: .trailing)
+                    .frame(width: 80, alignment: .trailing)
             }
         }
     }
@@ -428,7 +434,8 @@ struct AlgorithmSelectionView: View {
             ScanSettings.shared.confidenceLevel = .high
         }
 
-        UserDefaults.standard.set(maxDistance, forKey: "ScanDistanceLimit")
+        let distToSave = maxDistance > 10 ? 1000.0 : maxDistance
+        UserDefaults.standard.set(distToSave, forKey: "ScanDistanceLimit")
         SLAMService.sharedInstance().reloadSettings()
 
         #if DEBUG

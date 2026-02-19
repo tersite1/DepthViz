@@ -86,6 +86,11 @@ extension MainVM {
     }
 
     func terminateRecording() {
+        // 녹화 중이 아니면 무시 (메모리 경고 등으로 호출될 때 방어)
+        guard self.mode == .recording else {
+            print("⚠️ terminateRecording 무시 — 현재 모드: \(self.mode)")
+            return
+        }
         self.mode = .recordingTerminate
         self.stopRecording()
     }
@@ -227,6 +232,12 @@ extension MainVM {
     }
 
     private func stopRecording() {
+        // 이미 녹화 중지됨 + 포인트 0개면 이중 호출 방지
+        guard self.renderer.isRecording || self.renderer.currentPointCount > 0 else {
+            print("⚠️ stopRecording 무시 — isRecording=false, points=0")
+            return
+        }
+
         self.renderer.isRecording = false
 
         let algorithm = ScanSettings.shared.algorithm

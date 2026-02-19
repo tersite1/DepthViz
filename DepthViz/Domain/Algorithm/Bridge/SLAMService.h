@@ -30,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)start;
 - (void)stop;
+- (void)reset;
 - (void)reloadSettings;
 
 /// Process ARFrame data (Depth + Camera Pose hint)

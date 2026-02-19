@@ -113,6 +113,40 @@ class ScanPreviewVC: UIViewController {
         return indicator
     }()
 
+    // 높이(Y축) 클리핑 슬라이더 — 천장 제거용
+    private let heightClipSlider: UISlider = {
+        let slider = UISlider()
+        slider.minimumValue = 0
+        slider.maximumValue = 1
+        slider.value = 1 // 기본값: 전부 표시
+        slider.minimumTrackTintColor = UIColor(white: 0.4, alpha: 0.6)
+        slider.maximumTrackTintColor = .white
+        slider.thumbTintColor = .white
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        return slider
+    }()
+
+    /// 높이 슬라이더 아이콘 (위: 전체, 아래: 자르기)
+    private let heightClipTopIcon: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        let iv = UIImageView(image: UIImage(systemName: "building.2.fill", withConfiguration: config))
+        iv.tintColor = UIColor(white: 0.7, alpha: 1)
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
+    private let heightClipBottomIcon: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        let iv = UIImageView(image: UIImage(systemName: "scissors", withConfiguration: config))
+        iv.tintColor = UIColor(white: 0.7, alpha: 1)
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
+    /// Y축 범위 (바운딩 박스에서 계산)
+    private var clipYMin: Float = 0
+    private var clipYMax: Float = 1
+
     // 포인트 크기 슬라이더
     private let pointSizeSlider: UISlider = {
         let slider = UISlider()
@@ -296,10 +330,6 @@ class ScanPreviewVC: UIViewController {
             colorData.deallocate()
         }
 
-        // 원점 기준 구형 거리 필터 (maxDistance)
-        let maxDist = ScanSettings.shared.distanceLimit.distanceValue
-        let maxDistSq = maxDist * maxDist
-
         var actualCount = 0
         renderer.particlesBuffer.withUnsafeBufferPointer { buffer in
             let bufferCount = min(totalPoints, buffer.count)
@@ -309,11 +339,7 @@ class ScanPreviewVC: UIViewController {
                 let particle = buffer[i]
                 i += stride
 
-                // 원점(스캔 시작 위치) 기준 거리 계산
                 let pos = particle.position - originOffset
-                let distSq = pos.x * pos.x + pos.y * pos.y + pos.z * pos.z
-                if distSq > maxDistSq { continue }
-
                 positionData[outIdx] = pos
                 colorData[outIdx] = SIMD4<Float>(particle.color.x, particle.color.y, particle.color.z, 1.0)
                 outIdx += 1
@@ -370,6 +396,21 @@ class ScanPreviewVC: UIViewController {
         let material = SCNMaterial()
         material.lightingModel = .constant
         material.isDoubleSided = true
+
+        // Y축(높이) 클리핑: geometry modifier에서 clipMaxY 초과 포인트를 화면 밖으로 이동
+        // Metal SceneKit은 #pragma varyings 미지원 → geometry modifier만 사용
+        let geoModifier = """
+        #pragma arguments
+        float clipMaxY;
+
+        #pragma body
+        if (_geometry.position.y > clipMaxY) {
+            _geometry.position.xyz = float3(0.0, 0.0, -1.0e8);
+        }
+        """
+        material.shaderModifiers = [.geometry: geoModifier]
+        material.setValue(NSNumber(value: Float(999)), forKey: "clipMaxY")
+
         geometry.materials = [material]
 
         return geometry
@@ -426,6 +467,18 @@ class ScanPreviewVC: UIViewController {
         // orbitTurntable: Y축(중력 방향) 기준 회전 보장
         scnView.defaultCameraController.target = center
         scnView.defaultCameraController.worldUp = SCNVector3(0, 1, 0)
+
+        // 높이 클리핑 슬라이더 범위 설정
+        clipYMin = minBound.y
+        clipYMax = maxBound.y
+        let yRange = clipYMax - clipYMin
+        heightClipSlider.minimumValue = clipYMin
+        heightClipSlider.maximumValue = clipYMax + yRange * 0.05  // 약간의 여유
+        heightClipSlider.value = heightClipSlider.maximumValue  // 기본: 전부 표시
+        // 셰이더 초기값 설정
+        if let mat = node.geometry?.materials.first {
+            mat.setValue(NSNumber(value: heightClipSlider.maximumValue), forKey: "clipMaxY")
+        }
 
         // 트라젝토리 시각화 (프리미엄)
         addTrajectoryLine()
@@ -578,6 +631,13 @@ class ScanPreviewVC: UIViewController {
         view.addSubview(saveButton)
         saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
 
+        // 높이 클리핑 슬라이더 (우측 세로 배치)
+        view.addSubview(heightClipTopIcon)
+        view.addSubview(heightClipSlider)
+        view.addSubview(heightClipBottomIcon)
+        heightClipSlider.transform = CGAffineTransform(rotationAngle: -.pi / 2)
+        heightClipSlider.addTarget(self, action: #selector(heightClipChanged(_:)), for: .valueChanged)
+
         // 포인트 크기 슬라이더 (하단 가로 배치: ● ——— ⬤)
         view.addSubview(pointSizeSmallDot)
         view.addSubview(pointSizeSlider)
@@ -600,6 +660,17 @@ class ScanPreviewVC: UIViewController {
             editButton.widthAnchor.constraint(equalToConstant: 44),
             editButton.heightAnchor.constraint(equalToConstant: 44),
 
+            // 높이 클리핑 슬라이더 (우측 세로) — 회전된 슬라이더이므로 width=height
+            heightClipTopIcon.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -14),
+            heightClipTopIcon.topAnchor.constraint(equalTo: shareButton.bottomAnchor, constant: 24),
+
+            heightClipSlider.centerXAnchor.constraint(equalTo: heightClipTopIcon.centerXAnchor),
+            heightClipSlider.topAnchor.constraint(equalTo: heightClipTopIcon.bottomAnchor, constant: 80),
+            heightClipSlider.widthAnchor.constraint(equalToConstant: 200),  // 회전 후 높이가 됨
+
+            heightClipBottomIcon.centerXAnchor.constraint(equalTo: heightClipTopIcon.centerXAnchor),
+            heightClipBottomIcon.topAnchor.constraint(equalTo: heightClipSlider.bottomAnchor, constant: 80),
+
             // 포인트 크기 슬라이더 — Save 버튼 옆, 하단 가로
             pointSizeSmallDot.leadingAnchor.constraint(equalTo: saveButton.trailingAnchor, constant: 16),
             pointSizeSmallDot.centerYAnchor.constraint(equalTo: saveButton.centerYAnchor),
@@ -619,6 +690,13 @@ class ScanPreviewVC: UIViewController {
             saveButton.widthAnchor.constraint(equalToConstant: 140),
             saveButton.heightAnchor.constraint(equalToConstant: 50)
         ])
+    }
+
+    // MARK: - Height Clip Control
+
+    @objc private func heightClipChanged(_ slider: UISlider) {
+        guard let mat = pointCloudNode?.geometry?.materials.first else { return }
+        mat.setValue(NSNumber(value: slider.value), forKey: "clipMaxY")
     }
 
     // MARK: - Point Size Control

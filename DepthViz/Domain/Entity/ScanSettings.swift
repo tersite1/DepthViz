@@ -204,7 +204,7 @@ public class ScanSettings: ObservableObject {
            let format = FileFormat(rawValue: savedFormat) {
             self.fileFormat = format
         } else {
-            self.fileFormat = .plyAscii
+            self.fileFormat = .plyBinary
         }
     }
 }

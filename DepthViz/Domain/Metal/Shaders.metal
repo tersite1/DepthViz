@@ -66,18 +66,41 @@ vertex void unprojectVertex(uint vertexID [[vertex_id]],
         return;
     }
 
+    // Depth edge rejection — reject points at sharp depth discontinuities (depth bleeding fix)
+    // LiDAR returns mixed depth at object edges where beam partially hits foreground and background
+    if (uniforms.depthEdgeThreshold > 0.0) {
+        const float2 pixelSize = 1.0 / uniforms.cameraResolution;
+        const float dL = depthTexture.sample(colorSampler, texCoord + float2(-pixelSize.x, 0)).r;
+        const float dR = depthTexture.sample(colorSampler, texCoord + float2(+pixelSize.x, 0)).r;
+        const float dU = depthTexture.sample(colorSampler, texCoord + float2(0, -pixelSize.y)).r;
+        const float dD = depthTexture.sample(colorSampler, texCoord + float2(0, +pixelSize.y)).r;
+
+        // Max depth difference among 4-connected neighbors
+        const float maxDiff = max(max(abs(depth - dL), abs(depth - dR)),
+                                  max(abs(depth - dU), abs(depth - dD)));
+
+        if (maxDiff > uniforms.depthEdgeThreshold) {
+            particleUniforms[currentPointIndex].confidence = -1.0;
+            return;
+        }
+    }
+
     // With a 2D point plus depth, we can now get its 3D position
     const auto position = worldPoint(gridPoint, depth, uniforms.cameraIntrinsicsInversed, uniforms.localToWorld);
 
-    // Voxel occupancy check — hash world position to a voxel and skip if already occupied
+    // Temporal voxel voting — count observations per voxel, accept only at threshold
+    // Ghost points jitter between voxels and never accumulate enough observations
+    // Real surface points are stable and reach the threshold quickly
     const float vs = uniforms.voxelSize;
     const int ix = int(floor(position.x / vs));
     const int iy = int(floor(position.y / vs));
     const int iz = int(floor(position.z / vs));
     const uint hash = (uint(ix) * 73856093u ^ uint(iy) * 19349663u ^ uint(iz) * 83492791u) % uint(uniforms.voxelGridSize);
-    const uint prev = atomic_exchange_explicit(&voxelGrid[hash], 1u, memory_order_relaxed);
-    if (prev != 0u) {
-        // Voxel already occupied — mark point as invalid
+    const uint prevCount = atomic_fetch_add_explicit(&voxelGrid[hash], 1u, memory_order_relaxed);
+    const uint newCount = prevCount + 1u;
+    const uint threshold = uint(max(uniforms.temporalThreshold, 1));
+    if (newCount != threshold) {
+        // Either not enough observations yet, or already accepted (duplicate) → skip
         particleUniforms[currentPointIndex].confidence = -1.0;
         return;
     }

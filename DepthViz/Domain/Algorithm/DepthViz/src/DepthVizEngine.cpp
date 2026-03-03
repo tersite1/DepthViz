@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstring>
 #include <chrono>
+#include <cstdio>
 
 DepthVizEngine::DepthVizEngine() = default;
 
@@ -284,7 +285,10 @@ void DepthVizEngine::run() {
             profiling_.total_output_points += static_cast<int>(bundled.size());
         }
 
-        if (bundled.empty()) continue;
+        if (bundled.empty()) {
+            printf("[ENG] frame: %d raw pts → 0 after B&D → SKIP\n", n_points);
+            continue;
+        }
 
         // Stamp frame timestamp on all bundled points
         for (auto& pt : bundled) {
@@ -365,16 +369,31 @@ void DepthVizEngine::run() {
             continue;
         }
 
+        // Log keyframe info
+        {
+            Eigen::Vector3d dt_kf = prior_pose.block<3, 1>(0, 3) - last_keyframe_pose_.block<3, 1>(0, 3);
+            Eigen::Matrix3d dR_kf = last_keyframe_pose_.block<3, 3>(0, 0).transpose() * prior_pose.block<3, 3>(0, 0);
+            double cos_a = std::max(-1.0, std::min(1.0, (dR_kf.trace() - 1.0) * 0.5));
+            double angle_deg = std::acos(cos_a) * 180.0 / M_PI;
+            printf("[ENG] KEYFRAME #%d raw=%d bd=%zu move=%.3fm rot=%.1f°\n",
+                   profiling_.keyframes + 1, n_points, bundled.size(),
+                   dt_kf.norm(), angle_deg);
+        }
+
         // LIO optimization (or skip if ablation disabled → ARKit-only)
         Eigen::Matrix4d refined_pose = prior_pose;
         if (ablation_.enable_lio && lio_) {
             auto lio_start = std::chrono::high_resolution_clock::now();
             refined_pose = lio_->process(prior_pose, bundled);
             auto lio_end = std::chrono::high_resolution_clock::now();
+            double lio_ms = std::chrono::duration<double, std::milli>(lio_end - lio_start).count();
 
             std::lock_guard<std::mutex> lock(mtx_state_);
-            profiling_.total_lio_ms += std::chrono::duration<double, std::milli>(lio_end - lio_start).count();
+            profiling_.total_lio_ms += lio_ms;
             profiling_.keyframes++;
+            printf("[ENG] LIO %.1fms | total KF=%d avgLIO=%.1fms\n",
+                   lio_ms, profiling_.keyframes,
+                   profiling_.keyframes > 0 ? profiling_.total_lio_ms / profiling_.keyframes : 0.0);
         }
 
         // Update state and accumulate full map with RGB
@@ -414,7 +433,19 @@ void DepthVizEngine::run() {
             }
 
             auto frame_end = std::chrono::high_resolution_clock::now();
-            profiling_.total_pipeline_ms += std::chrono::duration<double, std::milli>(frame_end - frame_start).count();
+            double total_ms = std::chrono::duration<double, std::milli>(frame_end - frame_start).count();
+            profiling_.total_pipeline_ms += total_ms;
+
+            // Summary every 10 keyframes
+            if (profiling_.keyframes % 10 == 0) {
+                printf("[ENG] === KF#%d summary: frames=%d map=%zu avgLIO=%.1fms avgPipe=%.1fms B&D_ratio=%.1f%% ===\n",
+                       profiling_.keyframes,
+                       profiling_.total_frames,
+                       full_map_.size(),
+                       profiling_.keyframes > 0 ? profiling_.total_lio_ms / profiling_.keyframes : 0.0,
+                       profiling_.total_frames > 0 ? profiling_.total_pipeline_ms / profiling_.total_frames : 0.0,
+                       profiling_.total_input_points > 0 ? 100.0 * profiling_.total_output_points / profiling_.total_input_points : 0.0);
+            }
         }
 
         // Feedback to VIO

@@ -1,5 +1,6 @@
 #include "../include/DV_ESKF.h"
 #include <cmath>
+#include <cstdio>
 
 namespace DV {
 
@@ -88,6 +89,7 @@ bool DV_ESKF::updateObserve(const ObsFunc& obs_func) {
             // Restore state on failure — partial corrections must not persist
             state_ = state_backup;
             P_ = P_backup;
+            printf("[ESKF] obs_func FAIL at iter=%d → state restored\n", iter);
             return false;
         }
 
@@ -106,6 +108,7 @@ bool DV_ESKF::updateObserve(const ObsFunc& obs_func) {
         if (S_ldlt.info() != Eigen::Success) {
             state_ = state_backup;
             P_ = P_backup;
+            printf("[ESKF] S matrix LDLT FAIL (singular) obs=%d → state restored\n", n);
             return false;
         }
         Eigen::MatrixXd K = PHt * S_ldlt.solve(Eigen::MatrixXd::Identity(n, n)); // 18xN
@@ -123,9 +126,23 @@ bool DV_ESKF::updateObserve(const ObsFunc& obs_func) {
         P_iter = 0.5 * (P_iter + P_iter.transpose());
 
         // Check convergence
-        if (dx.norm() < opts_.quit_eps) {
+        double dx_norm = dx.norm();
+        if (dx_norm < opts_.quit_eps) {
+            printf("[ESKF] converged iter=%d/%d dx=%.6f obs=%d\n",
+                   iter + 1, opts_.num_iterations, dx_norm, n);
             break;
         }
+        if (iter == opts_.num_iterations - 1) {
+            printf("[ESKF] max_iter=%d dx=%.6f obs=%d (not converged)\n",
+                   opts_.num_iterations, dx_norm, n);
+        }
+    }
+
+    // Log covariance health (position uncertainty)
+    double pos_trace = P_iter.block<3, 3>(3, 3).trace();
+    double vel_norm = state_.v.norm();
+    if (pos_trace > 0.1 || vel_norm > 3.0) {
+        printf("[ESKF] WARNING pos_cov_trace=%.4f vel=%.2fm/s\n", pos_trace, vel_norm);
     }
 
     P_ = P_iter;

@@ -23,15 +23,8 @@ class PremiumManager: ObservableObject {
     }
 
     private init() {
-        #if DEBUG
-        // DEBUG: 프리미엄 기능 전부 활성화 (광고는 ScanCountManager에서 별도 제어)
-        UserDefaults.standard.register(defaults: [
-            "is_premium": true,
-            "premium_show_odometry": true,
-            "premium_show_imu": true,
-            "premium_save_video": true
-        ])
-        #endif
+        // DEBUG에서도 프리미엄 기본값 false (IAP 테스트용)
+        // 프리미엄 기능은 구매 후 활성화됨
 
         self.isPremium = UserDefaults.standard.bool(forKey: "is_premium")
         self.showOdometry = UserDefaults.standard.bool(forKey: "premium_show_odometry")

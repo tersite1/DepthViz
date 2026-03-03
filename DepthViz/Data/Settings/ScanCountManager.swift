@@ -14,13 +14,13 @@ final class ScanCountManager {
     private let scanCountKey = "scan_count_total"
     private let lastPromptCountKey = "last_premium_prompt_count"
     #if DEBUG
-    private let premiumThreshold = 3   // 디버그: 3회부터 팝업
+    private let premiumThreshold = 9   // 디버그: 9회부터 팝업
     private let repeatInterval = 3     // 디버그: 3회마다 반복
-    private let adThreshold = 10       // 디버그: 10회부터 광고
+    private let adThreshold = 10       // 디버그: 10회부터 배너 광고
     #else
-    private let premiumThreshold = 3   // 첫 팝업 기준 (3회)
+    private let premiumThreshold = 9   // 첫 팝업 기준 (9회)
     private let repeatInterval = 3     // 이후 3회마다 반복
-    private let adThreshold = 10       // 전면 광고 기준 (10회)
+    private let adThreshold = 10       // 배너 광고 기준 (10회)
     #endif
 
     private init() {}
@@ -74,6 +74,16 @@ final class ScanCountManager {
     func markPromptShown() {
         UserDefaults.standard.set(currentCount, forKey: lastPromptCountKey)
         print("📊 프리미엄 팝업 표시 완료 (count: \(currentCount))")
+    }
+
+    /// 10회 이상 미구매 → 프리뷰 배너 광고 표시
+    var shouldShowBannerAd: Bool {
+        #if DEBUG
+        return currentCount >= adThreshold
+        #else
+        guard !PremiumManager.shared.isPremium else { return false }
+        return currentCount >= adThreshold
+        #endif
     }
 
     /// 10회 이상 미구매 → 매 스캔마다 전면 광고 표시

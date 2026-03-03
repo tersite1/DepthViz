@@ -275,8 +275,8 @@ struct SysState {
 // ============================================================================
 
 struct BundleDiscardConfig {
-    float voxel_size = 0.1f;        // 10cm voxels
-    int min_density = 5;            // Min points per voxel to keep
+    float voxel_size = 0.05f;       // 5cm voxels (was 10cm: too aggressive, only ~50pts/frame)
+    int min_density = 3;            // Min points per voxel (was 5: too strict for 5cm voxels)
     float min_avg_confidence = 1.5f; // Min avg confidence: requires majority high-conf (≥2) points
 };
 
@@ -289,7 +289,7 @@ struct KeyframeConfig {
 };
 
 struct ESKFOptions {
-    int num_iterations = 3;
+    int num_iterations = 5;           // 3→5: narrow spaces need more convergence
     double quit_eps = 1e-6;
     // IMU noise parameters
     double gyro_noise = 0.01;         // rad/s/sqrt(Hz)

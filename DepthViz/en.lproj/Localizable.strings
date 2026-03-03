@@ -47,5 +47,15 @@
 "developer_usdt" = "Donate via USDT (TRC-20)";
 "developer_website" = "Developer Website";
 
+/* In-App Purchase States */
+"iap_loading" = "Loading product info...";
+"iap_retry" = "Retry";
+"iap_restore" = "Restore Purchase";
+"iap_load_failed" = "Unable to load product info. Please check your network and try again.";
+"iap_product_unavailable" = "Product unavailable.";
+"iap_pending" = "Purchase is pending approval.";
+"iap_purchase_failed" = "Purchase failed: %@";
+"iap_restore_empty" = "No purchases to restore.";
+
 /* Premium Export Path */
 "premium_export_path" = "CSV and video files are saved to Files app > On My iPhone > DepthViz";

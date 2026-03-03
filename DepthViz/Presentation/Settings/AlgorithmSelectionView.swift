@@ -108,9 +108,33 @@ struct AlgorithmSelectionView: View {
                     .frame(width: 70, alignment: .trailing)
             }
 
-            Text("Higher values = stricter filtering")
+            // 현재 레벨의 활성 필터 표시
+            let level = confidenceThreshold < 0.33 ? ConfidenceLevel.low : confidenceThreshold < 0.66 ? ConfidenceLevel.medium : ConfidenceLevel.high
+            VStack(alignment: .leading, spacing: 3) {
+                if level.shaderThreshold > 1.0 {
+                    filterBadge("High confidence only", icon: "checkmark.shield.fill", active: true)
+                } else {
+                    filterBadge("Medium + High confidence", icon: "checkmark.shield", active: true)
+                }
+                filterBadge("Depth edge rejection (\(Int(level.depthEdgeThreshold * 100))cm)",
+                           icon: "square.3.layers.3d.down.left",
+                           active: level.depthEdgeThreshold > 0)
+                filterBadge("Temporal voting (\(level.temporalThreshold)x)",
+                           icon: "clock.arrow.2.circlepath",
+                           active: level.temporalThreshold > 1)
+            }
+            .padding(.top, 2)
+        }
+    }
+
+    private func filterBadge(_ text: String, icon: String, active: Bool) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
                 .font(.system(size: 11))
-                .foregroundColor(.secondary)
+                .foregroundColor(active ? .blue : .gray.opacity(0.4))
+            Text(text)
+                .font(.system(size: 12))
+                .foregroundColor(active ? .primary : .secondary.opacity(0.5))
         }
     }
 
@@ -438,9 +462,8 @@ struct AlgorithmSelectionView: View {
         UserDefaults.standard.set(distToSave, forKey: "ScanDistanceLimit")
         SLAMService.sharedInstance().reloadSettings()
 
-        #if DEBUG
-        print("Settings saved: algo=\(selectedAlgorithm.rawValue), conf=\(ScanSettings.shared.confidenceLevel.rawValue), dist=\(maxDistance)")
-        #endif
+        let cl = ScanSettings.shared.confidenceLevel
+        print("⚙️ 설정 저장: algo=\(selectedAlgorithm.badge), conf=\(cl.rawValue)(shader≥\(cl.shaderThreshold), edge=\(Int(cl.depthEdgeThreshold*100))cm, temporal=\(cl.temporalThreshold)x), dist=\(maxDistance > 10 ? "∞" : String(format: "%.1fm", maxDistance))")
     }
 }
 

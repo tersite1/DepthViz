@@ -191,9 +191,9 @@ class ScanPreviewVC: UIViewController {
             startPreExport(renderer: renderer)
         }
 
-        // 20회 이상 미구매 → 하단 배너 광고 (DEBUG에서는 비활성화)
+        // 10회 이상 미구매 → 하단 배너 광고 (DEBUG에서는 비활성화)
         #if !DEBUG
-        if ScanCountManager.shared.shouldShowInterstitialAd {
+        if ScanCountManager.shared.shouldShowBannerAd {
             setupBannerAd()
         }
         #endif
@@ -215,7 +215,7 @@ class ScanPreviewVC: UIViewController {
 
         NSLayoutConstraint.activate([
             banner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            banner.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            banner.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -8),
             banner.widthAnchor.constraint(equalToConstant: GADAdSizeBanner.size.width),
             banner.heightAnchor.constraint(equalToConstant: GADAdSizeBanner.size.height)
         ])

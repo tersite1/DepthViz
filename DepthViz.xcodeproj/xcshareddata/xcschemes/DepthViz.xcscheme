@@ -51,13 +51,6 @@
             ReferencedContainer = "container:DepthViz.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <AdditionalOptions>
-         <AdditionalOption
-            key = "NSZombieEnabled"
-            value = "YES"
-            isEnabled = "YES">
-         </AdditionalOption>
-      </AdditionalOptions>
       <StoreKitConfigurationFileReference
          identifier = "../../DepthViz/Configuration/DepthVizProducts.storekit">
       </StoreKitConfigurationFileReference>

@@ -81,6 +81,7 @@ struct LoopingVideoPlayer: UIViewRepresentable {
 struct PremiumVideoPopup: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var purchaseManager = PremiumPurchaseManager.shared
+    @ObservedObject private var premiumManager = PremiumManager.shared
 
     var body: some View {
         ZStack {
@@ -134,44 +135,20 @@ struct PremiumVideoPopup: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
 
-                // 구매 버튼
+                // 구매 버튼 영역
+                purchaseButtonSection
+                    .padding(.horizontal, 20)
+                    .padding(.top, 18)
+
+                // 구매 복원 버튼
                 Button(action: {
-                    Task { await purchaseManager.purchase() }
+                    Task { await purchaseManager.restorePurchases() }
                 }) {
-                    HStack {
-                        if purchaseManager.isPurchasing {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        } else if let product = purchaseManager.product {
-                            Text(product.displayPrice)
-                                .fontWeight(.bold)
-                            Text(NSLocalizedString("premium_unlock", comment: ""))
-                        } else {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                .frame(width: 16, height: 16)
-                            Text(NSLocalizedString("premium_unlock", comment: ""))
-                                .onAppear {
-                                    Task { await purchaseManager.loadProduct() }
-                                }
-                        }
-                    }
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 48)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.blue, Color.blue.opacity(0.7)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .cornerRadius(12)
+                    Text(NSLocalizedString("iap_restore", comment: ""))
+                        .font(.system(size: 13))
+                        .foregroundColor(.white.opacity(0.5))
                 }
-                .disabled(purchaseManager.isPurchasing)
-                .padding(.horizontal, 20)
-                .padding(.top, 18)
+                .padding(.top, 8)
 
                 // 에러 메시지
                 if let error = purchaseManager.errorMessage {
@@ -179,6 +156,7 @@ struct PremiumVideoPopup: View {
                         .font(.system(size: 12))
                         .foregroundColor(.red.opacity(0.8))
                         .padding(.top, 4)
+                        .padding(.horizontal, 20)
                 }
 
                 Spacer().frame(height: 20)
@@ -191,8 +169,91 @@ struct PremiumVideoPopup: View {
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .padding(.horizontal, 20)
         }
-        .onChange(of: PremiumManager.shared.isPremium) { isPremium in
+        .onChange(of: premiumManager.isPremium) { isPremium in
             if isPremium { dismiss() }
+        }
+    }
+
+    // MARK: - Purchase Button States
+
+    @ViewBuilder
+    private var purchaseButtonSection: some View {
+        if purchaseManager.isLoadingProduct {
+            // 상태 1: 로딩 중
+            HStack {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .frame(width: 16, height: 16)
+                Text(NSLocalizedString("iap_loading", comment: ""))
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .background(Color.gray.opacity(0.3))
+            .cornerRadius(12)
+        } else if purchaseManager.productLoadFailed {
+            // 상태 2: 로드 실패 — 재시도 버튼
+            Button(action: {
+                Task { await purchaseManager.loadProduct() }
+            }) {
+                HStack {
+                    Image(systemName: "arrow.clockwise")
+                    Text(NSLocalizedString("iap_retry", comment: ""))
+                }
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(Color.orange)
+                .cornerRadius(12)
+            }
+        } else if let product = purchaseManager.product {
+            // 상태 3: 상품 로드 완료 — 구매 버튼
+            Button(action: {
+                Task { await purchaseManager.purchase() }
+            }) {
+                HStack {
+                    if purchaseManager.isPurchasing {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    } else {
+                        Text(product.displayPrice)
+                            .fontWeight(.bold)
+                        Text(NSLocalizedString("premium_unlock", comment: ""))
+                    }
+                }
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(
+                    LinearGradient(
+                        colors: [Color.blue, Color.blue.opacity(0.7)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .cornerRadius(12)
+            }
+            .disabled(purchaseManager.isPurchasing)
+        } else {
+            // 상태 4: 초기 — 자동 로드 트리거
+            HStack {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                    .frame(width: 16, height: 16)
+                Text(NSLocalizedString("iap_loading", comment: ""))
+                    .font(.system(size: 14))
+                    .foregroundColor(.white.opacity(0.6))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 48)
+            .background(Color.gray.opacity(0.3))
+            .cornerRadius(12)
+            .onAppear {
+                Task { await purchaseManager.loadProduct() }
+            }
         }
     }
 

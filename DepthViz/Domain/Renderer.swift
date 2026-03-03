@@ -125,8 +125,10 @@ final class Renderer: NSObject, SLAMDelegate {
         uniforms.cameraResolution = Float2(1920, 1440)
         uniforms.voxelSize = voxelSize
         uniforms.voxelGridSize = Int32(voxelGridSize)
-        let savedDist = Float(UserDefaults.standard.double(forKey: "ScanDistanceLimit"))
-        uniforms.maxDistance = savedDist > 0 ? savedDist : 1000.0
+        uniforms.depthEdgeThreshold = ScanSettings.shared.confidenceLevel.depthEdgeThreshold
+        uniforms.temporalThreshold = Int32(ScanSettings.shared.confidenceLevel.temporalThreshold)
+        let initDist = Float(UserDefaults.standard.double(forKey: "ScanDistanceLimit"))
+        uniforms.maxDistance = initDist > 0 ? initDist : ScanSettings.shared.distanceLimit.distanceValue
         return uniforms
     }()
     private var pointCloudUniformsBuffers = [MetalBuffer<PointCloudUniforms>]()
@@ -146,8 +148,14 @@ final class Renderer: NSObject, SLAMDelegate {
     }
     // 복셀 그리드 주기적 초기화 (격자 패턴 방지)
     private var voxelResetCounter = 0
-    private let voxelResetInterval = 30  // 30프레임마다 리셋
+    // DV-SLAM: 60프레임 (temporal voting 관측 시간 확보)
+    // ARKit: 30프레임
+    private var voxelResetInterval: Int {
+        ScanSettings.shared.algorithm == .depthViz ? 60 : 30
+    }
     private var voxelGridBuffer: MTLBuffer!
+    /// 스캔 FOV 비율 (0.0~1.0). 1.0=전체 LiDAR FOV, 0.5=중앙 50%만 스캔
+    private var scanFOVScale: Float = 0.6
     // Camera data
     private var cameraResolution: Float2?
     private var lastCameraTransform: simd_float4x4?
@@ -292,14 +300,19 @@ final class Renderer: NSObject, SLAMDelegate {
     /// 사용자 설정 적용 (ARSession이 시작된 후, 녹화 시작 전에 호출)
     func applySettings() {
         let settings = ScanSettings.shared
-        // Confidence → 셰이더 uniform
+        // Confidence → 셰이더 uniform (particleVertex에서 visibility 판정용)
         confidenceThreshold = settings.confidenceLevel.shaderThreshold
-        // Distance limit → 셰이더에서 초과 거리 즉시 거부 (UserDefaults 직접 읽기 — 슬라이더 값 반영)
+        // Distance limit → 셰이더에서 초과 거리 즉시 거부
+        // 설정 UI가 슬라이더(float)를 "ScanDistanceLimit"에 직접 저장하므로 UserDefaults에서 읽기
         let savedDist = Float(UserDefaults.standard.double(forKey: "ScanDistanceLimit"))
-        pointCloudUniforms.maxDistance = savedDist > 0 ? savedDist : 1000.0
-        // 알고리즘에 맞게 그리드 포인트 버퍼 재생성 (DV-SLAM: 4096, ARKit: 2048)
+        pointCloudUniforms.maxDistance = savedDist > 0 ? savedDist : settings.distanceLimit.distanceValue
+        // Depth edge rejection + temporal voting (depth bleeding / ghost point 방지)
+        pointCloudUniforms.depthEdgeThreshold = settings.confidenceLevel.depthEdgeThreshold
+        pointCloudUniforms.temporalThreshold = Int32(settings.confidenceLevel.temporalThreshold)
+        // 알고리즘에 맞게 그리드 포인트 버퍼 재생성 (DV-SLAM: 8192, ARKit: 2048)
         rebuildGridPointsBuffer()
-        print("⚙️ 설정 적용: 알고리즘=\(settings.algorithm.badge), 신뢰도=\(settings.confidenceLevel.rawValue)(threshold=\(confidenceThreshold)), 거리=\(settings.distanceLimit.displayName)(max=\(settings.distanceLimit.distanceValue)m)")
+        let distDisplay = pointCloudUniforms.maxDistance >= 999 ? "∞" : String(format: "%.1fm", pointCloudUniforms.maxDistance)
+        print("⚙️ 설정 적용: 알고리즘=\(settings.algorithm.badge), 신뢰도=\(settings.confidenceLevel.rawValue)(shader≥\(confidenceThreshold), edge=\(Int(pointCloudUniforms.depthEdgeThreshold*100))cm, temporal=\(pointCloudUniforms.temporalThreshold)회), 거리=\(distDisplay), 복셀=\(voxelSize*1000)mm")
     }
     
     /// DV-SLAM용 IMU 데이터 공급 시작 (100Hz — LIO 필수)
@@ -358,13 +371,20 @@ final class Renderer: NSObject, SLAMDelegate {
                 guard let self = self else { return }
                 let poseOK = self.latestSLAMPose != nil
                 let correction: String
+                let rotDiff: String
                 if let slam = self.latestSLAMPose, let arkit = self.lastCameraTransform {
                     let d = distance(slam.columns.3, arkit.columns.3)
                     correction = String(format: "%.3fm", d)
+                    // 회전 차이
+                    let rel = slam * arkit.inverse
+                    let trace = rel.columns.0.x + rel.columns.1.y + rel.columns.2.z
+                    let angle = acos(max(-1, min(1, (trace - 1) / 2))) * 180 / .pi
+                    rotDiff = String(format: "%.1f°", angle)
                 } else {
                     correction = "N/A"
+                    rotDiff = "N/A"
                 }
-                print("📊 [DV-SLAM 상태] IMU:\(self.imuSampleCount)회 | AR프레임:\(self.slamFrameFeedCount)회 | 포즈업데이트:\(self.slamPoseUpdateCount)회 | 포즈수신:\(poseOK ? "✅" : "❌") | ARKit↔SLAM 차이:\(correction) | 포인트:\(self.currentPointCount)")
+                print("📊 [DV-SLAM] IMU:\(self.imuSampleCount) | 프레임:\(self.slamFrameFeedCount) | 포즈:\(self.slamPoseUpdateCount) | 보정쌍:\(self.poseCorrectionLog.count) | 위치차:\(correction) 회전차:\(rotDiff) | 포인트:\(self.currentPointCount)")
             }
         }
 
@@ -707,21 +727,31 @@ private extension Renderer {
     func makeGridPoints() -> [Float2] {
         // cameraResolution이 아직 설정되지 않은 경우 기본 해상도 사용
         let resolution = cameraResolution ?? Float2(1920, 1440)
-        let gridArea = resolution.x * resolution.y
+
+        // FOV 제한: 화면 중앙 영역만 샘플링
+        let scale = max(0.2, min(1.0, scanFOVScale))
+        let marginX = resolution.x * (1.0 - scale) / 2.0
+        let marginY = resolution.y * (1.0 - scale) / 2.0
+        let scanWidth = resolution.x * scale
+        let scanHeight = resolution.y * scale
+
+        let gridArea = scanWidth * scanHeight
         let spacing = sqrt(gridArea / Float(numGridPoints))
-        let deltaX = Int(round(resolution.x / spacing))
-        let deltaY = Int(round(resolution.y / spacing))
-        
+        let deltaX = Int(round(scanWidth / spacing))
+        let deltaY = Int(round(scanHeight / spacing))
+
         var points = [Float2]()
         for gridY in 0 ..< deltaY {
             let alternatingOffsetX = Float(gridY % 2) * spacing / 2
             for gridX in 0 ..< deltaX {
-                let cameraPoint = Float2(alternatingOffsetX + (Float(gridX) + 0.5) * spacing, (Float(gridY) + 0.5) * spacing)
-                
+                let cameraPoint = Float2(
+                    marginX + alternatingOffsetX + (Float(gridX) + 0.5) * spacing,
+                    marginY + (Float(gridY) + 0.5) * spacing
+                )
                 points.append(cameraPoint)
             }
         }
-        
+
         return points
     }
     
@@ -892,10 +922,10 @@ extension Renderer {
 
     // MARK: - Post-Processing Optimization Pipeline
     //
-    // DV-SLAM: SLAM 근접 필터 → 표면 씬닝 → 15mm 복셀 평균화 → 이상치 제거
+    // DV-SLAM: SLAM 포즈보정 → 표면씬닝 → 복셀 평균화 → 이상치 제거
     // ARKit:   최적화 없이 raw output
     //
-    // SLAM full_map (다중 관측 검증 점)을 기준으로 GPU 고스트/노이즈를 걸러내는 파이프라인
+    // SLAM 맵은 포즈 보정에만 사용 (직접 필터링은 confidence level이 충분히 처리)
 
     func optimizeAndExport(useSLAM: Bool) {
         self.clearing = true
@@ -934,34 +964,149 @@ extension Renderer {
                 return
             }
 
+            // ── Phase 0: Confidence 필터링 ──
+            // 셰이더는 confidence 0,1,2 모두 버퍼에 저장하지만 렌더링 시 threshold 이상만 표시.
+            // 후처리/프리뷰/내보내기에서도 동일 기준 적용: 저품질 포인트 제거.
+            let confThreshold = self.pointCloudUniforms.confidenceThreshold  // High=1.5
+            var confRejected = 0
+            for i in 0..<originalCount {
+                var p = self.particlesBuffer[i]
+                if p.confidence >= 0 && Float(p.confidence) < confThreshold {
+                    p.confidence = -1
+                    self.particlesBuffer[i] = p
+                    confRejected += 1
+                }
+            }
+
+            // 버퍼 압축: confidence < 0 제거
+            if confRejected > 0 {
+                var writeIdx = 0
+                for i in 0..<originalCount {
+                    let p = self.particlesBuffer[i]
+                    if p.confidence >= 0 {
+                        if writeIdx != i { self.particlesBuffer[writeIdx] = p }
+                        writeIdx += 1
+                    }
+                }
+                for i in writeIdx..<originalCount {
+                    var p = self.particlesBuffer[i]
+                    p.confidence = -1
+                    self.particlesBuffer[i] = p
+                }
+                self.currentPointIndex = writeIdx
+                self.currentPointCount = writeIdx
+            }
+            let afterConfCount = self.currentPointCount
+            print("📊 [Confidence 필터] \(originalCount)개 → \(afterConfCount)개 (제거: \(confRejected)개, threshold≥\(confThreshold))")
+
+            // ── Phase 0b: 원점 기준 거리 필터 ──
+            // 셰이더의 maxDistance는 카메라↔점 depth만 체크 (카메라 이동 시 전체 범위 무제한)
+            // 여기서 스캔 시작 위치 기준으로 월드 공간 거리도 필터
+            let worldDistLimit = self.pointCloudUniforms.maxDistance
+            if worldDistLimit < 999, let startTransform = self.startCameraTransform {
+                let origin = SIMD3<Float>(startTransform.columns.3.x,
+                                          startTransform.columns.3.y,
+                                          startTransform.columns.3.z)
+                var distRejected = 0
+                let count = self.currentPointCount
+                for i in 0..<count {
+                    var p = self.particlesBuffer[i]
+                    guard p.confidence >= 0 else { continue }
+                    let d = distance(p.position, origin)
+                    if d > worldDistLimit {
+                        p.confidence = -1
+                        self.particlesBuffer[i] = p
+                        distRejected += 1
+                    }
+                }
+                // 버퍼 압축
+                if distRejected > 0 {
+                    var writeIdx = 0
+                    for i in 0..<count {
+                        let p = self.particlesBuffer[i]
+                        if p.confidence >= 0 {
+                            if writeIdx != i { self.particlesBuffer[writeIdx] = p }
+                            writeIdx += 1
+                        }
+                    }
+                    for i in writeIdx..<count {
+                        var p = self.particlesBuffer[i]
+                        p.confidence = -1
+                        self.particlesBuffer[i] = p
+                    }
+                    self.currentPointIndex = writeIdx
+                    self.currentPointCount = writeIdx
+                }
+                print("📊 [거리 필터] \(afterConfCount)개 → \(self.currentPointCount)개 (제거: \(distRejected)개, 원점기준 >\(String(format: "%.1f", worldDistLimit))m)")
+            }
+            let afterDistCount = self.currentPointCount
+
+            // GPU 포인트 바운딩 박스 분석
+            var gpuMin = SIMD3<Float>(repeating: .greatestFiniteMagnitude)
+            var gpuMax = SIMD3<Float>(repeating: -.greatestFiniteMagnitude)
+            var validCount = 0
+            self.particlesBuffer.withUnsafeBufferPointer { buffer in
+                let n = min(afterDistCount, buffer.count)
+                for i in 0..<n {
+                    let p = buffer[i]
+                    guard p.confidence >= 0 else { continue }
+                    gpuMin = min(gpuMin, p.position)
+                    gpuMax = max(gpuMax, p.position)
+                    validCount += 1
+                }
+            }
+            let gpuSpan = gpuMax - gpuMin
+            print("📊 [GPU 포인트] \(afterConfCount)개 (유효 \(validCount)개) | 범위: X=\(String(format: "%.2f", gpuSpan.x))m Y=\(String(format: "%.2f", gpuSpan.y))m Z=\(String(format: "%.2f", gpuSpan.z))m")
+
             if useSLAM {
                 // ═══════════════════════════════════════════
-                // Mobile-LIO 3단계 파이프라인 (git fa926f3 기준 복원)
-                // 표면씬닝 → 12mm 복셀 평균화 → 이상치제거
-                //
-                // SLAM 맵 로드/필터는 좌표계 정합 완료 후 재도입 예정
+                // Mobile-LIO 4단계 파이프라인
+                // SLAM포즈보정 → 표면씬닝 → 8mm복셀 → 이상치제거
+                // (SLAM맵은 포즈보정에만 사용, 직접 필터링 안함)
                 // ═══════════════════════════════════════════
 
-                // Phase 1: 표면 씬닝 (드리프트로 겹친 중복 벽 제거)
-                self.performSurfaceThinning()
+                // Phase 1: SLAM 포즈 보정 (드리프트 교정)
+                let t1 = CFAbsoluteTimeGetCurrent()
+                self.applySLAMPoseCorrection()
                 let p1 = self.currentPointCount
+                let t1e = CFAbsoluteTimeGetCurrent() - t1
 
-                // Phase 2: 12mm 복셀 평균화 (minCount 없음 — 모든 복셀 유지, 위치/색상 평균)
-                self.performVoxelDownsampling(voxelSize: 0.012)
+                // Phase 2: 표면 씬닝 (드리프트로 겹친 중복 벽 제거)
+                let t2 = CFAbsoluteTimeGetCurrent()
+                self.performSurfaceThinning()
                 let p2 = self.currentPointCount
+                let t2e = CFAbsoluteTimeGetCurrent() - t2
 
-                // Phase 3: 통계적 이상치 제거 (고립 노이즈 포인트)
-                self.removeStatisticalOutliers()
+                // Phase 3: 8mm 복셀 평균화 (세밀한 디테일 유지)
+                let t3 = CFAbsoluteTimeGetCurrent()
+                self.performVoxelDownsampling(voxelSize: 0.008)
                 let p3 = self.currentPointCount
+                let t3e = CFAbsoluteTimeGetCurrent() - t3
+
+                // Phase 4: 통계적 이상치 제거 (고립 노이즈 포인트)
+                let t4 = CFAbsoluteTimeGetCurrent()
+                self.removeStatisticalOutliers()
+                let p4 = self.currentPointCount
+                let t4e = CFAbsoluteTimeGetCurrent() - t4
 
                 let elapsed = CFAbsoluteTimeGetCurrent() - startTime
-                print("🔬 Mobile-LIO 최적화: \(originalCount)(GPU) → \(p1)(씬닝) → \(p2)(복셀) → \(p3)(이상치) [\(String(format: "%.1f", elapsed))초]")
+                let totalReduction = Float(originalCount - p4) / Float(max(originalCount, 1)) * 100
+                print("═══════════════════════════════════════")
+                print("🔬 Mobile-LIO 파이프라인 완료")
+                print("   0a.신뢰도: \(originalCount) → \(afterConfCount) (conf≥\(confThreshold))")
+                print("   0b.거리:  \(afterConfCount) → \(afterDistCount) (원점기준)")
+                print("   1.포즈보정: \(afterDistCount) → \(p1) [\(String(format: "%.2f", t1e))초]")
+                print("   2.씬닝:    \(p1) → \(p2) [\(String(format: "%.2f", t2e))초]")
+                print("   3.복셀8mm: \(p2) → \(p3) [\(String(format: "%.2f", t3e))초]")
+                print("   4.이상치:  \(p3) → \(p4) [\(String(format: "%.2f", t4e))초]")
+                print("   총: \(originalCount) → \(p4) (제거 \(String(format: "%.1f%%", totalReduction))) [\(String(format: "%.1f", elapsed))초]")
+                print("═══════════════════════════════════════")
             } else {
                 // ═══════════════════════════════════════════
-                // ARKit: 최적화 없이 raw output
+                // ARKit: confidence + 거리 필터만 적용
                 // ═══════════════════════════════════════════
                 let elapsed = CFAbsoluteTimeGetCurrent() - startTime
-                print("📱 ARKit raw: \(originalCount)개 그대로 유지 [\(String(format: "%.1f", elapsed))초]")
+                print("📱 ARKit: \(originalCount) → \(afterDistCount) (conf≥\(confThreshold), dist) [\(String(format: "%.1f", elapsed))초]")
             }
 
             // GPU 렌더 재개
@@ -985,14 +1130,148 @@ extension Renderer {
         }
     }
 
-    // MARK: Phase 0 — SLAM 맵 기반 공간 필터링
+    // MARK: Phase 0 — SLAM 포즈 보정 (드리프트 교정)
     //
-    // SLAM full_map (4단계 outlier 파이프라인 통과, 키프레임 LIO 포즈로 배치된 점)을
+    // poseCorrectionLog의 (ARKit, SLAM) 포즈 쌍을 이용하여
+    // GPU 포인트의 ARKit 드리프트를 SLAM 기준으로 보정.
+    //
+    // T_correction_i = SLAM_i × ARKit_i⁻¹
+    // p_corrected = T_correction_0⁻¹ × T_correction_i × p_world
+    //
+    // T_correction_0⁻¹가 Z-up↔Y-up 변환을 상쇄 → 출력은 ARKit Y-up 유지
+
+    /// 보정 쌍의 회전 차이(도)를 계산
+    private func rotationDifferenceDeg(_ a: simd_float4x4, _ b: simd_float4x4) -> Float {
+        let rel = b * a.inverse
+        let trace = rel.columns.0.x + rel.columns.1.y + rel.columns.2.z
+        return acos(max(-1, min(1, (trace - 1) / 2))) * 180 / .pi
+    }
+
+    private func applySLAMPoseCorrection() {
+        guard poseCorrectionLog.count >= 2 else {
+            print("⚠️ SLAM 보정 쌍 부족 (\(poseCorrectionLog.count)) — 보정 생략")
+            return
+        }
+
+        let count = currentPointCount
+        guard count > 0 else { return }
+
+        // ── 수렴 감지: SLAM 초기화 단계의 불안정 쌍 제거 ──
+        // SLAM 엔진은 초기 몇 초간 위치/회전이 크게 발산 (최대 90°+)
+        // 수렴 기준: 회전차 < 10° AND 위치차 < 0.15m
+        let convergenceRotThreshold: Float = 10.0  // 도
+        let convergencePosThreshold: Float = 0.15  // m
+
+        var convergedLog: [PoseCorrectionEntry] = []
+        var skippedCount = 0
+
+        for entry in poseCorrectionLog {
+            let aPos = SIMD3<Float>(entry.arkitPose.columns.3.x, entry.arkitPose.columns.3.y, entry.arkitPose.columns.3.z)
+            let sPos = SIMD3<Float>(entry.slamPose.columns.3.x, entry.slamPose.columns.3.y, entry.slamPose.columns.3.z)
+            let posDiff = distance(aPos, sPos)
+            let rotDiff = rotationDifferenceDeg(entry.arkitPose, entry.slamPose)
+
+            if rotDiff < convergenceRotThreshold && posDiff < convergencePosThreshold {
+                convergedLog.append(entry)
+            } else {
+                skippedCount += 1
+            }
+        }
+
+        print("📊 [수렴 필터] 전체 \(poseCorrectionLog.count)쌍 → 수렴 \(convergedLog.count)쌍 (스킵 \(skippedCount)쌍, 기준: 회전<\(convergenceRotThreshold)° 위치<\(convergencePosThreshold)m)")
+
+        guard convergedLog.count >= 2 else {
+            print("⚠️ 수렴된 보정 쌍 부족 (\(convergedLog.count)) — 보정 생략")
+            return
+        }
+
+        // ── 드리프트 분석 (수렴된 쌍만) ──
+        var driftMin: Float = .greatestFiniteMagnitude
+        var driftMax: Float = 0
+        var driftSum: Float = 0
+        var rotMin: Float = .greatestFiniteMagnitude
+        var rotMax: Float = 0
+
+        for entry in convergedLog {
+            let aPos = SIMD3<Float>(entry.arkitPose.columns.3.x, entry.arkitPose.columns.3.y, entry.arkitPose.columns.3.z)
+            let sPos = SIMD3<Float>(entry.slamPose.columns.3.x, entry.slamPose.columns.3.y, entry.slamPose.columns.3.z)
+            let d = distance(aPos, sPos)
+            driftMin = min(driftMin, d)
+            driftMax = max(driftMax, d)
+            driftSum += d
+
+            let rotDiff = rotationDifferenceDeg(entry.arkitPose, entry.slamPose)
+            rotMin = min(rotMin, rotDiff)
+            rotMax = max(rotMax, rotDiff)
+        }
+        let driftAvg = driftSum / Float(convergedLog.count)
+
+        print("📊 [포즈 분석] \(convergedLog.count)쌍 | ARKit↔SLAM 위치차: min=\(String(format: "%.3f", driftMin))m avg=\(String(format: "%.3f", driftAvg))m max=\(String(format: "%.3f", driftMax))m | 회전차: \(String(format: "%.1f", rotMin))°~\(String(format: "%.1f", rotMax))°")
+
+        // 기준 프레임: 첫 번째 수렴된 쌍
+        let T0 = convergedLog[0].slamPose * convergedLog[0].arkitPose.inverse
+        let T0_inv = T0.inverse
+
+        // 보정량 분석 + 200mm 안전 캡
+        let maxCorrectionCap: Float = 0.200  // 200mm — 이 이상 보정은 잘못된 것
+        var correctionMin: Float = .greatestFiniteMagnitude
+        var correctionMax: Float = 0
+        var correctionSum: Float = 0
+        var cappedCount = 0
+
+        var correctedCount = 0
+        var logIdx = 0
+
+        for i in 0..<count {
+            var p = particlesBuffer[i]
+            guard p.confidence >= 0 else { continue }
+
+            // 수렴 전 포인트 (pointIndex < 첫 수렴 쌍) → 보정 안함
+            if i < convergedLog[0].pointIndex {
+                continue
+            }
+
+            // 수렴 후 포인트: 해당 시점의 보정 쌍으로 드리프트 교정
+            while logIdx < convergedLog.count - 1 &&
+                  convergedLog[logIdx + 1].pointIndex <= i {
+                logIdx += 1
+            }
+
+            let entry = convergedLog[logIdx]
+            let Ti = entry.slamPose * entry.arkitPose.inverse
+            let correction = T0_inv * Ti  // 드리프트만 추출
+
+            let p4 = SIMD4<Float>(p.position.x, p.position.y, p.position.z, 1.0)
+            let corrected = correction * p4
+            let correctedPos = SIMD3<Float>(corrected.x, corrected.y, corrected.z)
+            let displacement = distance(p.position, correctedPos)
+
+            // 보정량이 200mm 초과 시 스킵 (비정상 보정 방지)
+            if displacement > maxCorrectionCap {
+                cappedCount += 1
+                continue
+            }
+
+            correctionMin = min(correctionMin, displacement)
+            correctionMax = max(correctionMax, displacement)
+            correctionSum += displacement
+
+            p.position = correctedPos
+            particlesBuffer[i] = p
+            correctedCount += 1
+        }
+
+        let correctionAvg = correctedCount > 0 ? correctionSum / Float(correctedCount) : 0
+        print("🔬 SLAM 포즈 보정: \(correctedCount)/\(count) 포인트 | 보정량: min=\(String(format: "%.1f", correctionMin*1000))mm avg=\(String(format: "%.1f", correctionAvg*1000))mm max=\(String(format: "%.1f", correctionMax*1000))mm | 캡초과스킵: \(cappedCount)개")
+    }
+
+    // MARK: Phase 1 — SLAM 맵 기반 공간 필터링
+    //
+    // SLAM full_map (키프레임 LIO 포즈로 배치된 검증된 점)을
     // GPU 포인트의 공간 필터로 사용.
     //
-    // 1) poseCorrectionLog에서 수렴된 보정 쌍으로 SLAM→ARKit 정렬 행렬 계산
-    // 2) SLAM 점을 ARKit 프레임으로 변환 후 5cm 복셀 점유 그리드 구축 (+1링 확장)
-    // 3) GPU 포인트 중 점유 복셀에 속하지 않는 것 = 고스트/노이즈 → 제거
+    // Step 0에서 GPU 포인트가 T0_inv * Ti * p로 보정됨
+    // SLAM 맵도 동일하게 T0_inv * p_slam으로 변환해야 같은 좌표계
 
     private func filterBySLAMProximity() {
         let count = currentPointCount
@@ -1012,29 +1291,27 @@ extension Renderer {
             return
         }
 
-        // ── 2. SLAM→ARKit 정렬 행렬 ──
-        // 진단에서 SLAM≈ARKit 수렴 확인됨 (최종 diff ~0.008m)
-        // poseCorrectionLog 쌍에서 alignment 계산 시 타이밍 불일치 발생 가능:
-        //   arkitPose = lastCameraTransform (이전 프레임)
-        //   slamPose = getCurrentPose() (현재 프레임)
-        //   → A_prev * A_current⁻¹ * C⁻¹ ≠ C⁻¹ (회전 오차 누적)
-        // 따라서: 계산된 회전 > 3° → SLAM≈ARKit이므로 identity 사용
-        let alignTransform: simd_float4x4
-        if let entry = poseCorrectionLog.last {
-            let candidate = entry.arkitPose * entry.slamPose.inverse
-            let rotTrace = candidate.columns.0.x + candidate.columns.1.y + candidate.columns.2.z
-            let rotAngle = acos(max(-1, min(1, (rotTrace - 1) / 2))) * 180 / .pi
-            let t = candidate.columns.3
-            let transDist = sqrt(t.x*t.x + t.y*t.y + t.z*t.z)
+        // SLAM 맵 바운딩 박스 분석
+        var slamMin = SIMD3<Float>(repeating: .greatestFiniteMagnitude)
+        var slamMax = SIMD3<Float>(repeating: -.greatestFiniteMagnitude)
+        for sp in slamPoints {
+            let p = SIMD3<Float>(sp.x, sp.y, sp.z)
+            slamMin = min(slamMin, p)
+            slamMax = max(slamMax, p)
+        }
+        let slamSpan = slamMax - slamMin
+        print("📊 [SLAM 맵] \(slamPoints.count)개 | 범위: X=\(String(format: "%.2f", slamSpan.x))m Y=\(String(format: "%.2f", slamSpan.y))m Z=\(String(format: "%.2f", slamSpan.z))m")
 
-            if rotAngle > 3.0 {
-                // 타이밍 불일치로 인한 가짜 회전 → identity 사용 (SLAM≈ARKit 수렴 확인됨)
-                alignTransform = matrix_identity_float4x4
-                print("🔬 SLAM→ARKit 정렬: 계산값 \(String(format: "%.3f", transDist))m/\(String(format: "%.1f°", rotAngle)) → 회전 과다, identity 사용 [총 \(poseCorrectionLog.count)쌍]")
-            } else {
-                alignTransform = candidate
-                print("🔬 SLAM→ARKit 정렬: \(String(format: "%.3f", transDist))m/\(String(format: "%.1f°", rotAngle)) [마지막 쌍, 총 \(poseCorrectionLog.count)쌍]")
-            }
+        // ── 2. SLAM→보정된 ARKit 공간 정렬 행렬 ──
+        // Step 0(applySLAMPoseCorrection)에서 GPU 포인트가 T0_inv * Ti * p로 보정됨
+        // SLAM 맵도 동일한 기준 프레임으로 변환: T0_inv * p_slam
+        let alignTransform: simd_float4x4
+        if poseCorrectionLog.count >= 1 {
+            let T0 = poseCorrectionLog[0].slamPose * poseCorrectionLog[0].arkitPose.inverse
+            alignTransform = T0.inverse  // SLAM→보정된 ARKit 공간
+            let t = alignTransform.columns.3
+            let transDist = sqrt(t.x*t.x + t.y*t.y + t.z*t.z)
+            print("🔬 SLAM→ARKit 정렬: T0⁻¹ 사용 (translation=\(String(format: "%.3f", transDist))m) [\(poseCorrectionLog.count)쌍]")
         } else {
             alignTransform = matrix_identity_float4x4
             print("⚠️ poseCorrectionLog 비어있음 — identity 사용")
@@ -1132,7 +1409,7 @@ extension Renderer {
         print("🔬 SLAM 근접 필터: \(count) → \(currentPointCount) (제거: \(removeCount), \(String(format: "%.1f%%", pct))) [SLAM 맵: \(slamPoints.count)개, 점유 복셀: \(occupiedVoxels.count)개]")
     }
 
-    // MARK: Phase 1 — 중복 표면 제거 (Surface Thinning)
+    // MARK: Phase 2 — 중복 표면 제거 (Surface Thinning)
     //
     // 드리프트/multipath로 인해 벽 뒤로 길쭉하게 늘어나는 고스트 제거
     // 30mm 영역마다 포인트 분포를 분석하여 가장 밀집된 단일 표면층만 유지
@@ -1142,16 +1419,15 @@ extension Renderer {
         let count = currentPointCount
         guard count > 1000 else { return }
 
-        let coarseSize: Float = 0.030   // 30mm 분석 영역 (더 세밀)
+        let coarseSize: Float = 0.030   // 30mm 분석 영역
         let binSize: Float = 0.003      // 3mm 히스토그램 빈
         let minSpread: Float = 0.015    // 15mm 미만 두께 = 정상 표면, 스킵
         let gapThreshold: Float = 0.008 // 8mm 이상 빈 공간 = 중복/고스트 감지
         let keepWindow: Float = 0.015   // 15mm 윈도우 = 유지할 표면 두께
-        let maxRemoveRatio: Float = 0.50 // 안전장치: 최대 50%까지 제거
+        let maxRemoveRatio: Float = 0.50
 
         struct CKey: Hashable { let x: Int32, y: Int32, z: Int32 }
 
-        // 포인트를 50mm 영역별로 그룹화
         var groups: [CKey: [Int]] = [:]
         groups.reserveCapacity(count / 5)
 
@@ -1186,7 +1462,7 @@ extension Renderer {
             if spread.y > maxSprd { axis = 1; maxSprd = spread.y }
             if spread.z > maxSprd { axis = 2; maxSprd = spread.z }
 
-            // 30mm 미만이면 단일 표면 → 스킵
+            // 15mm 미만이면 단일 표면 → 스킵
             guard maxSprd > minSpread else { continue }
 
             let minVal: Float
@@ -1196,7 +1472,7 @@ extension Renderer {
             default: minVal = mn.z
             }
 
-            // 히스토그램 구축 (5mm 빈)
+            // 히스토그램 구축 (3mm 빈)
             let numBins = min(Int(ceil(maxSprd / binSize)), 200)
             guard numBins > 3 else { continue }
             var histogram = [Int](repeating: 0, count: numBins)
@@ -1213,7 +1489,7 @@ extension Renderer {
                 histogram[bin] += 1
             }
 
-            // Gap 감지: 10mm 이상 빈 공간이 있는지 확인
+            // Gap 감지: 8mm 이상 빈 공간이 있는지 확인
             // Gap이 없으면 = 연속 표면(모서리 등) → 건드리지 않음
             var hasGap = false
             var gapRun = 0
@@ -1229,7 +1505,7 @@ extension Renderer {
 
             guard hasGap else { continue }
 
-            // 슬라이딩 윈도우: 가장 밀집된 20mm 구간 탐색
+            // 슬라이딩 윈도우: 가장 밀집된 15mm 구간 탐색
             let windowBins = max(1, Int(ceil(keepWindow / binSize)))
             var bestStart = 0
             var bestCount = 0
@@ -1268,9 +1544,12 @@ extension Renderer {
             }
         }
 
-        guard totalRemoved > 0 else { return }
+        guard totalRemoved > 0 else {
+            print("🔬 표면 씬닝: \(count)개 중 중복 레이어 없음 — 스킵")
+            return
+        }
 
-        // 안전장치: 최대 40% 제거 — 너무 많이 제거하려 하면 제한
+        // 안전장치: 최대 50% 제거 — 너무 많이 제거하려 하면 제한
         let maxAllowed = Int(Float(count) * maxRemoveRatio)
         if totalRemoved > maxAllowed {
             // 제거 대상 중 일부만 실제 제거
@@ -1302,10 +1581,11 @@ extension Renderer {
 
         currentPointIndex = newIndex
         currentPointCount = newIndex
-        print("🔬 표면 씬닝: \(count) → \(newIndex) (\(totalRemoved) 중복 레이어 포인트 제거)")
+        let pct = Float(totalRemoved) / Float(max(count, 1)) * 100
+        print("🔬 표면 씬닝: \(count) → \(newIndex) (제거: \(totalRemoved)개, \(String(format: "%.1f%%", pct))) [분석 영역: \(groups.count)개, bin=\(binSize*1000)mm, gap≥\(gapThreshold*1000)mm]")
     }
 
-    // MARK: Phase 3 — 밀도 게이트 복셀 다운샘플링
+    // MARK: Phase 3 — 복셀 다운샘플링
     //
     // 작은 복셀(5mm) 내 관측 횟수가 minCount 미만이면 버림
     // 노이즈/고스트는 1~2회만 관측 → 제거, 실제 표면은 다수 관측 → 유지
@@ -1370,10 +1650,16 @@ extension Renderer {
 
         currentPointIndex = newIndex
         currentPointCount = newIndex
-        print("🔬 복셀 평균화: \(count) → \(newIndex) (\(voxels.count)개 복셀, vs=\(vs*1000)mm)")
+        // 복셀당 포인트 수 통계
+        let counts = voxels.values.map { $0.n }
+        let avgPerVoxel = counts.isEmpty ? 0 : Float(counts.reduce(0, +)) / Float(counts.count)
+        let maxPerVoxel = counts.max() ?? 0
+        let singleVoxels = counts.filter { $0 == 1 }.count
+        let pct = Float(count - newIndex) / Float(max(count, 1)) * 100
+        print("🔬 복셀 평균화: \(count) → \(newIndex) (제거: \(String(format: "%.1f%%", pct))) [vs=\(vs*1000)mm, \(voxels.count)복셀, avg=\(String(format: "%.1f", avgPerVoxel))pts/복셀, max=\(maxPerVoxel), 단독=\(singleVoxels)]")
     }
 
-    // MARK: Phase 4 — 이상치 제거 (Outlier Removal)
+    // MARK: Phase 4 — 이상치 제거
     //
     // 안전한 필터링: 절대 기준만 사용, 최대 제거 비율 30% 제한
     //  (A) 밀도: 30mm 셀, 27-이웃 합계 < 3 → 완전 고립된 포인트만
@@ -1506,7 +1792,9 @@ extension Renderer {
 
         currentPointIndex = newIndex
         currentPointCount = newIndex
-        print("🔬 이상치 제거: \(count) → \(newIndex) [밀도:\(removedByDensity) 거리:\(removedByDistance)] (제한: 최대 \(maxRemove))")
+        let outlierPct = Float(totalRemoved) / Float(max(count, 1)) * 100
+        let medianDist = distances[distances.count / 2]
+        print("🔬 이상치 제거: \(count) → \(newIndex) (\(String(format: "%.1f%%", outlierPct))) [밀도<3:\(removedByDensity)개, 거리극단:\(removedByDistance)개] 거리분포: Q1=\(String(format: "%.2f", q1))m 중앙=\(String(format: "%.2f", medianDist))m Q3=\(String(format: "%.2f", q3))m IQR=\(String(format: "%.2f", iqr))m cutoff=\(String(format: "%.2f", distanceCutoff))m")
     }
 }
 

@@ -98,7 +98,6 @@
 		SLAMPOINT_BUILD_ID /* SLAMPoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = SLAMPOINT_ID_123456 /* SLAMPoint.swift */; };
 		SLAMSERVICE_MM_BUILD_ID /* SLAMService.mm in Sources */ = {isa = PBXBuildFile; fileRef = SLAMSERVICE_MM_ID_123456 /* SLAMService.mm */; };
 		SPLASHVC_BUILD /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = SPLASHVC_REF /* SplashViewController.swift */; };
-		STOREKIT_BUILD /* DepthVizProducts.storekit in Resources */ = {isa = PBXBuildFile; fileRef = STOREKIT_REF /* DepthVizProducts.storekit */; };
 		STUBCLASSES_BUILD /* StubClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = STUBCLASSES_REF /* StubClasses.swift */; };
 		TRAJDEMO_BUILD /* trajectory_demo.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = TRAJDEMO_REF /* trajectory_demo.mp4 */; };
 /* End PBXBuildFile section */
@@ -106,12 +105,15 @@
 /* Begin PBXFileReference section */
 		6653E8952C8D0AA60007E24A /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		6653E8972C8D0C430007E24A /* building4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = building4.png; sourceTree = "<group>"; };
+		666482932F4D8AC500BC6708 /* DepthViz.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DepthViz.entitlements; sourceTree = "<group>"; };
 		6666DEE22C8F46B900D21424 /* a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "a_geometric_shaped__building_visualized_by_point_cloud__Remove_background_bird_eye_view__background__5f0285 (1).mp4"; sourceTree = "<group>"; };
 		66689B482C8C702200DB20E9 /* UserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModel.swift; sourceTree = "<group>"; };
 		66689B4B2C8C70A700DB20E9 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		66689B4D2C8C70E500DB20E9 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		666BA4A82EAD4CD6001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		666BA4AA2EAD4D32001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
+		6690E2932F4D9581008AAC08 /* DepthVizProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = DepthVizProducts.storekit; path = DepthViz/Configuration/DepthVizProducts.storekit; sourceTree = "<group>"; };
+		6690E2942F4D95F7008AAC08 /* DepthVizProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = DepthVizProducts.storekit; sourceTree = "<group>"; };
 		6697C8C92F42A86B006E4917 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		669A6F0B2C7F35A700F8BDAC /* MatrixMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixMath.swift; sourceTree = "<group>"; };
 		669A6F0D2C7F47F100F8BDAC /* PointCloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloud.swift; sourceTree = "<group>"; };
@@ -204,7 +206,6 @@
 		SLAMSERVICE_H_ID_123456 /* SLAMService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SLAMService.h; path = DepthViz/Domain/Algorithm/Bridge/SLAMService.h; sourceTree = SOURCE_ROOT; };
 		SLAMSERVICE_MM_ID_123456 /* SLAMService.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = SLAMService.mm; path = DepthViz/Domain/Algorithm/Bridge/SLAMService.mm; sourceTree = SOURCE_ROOT; };
 		SPLASHVC_REF /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SplashViewController.swift; path = DepthViz/Presentation/Shared/SplashViewController.swift; sourceTree = SOURCE_ROOT; };
-		STOREKIT_REF /* DepthVizProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = DepthVizProducts.storekit; path = DepthViz/Configuration/DepthVizProducts.storekit; sourceTree = SOURCE_ROOT; };
 		STUBCLASSES_REF /* StubClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = StubClasses.swift; path = DepthViz/Presentation/Main/StubClasses.swift; sourceTree = SOURCE_ROOT; };
 		TRAJDEMO_REF /* trajectory_demo.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = trajectory_demo.mp4; path = DepthViz/Resources/trajectory_demo.mp4; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -326,6 +327,7 @@
 		87ABC85829D173AC00881FFB /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
+				6690E2942F4D95F7008AAC08 /* DepthVizProducts.storekit */,
 				E73DD14224636FF100D77039 /* DepthViz-Bridging-Header.h */,
 				E7E2ED6F1473F1FD1E9543FA /* LICENSE.txt */,
 				DB23EE222C08398500FC4167 /* env.xcconfig */,
@@ -398,6 +400,7 @@
 		E73DD12424636FEF00D77039 = {
 			isa = PBXGroup;
 			children = (
+				6690E2932F4D9581008AAC08 /* DepthVizProducts.storekit */,
 				666BA4AA2EAD4D32001372FE /* logo.png */,
 				E73DD12F24636FEF00D77039 /* DepthViz */,
 				6697C8C82F42A86B006E4917 /* Frameworks */,
@@ -416,6 +419,7 @@
 		E73DD12F24636FEF00D77039 /* DepthViz */ = {
 			isa = PBXGroup;
 			children = (
+				666482932F4D8AC500BC6708 /* DepthViz.entitlements */,
 				87ABC85829D173AC00881FFB /* Configuration */,
 				8711C71529D1322A00F6D5CC /* Presentation */,
 				8711C71629D1323800F6D5CC /* Domain */,
@@ -463,7 +467,6 @@
 				TRAJDEMO_REF /* trajectory_demo.mp4 */,
 				LOCALIZABLE_REF /* Localizable.strings */,
 				INFOPLIST_STR_REF /* InfoPlist.strings */,
-				STOREKIT_REF /* DepthVizProducts.storekit */,
 				BLDPREMIUM_REF /* building4_premium.png */,
 				ADMOBMGR_REF /* AdMobManager.swift */,
 				APPOPENAD_REF /* AppOpenAdManager.swift */,
@@ -550,7 +553,6 @@
 				TRAJDEMO_BUILD /* trajectory_demo.mp4 in Resources */,
 				LOCALIZABLE_BUILD /* Localizable.strings in Resources */,
 				INFOPLIST_STR_BUILD /* InfoPlist.strings in Resources */,
-				STOREKIT_BUILD /* DepthVizProducts.storekit in Resources */,
 				BLDPREMIUM_BUILD /* building4_premium.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -816,10 +818,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"ASSETCATALOG_COMPILER_APPICON_NAME[sdk=iphoneos*]" = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = DepthViz/DepthViz.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = D9WJV9698J;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -836,7 +838,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "DepthViz-Kaist";
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -855,10 +857,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = DepthViz/DepthViz.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 14;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = D9WJV9698J;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -875,7 +877,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "DepthViz-Kaist";
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";

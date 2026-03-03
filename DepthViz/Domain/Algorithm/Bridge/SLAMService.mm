@@ -462,8 +462,8 @@ public:
 
                 if (pointIdx < maxPoints) {
                     _xyzBuffer[pointIdx * 3] = x;
-                    _xyzBuffer[pointIdx * 3 + 1] = y;
-                    _xyzBuffer[pointIdx * 3 + 2] = z;
+                    _xyzBuffer[pointIdx * 3 + 1] = -y;  // CV Y-down → ARKit Y-up
+                    _xyzBuffer[pointIdx * 3 + 2] = -z;  // CV Z-forward → ARKit Z-backward
                     _confBuffer[pointIdx] = confidence;
                     _rgbBuffer[pointIdx * 3] = (uint8_t)r;
                     _rgbBuffer[pointIdx * 3 + 1] = (uint8_t)g;

@@ -9,10 +9,7 @@
       }
     ]
   },
-  "identifier" : "DepthVizProducts",
-  "nonRenewableSubscriptions" : [
-
-  ],
+  "identifier" : "94A3868F",
   "nonRenewingSubscriptions" : [
 
   ],
@@ -40,8 +37,6 @@
   ],
   "settings" : {
     "_failTransactionsEnabled" : false,
-    "_locale" : "en_US",
-    "_storefront" : "USA",
     "_storeKitErrors" : [
       {
         "current" : null,

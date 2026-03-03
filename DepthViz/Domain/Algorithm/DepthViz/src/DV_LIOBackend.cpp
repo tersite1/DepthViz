@@ -2,12 +2,13 @@
 #include "../include/DV_RobustKernels.h"
 
 #include <cmath>
+#include <cstdio>
 
 DV_LIOBackend::DV_LIOBackend() = default;
 DV_LIOBackend::~DV_LIOBackend() = default;
 
 void DV_LIOBackend::init() {
-    map_ = std::make_unique<DV::DV_VoxelHashMap>(0.1f, 500000);
+    map_ = std::make_unique<DV::DV_VoxelHashMap>(0.05f, 500000);
     eskf_ = std::make_unique<DV::DV_ESKF>(eskf_opts_);
 
     DV::SysState initial_state;
@@ -61,19 +62,52 @@ Eigen::Matrix4d DV_LIOBackend::process(
     DV::SysState current_eskf_state = eskf_->getState();
     Eigen::Vector3d eskf_pos = current_eskf_state.p;
     Eigen::Vector3d prior_pos = prior_pose.block<3, 1>(0, 3);
+    Eigen::Matrix3d prior_R = prior_pose.block<3, 3>(0, 0);
 
-    // If the ESKF position hasn't moved from the last frame (no IMU predictions),
-    // use the ARKit prior as the starting point instead
+    // Check both position AND rotation divergence
     double pos_diff = (eskf_pos - prior_pos).norm();
-    if (pos_diff > 1.0) {
-        // Large disagreement: ESKF has diverged or no IMU data — reset to ARKit prior
-        DV::SysState reset_state = current_eskf_state;
-        reset_state.R = prior_pose.block<3, 3>(0, 0);
-        reset_state.p = prior_pos;
-        // Preserve velocity, biases, and gravity from ESKF
-        eskf_->setState(reset_state);
+    Eigen::Matrix3d dR = current_eskf_state.R.transpose() * prior_R;
+    double cos_angle = std::max(-1.0, std::min(1.0, (dR.trace() - 1.0) * 0.5));
+    double rot_diff_deg = std::acos(cos_angle) * 180.0 / M_PI;
+
+    // Always anchor ESKF to ARKit pose before ICP.
+    // This prevents drift accumulation: each frame's ICP starts fresh from ARKit,
+    // so corrections are always small and independent (not compounding).
+    // Velocity estimated from ARKit pose delta; biases preserved for calibration.
+    {
+        // Estimate velocity from ARKit pose difference
+        Eigen::Vector3d est_v = Eigen::Vector3d::Zero();
+        double dt_pose = current_eskf_state.timestamp > 0.0 ?
+            (prior_pose(3, 3) > 0.0 ? 0.0 : 0.0) : 0.0; // timestamp not in pose
+        if (last_arkit_timestamp_ > 0.0) {
+            double dt_ark = current_eskf_state.timestamp - last_arkit_timestamp_;
+            if (dt_ark > 0.001 && dt_ark < 1.0) {
+                est_v = (prior_pos - last_arkit_pos_) / dt_ark;
+                // Sanity: clamp to 5 m/s (walking speed)
+                double v_norm = est_v.norm();
+                if (v_norm > 5.0) {
+                    est_v = est_v * (5.0 / v_norm);
+                }
+            }
+        }
+        last_arkit_pos_ = prior_pos;
+        last_arkit_timestamp_ = current_eskf_state.timestamp;
+
+        DV::SysState anchored;
+        anchored.R = prior_R;
+        anchored.p = prior_pos;
+        anchored.v = est_v;                   // Velocity from ARKit, not IMU
+        anchored.bg = current_eskf_state.bg;  // Keep bias calibration
+        anchored.ba = current_eskf_state.ba;
+        anchored.g = current_eskf_state.g;
+        anchored.timestamp = current_eskf_state.timestamp;
+        eskf_->setState(anchored);
+
+        if (pos_diff > 0.1 || rot_diff_deg > 10.0) {
+            printf("[LIO] ANCHOR drift=%.3fm rot=%.1f° vel=%.2fm/s → reset to ARKit\n",
+                   pos_diff, rot_diff_deg, current_eskf_state.v.norm());
+        }
     }
-    // Otherwise: trust the IMU-propagated ESKF state (preserves R, p, v from IMU integration)
 
     // Capture points and map pointer for the observation lambda
     const auto& pts = points;
@@ -91,10 +125,9 @@ Eigen::Matrix4d DV_LIOBackend::process(
         Eigen::Matrix3d R = state.R;
         Eigen::Vector3d t = state.p;
 
-        // Accumulate valid observations
         struct Observation {
             Eigen::Vector3d normal_d;
-            Eigen::Vector3d p_camera_d; // Camera-frame point (needed for rotation Jacobian)
+            Eigen::Vector3d p_camera_d;
             double residual_val;
             double weight;
         };
@@ -102,50 +135,39 @@ Eigen::Matrix4d DV_LIOBackend::process(
         observations.reserve(pts.size());
 
         for (const auto& pt : pts) {
-            // Transform point to world frame
-            // NOTE: Points are in the camera frame (from ARKit sceneDepth unprojection).
-            // We assume T_camera_imu ≈ I (camera-IMU co-location approximation).
-            // On iPhone, the physical offset is ~5-10mm, introducing a bounded lever-arm
-            // error during rotation. The divergence guard (1m) masks this. For cm-level
-            // accuracy claims in publications, this approximation must be stated explicitly.
             Eigen::Vector3d p_camera(pt.x, pt.y, pt.z);
             Eigen::Vector3d p_world = R * p_camera + t;
             Eigen::Vector3f p_world_f = p_world.cast<float>();
 
-            // Query nearest neighbors
             DV::KNNResult knn;
             if (!map_ptr->getTopK(p_world_f, knn, 5)) continue;
 
-            // Fit plane
             Eigen::Vector3f normal_f, centroid_f;
             if (!DV::DV_VoxelHashMap::fitPlane(knn, normal_f, centroid_f)) continue;
 
-            // Point-to-plane residual: r = n^T (p_world - centroid)
             Eigen::Vector3f diff = p_world_f - centroid_f;
             float r = normal_f.dot(diff);
 
-            // Confidence weight (ablation: can disable)
             float conf_w = use_conf_w ? DepthViz::getConfidenceWeight(pt.confidence) : 1.0f;
             if (conf_w <= 0.f) continue;
 
-            // TLS weight (ablation: can disable)
             float tls_w = use_tls ? DepthViz::computeTLSWeight(r, 0.10f) : 1.0f;
             if (tls_w <= 0.f) continue;
-
-            float total_weight = conf_w * tls_w;
 
             Observation obs;
             obs.normal_d = normal_f.cast<double>();
             obs.p_camera_d = p_camera;
-            obs.residual_val = static_cast<double>(r); // Unweighted raw residual
-            obs.weight = static_cast<double>(total_weight);
+            obs.residual_val = static_cast<double>(r);
+            obs.weight = static_cast<double>(conf_w * tls_w);
             observations.push_back(obs);
         }
 
         int n = static_cast<int>(observations.size());
-        if (n < 10) return false; // Not enough valid observations
+        if (n < 10) {
+            printf("[LIO] obs=%d (< 10 min) from %zu pts → SKIP\n", n, pts.size());
+            return false;
+        }
 
-        // Build H (Nx18) and residual (Nx1)
         H = Eigen::MatrixXd::Zero(n, 18);
         residual = Eigen::VectorXd::Zero(n);
         R_obs = Eigen::MatrixXd::Zero(n, n);
@@ -153,24 +175,12 @@ Eigen::Matrix4d DV_LIOBackend::process(
         for (int i = 0; i < n; i++) {
             const auto& obs = observations[i];
 
-            // Jacobian of point-to-plane residual w.r.t. error state:
-            // r = n^T (R * p_camera + t - q)
-            // dr/dtheta = -n^T * R * [p_camera]_x  (rotation perturbation)
-            // dr/dp     = n^T                        (translation perturbation)
-            // Other states: zero (not directly observable from LiDAR)
-            // NOTE: p_camera used as p_body under T_camera_imu ≈ I assumption.
-
-            // Rotation Jacobian: H_theta = -n^T * R * hat(p_camera)
             Eigen::Matrix3d p_camera_hat = DV::SO3::hat(obs.p_camera_d);
             H.block<1, 3>(i, 0) = -obs.normal_d.transpose() * R * p_camera_hat;
-
-            // Translation Jacobian: H_p = n^T
             H.block<1, 3>(i, 3) = obs.normal_d.transpose();
+            residual(i) = -obs.residual_val;
 
-            residual(i) = -obs.residual_val; // Negative because update = K * (-r)
-
-            // Observation noise: sigma² / weight (higher weight = lower noise = more trusted)
-            double sigma2 = 0.01 * 0.01; // Base observation noise variance (1cm)
+            double sigma2 = 0.01 * 0.01;
             R_obs(i, i) = sigma2 / std::max(obs.weight, 0.01);
         }
 
@@ -180,14 +190,23 @@ Eigen::Matrix4d DV_LIOBackend::process(
     // Run iterated Kalman update
     bool success = eskf_->updateObserve(obs_func);
 
+    // Compute pose delta (SLAM refinement amount)
+    Eigen::Vector3d prior_t = prior_pose.block<3, 1>(0, 3);
+
     if (success) {
         current_pose_ = eskf_->getPoseMatrix();
+        Eigen::Vector3d refined_t = current_pose_.block<3, 1>(0, 3);
+        double refine_dist = (refined_t - prior_t).norm();
+        int map_size = map_ ? static_cast<int>(map_->size()) : 0;
+        printf("[LIO] OK pts=%zu refine=%.4fm map=%d\n",
+               points.size(), refine_dist, map_size);
     } else {
-        // Fall back to prior
         current_pose_ = prior_pose;
+        printf("[LIO] FAIL pts=%zu → fallback to ARKit prior\n", points.size());
     }
 
-    // Insert surviving points into map
+    // Insert with refined pose — safe because ESKF is anchored to ARKit each frame,
+    // so corrections are small and independent (no drift accumulation).
     insertPoints(current_pose_, points);
 
     return current_pose_;

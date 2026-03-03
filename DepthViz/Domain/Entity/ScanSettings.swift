@@ -56,23 +56,24 @@ public enum ConfidenceLevel: String, CaseIterable, Codable {
 
     /// Depth edge rejection threshold (meters).
     /// Rejects points where neighboring depth differs sharply — multipath artifact hotspot.
-    /// 0 = disabled.
+    /// 녹화 중 포인트 풍부함 유지 위해 관대하게 설정, 극심한 edge만 거부
+    /// 0 = disabled. 너무 작으면 코너/경사면도 거부됨.
     public var depthEdgeThreshold: Float {
         switch self {
         case .low:    return 0      // 비활성화
-        case .medium: return 0.10   // 10cm — 극심한 depth edge만 거부
-        case .high:   return 0.04   // 4cm — 공격적 edge 거부 (multipath 최소화)
+        case .medium: return 0.15   // 15cm — 극심한 depth edge만 거부
+        case .high:   return 0.10   // 10cm — 명확한 depth bleeding만 거부
         }
     }
 
     /// Temporal voting threshold: number of observations in same voxel before accepting.
-    /// Ghost points jitter between voxels (multipath instability) → never confirmed.
-    /// Real surfaces stay stable → quickly confirmed.
+    /// 녹화 중에는 풍부한 포인트 수집이 중요 → 모든 레벨에서 1 (즉시 수용)
+    /// 고스트/노이즈는 후처리 파이프라인에서 제거
     public var temporalThreshold: Int {
         switch self {
-        case .low:    return 1   // 즉시 수용 (기존 동작)
-        case .medium: return 2   // 2회 관측 확인
-        case .high:   return 3   // 3회 관측 확인 (TSDF식 temporal voting)
+        case .low:    return 1   // 즉시 수용
+        case .medium: return 1   // 즉시 수용
+        case .high:   return 1   // 즉시 수용 (후처리가 품질 담당)
         }
     }
 

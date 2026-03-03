@@ -1,384 +1,505 @@
 //
-//  Utils.swift
+//  ScanViewerVC.swift
 //  DepthViz
 //
-//  Created by Group 9 on 2024/06/15.
-//  Copyright © 2024 Apple. All rights reserved.
+//  저장된 PLY 파일을 포인트 클라우드로 렌더링 (ScanPreviewVC와 동일한 방식)
 //
 
 import UIKit
 import SceneKit
 
-class ScanViewerVC: UIViewController, UIGestureRecognizerDelegate, SCNSceneRendererDelegate {
+class ScanViewerVC: UIViewController, SCNSceneRendererDelegate {
 
-    @IBOutlet weak var sceneView: SCNView!
     static let identifier = "ScanViewerVC"
-    var scene = SCNScene()
-    var lightingEnvironmentContent = UIImage(named: "white-env.jpg")
-    var lightingEnvironmentIntensity: CGFloat = 1.0
-    var rightFingerView: UIImageView!
-    var leftFingerView: UIImageView!
-    var idleTimer: Timer?
-    let panSequenceKey: String = "panSequence"
-    let camera = SCNCamera()
-    var cameraNode = SCNNode()
-    var cameraOrbitFinal = SCNNode()
-    let cameraOrbitStart = SCNNode()
-    var widthAngle: Float = 0.0
-    var heightAngle: Float = 0.0
-    var lastWidthAngle: Float = 0.0
-    var lastHeightAngle: Float = 0.0
-    var maxHeightAngleXUp: Float = 1
-    var maxHeightAngleXDown: Float = -1
-    var cameraCurrentZoomScale = 50.0
-    var cameraZoomScaleMax = 60.0
-    var cameraZoomScaleMin = 0.0
-    var maxXPositionRight: Float = 0.0
-    var maxXPositionLeft: Float = 0.0
-    var maxYPositionUp: Float = 0.0
-    var maxYPositionDown: Float = 0.0
-    var originalCameraZoomScale: Double!
-    var originalWidthAngle: Float!
-    var originalHeightAngle: Float!
-    var originalPositionX: Float!
-    var originalPositionY: Float!
-    var positionX: Float = 0.0
-    var positionY: Float = 0.0
-    
+
     var fileURL: URL?
-    
+
+    // SCNView를 코드로 생성 (스토리보드에 없으므로)
+    private var sceneView: SCNView!
+    private var pointCloudNode: SCNNode?
+
+    // 로딩 인디케이터
+    private let loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
+
+    // 높이(Y축) 클리핑 슬라이더
+    private let heightClipSlider: UISlider = {
+        let slider = UISlider()
+        slider.minimumValue = 0
+        slider.maximumValue = 1
+        slider.value = 1
+        slider.minimumTrackTintColor = UIColor(white: 0.4, alpha: 0.6)
+        slider.maximumTrackTintColor = .white
+        slider.thumbTintColor = .white
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        return slider
+    }()
+
+    private let heightClipTopIcon: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        let iv = UIImageView(image: UIImage(systemName: "building.2.fill", withConfiguration: config))
+        iv.tintColor = UIColor(white: 0.7, alpha: 1)
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
+    private let heightClipBottomIcon: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        let iv = UIImageView(image: UIImage(systemName: "scissors", withConfiguration: config))
+        iv.tintColor = UIColor(white: 0.7, alpha: 1)
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
+    // 포인트 크기 슬라이더
+    private let pointSizeSlider: UISlider = {
+        let slider = UISlider()
+        slider.minimumValue = 1.0
+        slider.maximumValue = 15.0
+        slider.value = 3.0
+        slider.minimumTrackTintColor = .white
+        slider.maximumTrackTintColor = UIColor(white: 0.4, alpha: 0.6)
+        slider.thumbTintColor = .white
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        return slider
+    }()
+
+    private let pointSizeSmallDot: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 6, weight: .regular)
+        let iv = UIImageView(image: UIImage(systemName: "circle.fill", withConfiguration: config))
+        iv.tintColor = UIColor(white: 0.7, alpha: 1)
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
+    private let pointSizeLargeDot: UIImageView = {
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .regular)
+        let iv = UIImageView(image: UIImage(systemName: "circle.fill", withConfiguration: config))
+        iv.tintColor = UIColor(white: 0.7, alpha: 1)
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+
+    private var clipYMin: Float = 0
+    private var clipYMax: Float = 1
+
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Ensure sceneView is not nil
-        guard let sceneView = sceneView else {
-            print("sceneView is nil")
-            return
-        }
+
+        view.backgroundColor = .black
+
+        // SCNView를 코드로 생성하여 전체 화면에 배치
+        sceneView = SCNView()
+        sceneView.translatesAutoresizingMaskIntoConstraints = false
+        sceneView.backgroundColor = .black
+        sceneView.allowsCameraControl = true
+        sceneView.defaultCameraController.interactionMode = .orbitTurntable
+        sceneView.defaultCameraController.inertiaEnabled = true
+        sceneView.antialiasingMode = .multisampling4X
+        sceneView.scene = SCNScene()
+        sceneView.delegate = self
+        view.addSubview(sceneView)
+
+        NSLayoutConstraint.activate([
+            sceneView.topAnchor.constraint(equalTo: view.topAnchor),
+            sceneView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            sceneView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            sceneView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+
+        // 로딩 인디케이터
+        view.addSubview(loadingIndicator)
+        NSLayoutConstraint.activate([
+            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+        ])
+
+        setupSliders()
 
         if let fileURL = fileURL {
-            show3DModel(fileURL: fileURL)
+            loadingIndicator.startAnimating()
+            loadPointCloudFromFile(fileURL: fileURL)
         }
-        
-        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(self.panGestureRecognized(gesture:)) )
-        panGesture.delegate = self
-        sceneView.addGestureRecognizer(panGesture)
-        
-        let pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(self.pinchGestureRecognized(gesture:)) )
-        pinchGesture.delegate = self
-        sceneView.addGestureRecognizer(pinchGesture)
-        
-        let doubleTapGesture = UITapGestureRecognizer(target: self, action: #selector(self.doubleTapGestureRecognized(gesture:)) )
-        doubleTapGesture.delegate = self
-        doubleTapGesture.numberOfTapsRequired = 2
-        sceneView.addGestureRecognizer(doubleTapGesture)
     }
-    
-    func show3DModel(fileURL: URL) {
-        // Ensure scene can be loaded
+
+    // MARK: - Slider Setup
+
+    private func setupSliders() {
+        // 높이 클리핑 슬라이더 (우측 세로)
+        view.addSubview(heightClipTopIcon)
+        view.addSubview(heightClipSlider)
+        view.addSubview(heightClipBottomIcon)
+        heightClipSlider.transform = CGAffineTransform(rotationAngle: -.pi / 2)
+        heightClipSlider.addTarget(self, action: #selector(heightClipChanged(_:)), for: .valueChanged)
+
+        // 포인트 크기 슬라이더 (하단 가로)
+        view.addSubview(pointSizeSmallDot)
+        view.addSubview(pointSizeSlider)
+        view.addSubview(pointSizeLargeDot)
+        pointSizeSlider.addTarget(self, action: #selector(pointSizeChanged(_:)), for: .valueChanged)
+
+        NSLayoutConstraint.activate([
+            // 높이 클리핑 (우측)
+            heightClipTopIcon.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -14),
+            heightClipTopIcon.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 60),
+
+            heightClipSlider.centerXAnchor.constraint(equalTo: heightClipTopIcon.centerXAnchor),
+            heightClipSlider.topAnchor.constraint(equalTo: heightClipTopIcon.bottomAnchor, constant: 80),
+            heightClipSlider.widthAnchor.constraint(equalToConstant: 200),
+
+            heightClipBottomIcon.centerXAnchor.constraint(equalTo: heightClipTopIcon.centerXAnchor),
+            heightClipBottomIcon.topAnchor.constraint(equalTo: heightClipSlider.bottomAnchor, constant: 80),
+
+            // 포인트 크기 (하단)
+            pointSizeSmallDot.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            pointSizeSmallDot.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+
+            pointSizeSlider.leadingAnchor.constraint(equalTo: pointSizeSmallDot.trailingAnchor, constant: 8),
+            pointSizeSlider.trailingAnchor.constraint(equalTo: pointSizeLargeDot.leadingAnchor, constant: -8),
+            pointSizeSlider.centerYAnchor.constraint(equalTo: pointSizeSmallDot.centerYAnchor),
+
+            pointSizeLargeDot.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            pointSizeLargeDot.centerYAnchor.constraint(equalTo: pointSizeSmallDot.centerYAnchor),
+        ])
+    }
+
+    // MARK: - PLY Point Cloud Loading
+
+    private func loadPointCloudFromFile(fileURL: URL) {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+
+            let ext = fileURL.pathExtension.lowercased()
+            let points: [(pos: SIMD3<Float>, col: SIMD3<Float>)]
+
+            switch ext {
+            case "ply":
+                points = self.parsePLY(url: fileURL)
+            case "xyz":
+                points = self.parseXYZ(url: fileURL)
+            default:
+                DispatchQueue.main.async {
+                    self.loadingIndicator.stopAnimating()
+                    self.loadAsScene(fileURL: fileURL)
+                }
+                return
+            }
+
+            guard !points.isEmpty else {
+                print("⚠️ 파일에서 포인트를 읽지 못함: \(fileURL.lastPathComponent)")
+                DispatchQueue.main.async { self.loadingIndicator.stopAnimating() }
+                return
+            }
+
+            let geometry = self.buildPointCloudGeometry(points: points)
+
+            DispatchQueue.main.async {
+                self.loadingIndicator.stopAnimating()
+                self.addPointCloudToScene(geometry: geometry)
+            }
+        }
+    }
+
+    /// PLY (ASCII + Binary Little Endian) 파서
+    private func parsePLY(url: URL) -> [(pos: SIMD3<Float>, col: SIMD3<Float>)] {
+        guard let data = try? Data(contentsOf: url) else { return [] }
+
+        guard let headerEndRange = data.range(of: Data("end_header\n".utf8)) else { return [] }
+        let headerData = data[data.startIndex..<headerEndRange.lowerBound]
+        guard let headerStr = String(data: headerData, encoding: .utf8) else { return [] }
+
+        let headerLines = headerStr.components(separatedBy: "\n")
+        var vertexCount = 0
+        var isBinary = false
+        var properties: [String] = []
+
+        for line in headerLines {
+            let parts = line.trimmingCharacters(in: .whitespaces).components(separatedBy: " ")
+            if parts.first == "element" && parts.count >= 3 && parts[1] == "vertex" {
+                vertexCount = Int(parts[2]) ?? 0
+            } else if parts.first == "format" {
+                isBinary = line.contains("binary_little_endian")
+            } else if parts.first == "property" && parts.count >= 3 {
+                properties.append(parts.last ?? "")
+            }
+        }
+
+        guard vertexCount > 0 else { return [] }
+
+        let xIdx = properties.firstIndex(of: "x")
+        let yIdx = properties.firstIndex(of: "y")
+        let zIdx = properties.firstIndex(of: "z")
+        let rIdx = properties.firstIndex(of: "red")
+        let gIdx = properties.firstIndex(of: "green")
+        let bIdx = properties.firstIndex(of: "blue")
+
+        guard let xi = xIdx, let yi = yIdx, let zi = zIdx else { return [] }
+        let hasColor = rIdx != nil && gIdx != nil && bIdx != nil
+
+        let bodyStart = headerEndRange.upperBound
+        var result: [(pos: SIMD3<Float>, col: SIMD3<Float>)] = []
+        result.reserveCapacity(vertexCount)
+
+        if isBinary {
+            var propSizes: [Int] = []
+            var propOffsets: [Int] = []
+            var offset = 0
+            for line in headerLines {
+                let parts = line.trimmingCharacters(in: .whitespaces).components(separatedBy: " ")
+                guard parts.first == "property", parts.count >= 3 else { continue }
+                let type = parts[1]
+                let size: Int
+                switch type {
+                case "float", "float32": size = 4
+                case "double", "float64": size = 8
+                case "uchar", "uint8": size = 1
+                case "short", "int16": size = 2
+                case "int", "int32", "uint": size = 4
+                default: size = 4
+                }
+                propSizes.append(size)
+                propOffsets.append(offset)
+                offset += size
+            }
+            let vertexStride = offset
+
+            guard vertexStride > 0 else { return [] }
+
+            data.withUnsafeBytes { rawBuffer in
+                let base = rawBuffer.baseAddress!.advanced(by: bodyStart)
+                for i in 0..<vertexCount {
+                    let vBase = base.advanced(by: i * vertexStride)
+
+                    guard xi < propOffsets.count, yi < propOffsets.count, zi < propOffsets.count else { break }
+
+                    let x = vBase.advanced(by: propOffsets[xi]).assumingMemoryBound(to: Float.self).pointee
+                    let y = vBase.advanced(by: propOffsets[yi]).assumingMemoryBound(to: Float.self).pointee
+                    let z = vBase.advanced(by: propOffsets[zi]).assumingMemoryBound(to: Float.self).pointee
+
+                    var r: Float = 0.7, g: Float = 0.7, b: Float = 0.7
+                    if hasColor, let ri = rIdx, let gi = gIdx, let bi = bIdx,
+                       ri < propOffsets.count, gi < propOffsets.count, bi < propOffsets.count {
+                        if propSizes[ri] == 1 {
+                            r = Float(vBase.advanced(by: propOffsets[ri]).assumingMemoryBound(to: UInt8.self).pointee) / 255.0
+                            g = Float(vBase.advanced(by: propOffsets[gi]).assumingMemoryBound(to: UInt8.self).pointee) / 255.0
+                            b = Float(vBase.advanced(by: propOffsets[bi]).assumingMemoryBound(to: UInt8.self).pointee) / 255.0
+                        } else {
+                            r = vBase.advanced(by: propOffsets[ri]).assumingMemoryBound(to: Float.self).pointee
+                            g = vBase.advanced(by: propOffsets[gi]).assumingMemoryBound(to: Float.self).pointee
+                            b = vBase.advanced(by: propOffsets[bi]).assumingMemoryBound(to: Float.self).pointee
+                        }
+                    }
+
+                    result.append((pos: SIMD3<Float>(x, y, z), col: SIMD3<Float>(r, g, b)))
+                }
+            }
+        } else {
+            let bodyData = data[bodyStart...]
+            guard let bodyStr = String(data: bodyData, encoding: .utf8) else { return [] }
+            let lines = bodyStr.components(separatedBy: "\n")
+
+            for i in 0..<min(vertexCount, lines.count) {
+                let parts = lines[i].trimmingCharacters(in: .whitespaces).components(separatedBy: " ")
+                guard parts.count > max(xi, yi, zi) else { continue }
+
+                guard let x = Float(parts[xi]), let y = Float(parts[yi]), let z = Float(parts[zi]) else { continue }
+
+                var r: Float = 0.7, g: Float = 0.7, b: Float = 0.7
+                if hasColor, let ri = rIdx, let gi = gIdx, let bi = bIdx, parts.count > max(ri, gi, bi) {
+                    if let rv = Float(parts[ri]), let gv = Float(parts[gi]), let bv = Float(parts[bi]) {
+                        r = rv > 1 ? rv / 255.0 : rv
+                        g = gv > 1 ? gv / 255.0 : gv
+                        b = bv > 1 ? bv / 255.0 : bv
+                    }
+                }
+
+                result.append((pos: SIMD3<Float>(x, y, z), col: SIMD3<Float>(r, g, b)))
+            }
+        }
+
+        print("📂 PLY 로드: \(result.count)/\(vertexCount) 포인트 (\(isBinary ? "binary" : "ascii"))")
+        return result
+    }
+
+    /// XYZ 파서 (x y z r g b)
+    private func parseXYZ(url: URL) -> [(pos: SIMD3<Float>, col: SIMD3<Float>)] {
+        guard let content = try? String(contentsOf: url, encoding: .utf8) else { return [] }
+        var result: [(pos: SIMD3<Float>, col: SIMD3<Float>)] = []
+        let lines = content.components(separatedBy: "\n")
+        result.reserveCapacity(lines.count)
+
+        for line in lines {
+            let parts = line.trimmingCharacters(in: .whitespaces).components(separatedBy: " ").filter { !$0.isEmpty }
+            guard parts.count >= 3,
+                  let x = Float(parts[0]), let y = Float(parts[1]), let z = Float(parts[2]) else { continue }
+
+            var r: Float = 0.7, g: Float = 0.7, b: Float = 0.7
+            if parts.count >= 6, let rv = Float(parts[3]), let gv = Float(parts[4]), let bv = Float(parts[5]) {
+                r = rv > 1 ? rv / 255.0 : rv
+                g = gv > 1 ? gv / 255.0 : gv
+                b = bv > 1 ? bv / 255.0 : bv
+            }
+
+            result.append((pos: SIMD3<Float>(x, y, z), col: SIMD3<Float>(r, g, b)))
+        }
+
+        print("📂 XYZ 로드: \(result.count) 포인트")
+        return result
+    }
+
+    /// 포인트 클라우드 → SCNGeometry (ScanPreviewVC와 동일 방식)
+    private func buildPointCloudGeometry(points: [(pos: SIMD3<Float>, col: SIMD3<Float>)]) -> SCNGeometry {
+        let count = points.count
+        guard count > 0 else { return SCNGeometry(sources: [], elements: []) }
+
+        let maxDisplay = 2_000_000
+        let stride = count > maxDisplay ? (count + maxDisplay - 1) / maxDisplay : 1
+        let displayCount = (count + stride - 1) / stride
+
+        let positionData = UnsafeMutableBufferPointer<SIMD3<Float>>.allocate(capacity: displayCount)
+        let colorData = UnsafeMutableBufferPointer<SIMD4<Float>>.allocate(capacity: displayCount)
+        defer {
+            positionData.deallocate()
+            colorData.deallocate()
+        }
+
+        var outIdx = 0
+        var idx = 0
+        while idx < count {
+            let pt = points[idx]
+            positionData[outIdx] = pt.pos
+            colorData[outIdx] = SIMD4<Float>(pt.col.x, pt.col.y, pt.col.z, 1.0)
+            outIdx += 1
+            idx += stride
+        }
+
+        guard outIdx > 0, let posBase = positionData.baseAddress, let colBase = colorData.baseAddress else {
+            return SCNGeometry(sources: [], elements: [])
+        }
+
+        let posBytes = outIdx * MemoryLayout<SIMD3<Float>>.stride
+        let posData = Data(bytes: posBase, count: posBytes)
+        let posSource = SCNGeometrySource(
+            data: posData, semantic: .vertex, vectorCount: outIdx,
+            usesFloatComponents: true, componentsPerVector: 3,
+            bytesPerComponent: MemoryLayout<Float>.size,
+            dataOffset: 0, dataStride: MemoryLayout<SIMD3<Float>>.stride
+        )
+
+        let colBytes = outIdx * MemoryLayout<SIMD4<Float>>.stride
+        let colData = Data(bytes: colBase, count: colBytes)
+        let colorSource = SCNGeometrySource(
+            data: colData, semantic: .color, vectorCount: outIdx,
+            usesFloatComponents: true, componentsPerVector: 4,
+            bytesPerComponent: MemoryLayout<Float>.size,
+            dataOffset: 0, dataStride: MemoryLayout<SIMD4<Float>>.stride
+        )
+
+        let element = SCNGeometryElement(
+            data: nil, primitiveType: .point, primitiveCount: outIdx,
+            bytesPerIndex: MemoryLayout<UInt32>.size
+        )
+        element.pointSize = 3.0
+        element.minimumPointScreenSpaceRadius = 1.0
+        element.maximumPointScreenSpaceRadius = 5.0
+
+        let geometry = SCNGeometry(sources: [posSource, colorSource], elements: [element])
+
+        let material = SCNMaterial()
+        material.lightingModel = .constant
+        material.isDoubleSided = true
+
+        let geoModifier = """
+        #pragma arguments
+        float clipMaxY;
+
+        #pragma body
+        if (_geometry.position.y > clipMaxY) {
+            _geometry.position.xyz = float3(0.0, 0.0, -1.0e8);
+        }
+        """
+        material.shaderModifiers = [.geometry: geoModifier]
+        material.setValue(NSNumber(value: Float(999)), forKey: "clipMaxY")
+
+        geometry.materials = [material]
+        return geometry
+    }
+
+    private func addPointCloudToScene(geometry: SCNGeometry) {
+        guard let scene = sceneView.scene else { return }
+
+        let node = SCNNode(geometry: geometry)
+        scene.rootNode.addChildNode(node)
+        pointCloudNode = node
+
+        // 바운딩 박스 기반 카메라 배치
+        let (minBound, maxBound) = node.boundingBox
+        let center = SCNVector3(
+            (minBound.x + maxBound.x) / 2,
+            (minBound.y + maxBound.y) / 2,
+            (minBound.z + maxBound.z) / 2
+        )
+        let size = SCNVector3(
+            maxBound.x - minBound.x,
+            maxBound.y - minBound.y,
+            maxBound.z - minBound.z
+        )
+        let maxDimension = max(size.x, max(size.y, size.z))
+
+        let cameraNode = SCNNode()
+        cameraNode.camera = SCNCamera()
+        cameraNode.camera?.zNear = 0.01
+        cameraNode.camera?.zFar = Double(maxDimension) * 10
+        cameraNode.camera?.fieldOfView = 60
+        cameraNode.position = SCNVector3(center.x, center.y + maxDimension * 0.5, center.z + maxDimension * 2.5)
+        cameraNode.look(at: center, up: SCNVector3(0, 1, 0), localFront: SCNVector3(0, 0, -1))
+        scene.rootNode.addChildNode(cameraNode)
+
+        sceneView.pointOfView = cameraNode
+        sceneView.defaultCameraController.target = center
+        sceneView.defaultCameraController.worldUp = SCNVector3(0, 1, 0)
+
+        // 높이 클리핑 슬라이더 범위 설정
+        clipYMin = minBound.y
+        clipYMax = maxBound.y
+        let yRange = clipYMax - clipYMin
+        heightClipSlider.minimumValue = clipYMin
+        heightClipSlider.maximumValue = clipYMax + yRange * 0.05
+        heightClipSlider.value = heightClipSlider.maximumValue
+        if let mat = node.geometry?.materials.first {
+            mat.setValue(NSNumber(value: heightClipSlider.maximumValue), forKey: "clipMaxY")
+        }
+    }
+
+    /// 지원하지 않는 포맷 fallback
+    private func loadAsScene(fileURL: URL) {
         guard let scene = try? SCNScene(url: fileURL, options: nil) else {
             print("Failed to load 3D model from URL: \(fileURL)")
             return
         }
-        
-        // Setup Camera
-        cameraNode.camera = camera
-        cameraNode.position = SCNVector3(0, 0, Float(cameraCurrentZoomScale))
-        cameraOrbitStart.position = cameraNode.position
-        cameraOrbitFinal.addChildNode(cameraNode)
-        cameraOrbitFinal.position = SCNVector3(x: 0, y: 0, z: 0)
-        cameraOrbitFinal.eulerAngles.y = Float(-2 * Double.pi) * lastWidthAngle
-        cameraOrbitFinal.eulerAngles.x = Float(-Double.pi) * lastHeightAngle
-        cameraOrbitStart.eulerAngles.x = cameraOrbitFinal.eulerAngles.x
-        cameraOrbitStart.eulerAngles.y = cameraOrbitFinal.eulerAngles.y
-        scene.rootNode.addChildNode(cameraOrbitFinal)
-        scene.rootNode.addChildNode(cameraOrbitStart)
-        originalCameraZoomScale = cameraCurrentZoomScale
-        originalWidthAngle = widthAngle
-        originalHeightAngle = heightAngle
-        originalPositionX = positionX
-        originalPositionY = positionY
-        // Setup Sceneview
-        sceneView.delegate = self
-        sceneView.backgroundColor = UIColor.white
-        sceneView.layer.backgroundColor = UIColor.clear.cgColor
-        sceneView.antialiasingMode = .multisampling4X
         sceneView.scene = scene
-        startIdleTimer()
     }
-    
-    @objc func panGestureRecognized(gesture: UIPanGestureRecognizer) {
-        guard let sceneView = gesture.view else { return }
-        
-        if gesture.numberOfTouches == 1 {
-            stopFingerAnimationSequence()
-            let translation = gesture.translation(in: sceneView)
-            widthAngle = Float(translation.x) / Float(sceneView.frame.size.width) + lastWidthAngle
-            heightAngle = Float(translation.y) / Float(sceneView.frame.size.height) + lastHeightAngle
-            if (heightAngle >= maxHeightAngleXUp ) {
-                heightAngle = maxHeightAngleXUp
-                lastHeightAngle = heightAngle
-                gesture.setTranslation(CGPoint(x: translation.x, y: 0.0), in: sceneView)
-            }
-            if (heightAngle <= maxHeightAngleXDown ) {
-                heightAngle = maxHeightAngleXDown
-                lastHeightAngle = heightAngle
-                gesture.setTranslation(CGPoint(x: translation.x, y: 0.0), in: sceneView)
-            }
-            cameraOrbitStart.eulerAngles.y = Float(-2 * Double.pi) * widthAngle
-            cameraOrbitStart.eulerAngles.x = Float(-Double.pi) * heightAngle
-        }
-        else {
-            gesture.setTranslation(CGPoint(x: 0.0, y: 0.0), in: sceneView)
-            lastWidthAngle = widthAngle
-            lastHeightAngle = heightAngle
-        }
+
+    // MARK: - Slider Actions
+
+    @objc private func heightClipChanged(_ slider: UISlider) {
+        guard let mat = pointCloudNode?.geometry?.materials.first else { return }
+        mat.setValue(NSNumber(value: slider.value), forKey: "clipMaxY")
     }
-    
-    @objc func pinchGestureRecognized(gesture: UIPinchGestureRecognizer) {
-        if gesture.numberOfTouches == 2 {
-            stopFingerAnimationSequence()
-            var pinchVelocity = Double(gesture.velocity)
-            if (pinchVelocity.isNaN) || (pinchVelocity.isInfinite) {
-                pinchVelocity = 0.0
-            }
-            cameraCurrentZoomScale  -= pinchVelocity / 10.0
-            if cameraCurrentZoomScale <= cameraZoomScaleMin {
-                cameraCurrentZoomScale = cameraZoomScaleMin
-            }
-            if cameraCurrentZoomScale >= cameraZoomScaleMax {
-                cameraCurrentZoomScale = cameraZoomScaleMax
-            }
-            cameraOrbitStart.position = SCNVector3(x: positionX, y: positionY, z: Float(cameraCurrentZoomScale))
-        }
-    }
-    
-    @objc func doubleTapGestureRecognized(gesture: UITapGestureRecognizer) {
-        cameraOrbitStart.eulerAngles.y = Float(-2 * Double.pi) * originalWidthAngle
-        cameraOrbitStart.eulerAngles.x = Float(-Double.pi) * originalHeightAngle
-        cameraOrbitStart.position = SCNVector3(x: originalPositionX, y: originalPositionY, z: Float(originalCameraZoomScale))
-        cameraCurrentZoomScale = originalCameraZoomScale
-        lastWidthAngle = originalWidthAngle
-        lastHeightAngle = originalHeightAngle
-    }
-    
-    func updatePositions() {
-        let lerpY = (cameraOrbitStart.eulerAngles.y - cameraOrbitFinal.eulerAngles.y) * 0.5
-        let lerpX = (cameraOrbitStart.eulerAngles.x - cameraOrbitFinal.eulerAngles.x) * 0.5
-        cameraOrbitFinal.eulerAngles.y += lerpY
-        cameraOrbitFinal.eulerAngles.x += lerpX
-        
-        let lerpZ = (cameraOrbitStart.position.z - cameraNode.position.z) * 0.5
-        cameraNode.position.z += lerpZ
-    }
-    
-    func startIdleTimer() {
-        idleTimer?.invalidate()
-        idleTimer = Timer.scheduledTimer(
-            timeInterval: 1.5,
-            target: self,
-            selector: #selector(handleIdleTimeout),
-            userInfo: nil,
-            repeats: false)
-    }
-    
-    func fingerAnimationSequenceFinished() {
-        startIdleTimer()  // Loop
-    }
-    
-    func stopFingerAnimationSequence() {
-        idleTimer?.invalidate()
-        idleTimer = nil
-        if let rightFingerView = rightFingerView {
-            self.rightFingerView = nil
-            rightFingerView.layer.removeAllAnimations()
-            UIView.animate(withDuration: 0.3, animations: {
-                rightFingerView.alpha = 0.0
-            }) { _ in
-                rightFingerView.removeFromSuperview()
-            }
-        }
-        if let leftFingerView = leftFingerView {
-            self.leftFingerView = nil
-            leftFingerView.layer.removeAllAnimations()
-            UIView.animate(withDuration: 0.3, animations: {
-                leftFingerView.alpha = 0.0
-            }) { _ in
-                leftFingerView.removeFromSuperview()
-            }
-        }
-        cameraOrbitStart.removeAction(forKey: panSequenceKey)
-    }
-    
-    func renderer(_ renderer: SCNSceneRenderer, didApplyAnimationsAtTime time: TimeInterval) {
-        updatePositions()
-    }
-    
-    @objc func handleIdleTimeout() {
-        // Create Animation Finger
-        let center = sceneView.center
-        let panAmount: CGFloat = 45.0
-        let panDuration: TimeInterval = 0.75
-        let panDelay: TimeInterval = 0.1
-        rightFingerView = UIImageView(image: UIImage(named: "finger")!)
-        rightFingerView.center = center
-        rightFingerView.alpha = 0
-        sceneView.addSubview(rightFingerView)
-        leftFingerView = UIImageView(image: UIImage(named: "finger")!.withHorizontallyFlippedOrientation())
-        leftFingerView.center = center
-        leftFingerView.alpha = 0
-        sceneView.addSubview(leftFingerView)
-        let rightFingerFadeIn = CABasicAnimation(keyPath: "opacity")
-        rightFingerFadeIn.fromValue = 0
-        rightFingerFadeIn.toValue = 1
-        rightFingerFadeIn.duration = 0.3
-        rightFingerFadeIn.fillMode = .forwards
-        rightFingerFadeIn.isRemovedOnCompletion = false
-        let rightFingerPanLeft = CABasicAnimation(keyPath: "position.x")
-        rightFingerPanLeft.fromValue = center.x
-        rightFingerPanLeft.toValue = center.x - panAmount
-        rightFingerPanLeft.duration = panDuration
-        rightFingerPanLeft.beginTime = CACurrentMediaTime()
-        rightFingerPanLeft.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        rightFingerPanLeft.fillMode = .forwards
-        rightFingerPanLeft.isRemovedOnCompletion = false
-        let rightFingerPanLeftBack = CABasicAnimation(keyPath: "position.x")
-        rightFingerPanLeftBack.fromValue = center.x - panAmount
-        rightFingerPanLeftBack.toValue = center.x
-        rightFingerPanLeftBack.duration = panDuration
-        rightFingerPanLeftBack.beginTime = rightFingerPanLeft.beginTime + rightFingerPanLeft.duration + panDelay
-        rightFingerPanLeftBack.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        rightFingerPanLeftBack.fillMode = .forwards
-        rightFingerPanLeftBack.isRemovedOnCompletion = false
-        let rightFingerPanRight = CABasicAnimation(keyPath: "position.x")
-        rightFingerPanRight.fromValue = center.x
-        rightFingerPanRight.toValue = center.x + panAmount
-        rightFingerPanRight.duration = panDuration
-        rightFingerPanRight.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        rightFingerPanRight.beginTime = rightFingerPanLeftBack.beginTime + rightFingerPanLeftBack.duration
-        rightFingerPanRight.fillMode = .forwards
-        rightFingerPanRight.isRemovedOnCompletion = false
-        let rightFingerPanRightBack = CABasicAnimation(keyPath: "position.x")
-        rightFingerPanRightBack.fromValue = center.x + panAmount
-        rightFingerPanRightBack.toValue = center.x
-        rightFingerPanRightBack.duration = panDuration
-        rightFingerPanRightBack.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        rightFingerPanRightBack.beginTime = rightFingerPanRight.beginTime + rightFingerPanRight.duration + panDelay
-        rightFingerPanRightBack.fillMode = .forwards
-        rightFingerPanRightBack.isRemovedOnCompletion = false
-        let rightFingerPinchTop = CABasicAnimation(keyPath: "position.y")
-        rightFingerPinchTop.fromValue = center.y
-        rightFingerPinchTop.toValue = center.y - panAmount
-        rightFingerPinchTop.duration = panDuration
-        rightFingerPinchTop.beginTime = rightFingerPanRightBack.beginTime + rightFingerPanRightBack.duration + panDelay
-        rightFingerPinchTop.fillMode = .forwards
-        rightFingerPinchTop.isRemovedOnCompletion = false
-        let rightFingerPinchRight = CABasicAnimation(keyPath: "position.x")
-        rightFingerPinchRight.fromValue = center.x
-        rightFingerPinchRight.toValue = center.x + panAmount
-        rightFingerPinchRight.duration = panDuration
-        rightFingerPinchRight.beginTime = rightFingerPanRightBack.beginTime + rightFingerPanRightBack.duration + panDelay
-        rightFingerPinchRight.fillMode = .forwards
-        rightFingerPinchRight.isRemovedOnCompletion = false
-        let rightFingerPinchTopBack = CABasicAnimation(keyPath: "position.y")
-        rightFingerPinchTopBack.fromValue = center.y - panAmount
-        rightFingerPinchTopBack.toValue = center.y
-        rightFingerPinchTopBack.duration = panDuration
-        rightFingerPinchTopBack.beginTime = rightFingerPinchTop.beginTime + rightFingerPinchTop.duration + panDelay + panDelay
-        rightFingerPinchTopBack.fillMode = .forwards
-        rightFingerPinchTopBack.isRemovedOnCompletion = false
-        let rightFingerPinchRightBack = CABasicAnimation(keyPath: "position.x")
-        rightFingerPinchRightBack.fromValue = center.x + panAmount
-        rightFingerPinchRightBack.toValue = center.x
-        rightFingerPinchRightBack.duration = panDuration
-        rightFingerPinchRightBack.beginTime = rightFingerPinchRight.beginTime + rightFingerPinchRight.duration + panDelay + panDelay
-        rightFingerPinchRightBack.fillMode = .forwards
-        rightFingerPinchRightBack.isRemovedOnCompletion = false
-        let rightFingerFadeOut = CABasicAnimation(keyPath: "opacity")
-        rightFingerFadeOut.fromValue = 1
-        rightFingerFadeOut.toValue = 0
-        rightFingerFadeOut.duration = 0.3
-        rightFingerFadeOut.beginTime = rightFingerPinchRightBack.beginTime + rightFingerPinchRightBack.duration + panDelay
-        rightFingerFadeOut.fillMode = .forwards
-        rightFingerFadeOut.isRemovedOnCompletion = false
-        let leftFingerFadeStay = CABasicAnimation(keyPath: "opacity")
-        leftFingerFadeStay.fromValue = 1
-        leftFingerFadeStay.toValue = 1
-        leftFingerFadeStay.beginTime = rightFingerPanRightBack.beginTime + rightFingerPanRightBack.duration + panDelay
-        leftFingerFadeStay.duration = rightFingerPinchRight.beginTime + rightFingerPinchRight.duration + rightFingerPinchRightBack.beginTime + rightFingerPinchRightBack.duration + panDelay
-        leftFingerFadeStay.fillMode = .forwards
-        leftFingerFadeStay.isRemovedOnCompletion = false
-        let leftFingerPinchBottom = CABasicAnimation(keyPath: "position.y")
-        leftFingerPinchBottom.fromValue = center.y
-        leftFingerPinchBottom.toValue = center.y + panAmount
-        leftFingerPinchBottom.duration = panDuration
-        leftFingerPinchBottom.beginTime = rightFingerPanRightBack.beginTime + rightFingerPanRightBack.duration + panDelay
-        rightFingerPanLeft.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        leftFingerPinchBottom.fillMode = .forwards
-        leftFingerPinchBottom.isRemovedOnCompletion = false
-        let leftFingerPinchLeft = CABasicAnimation(keyPath: "position.x")
-        leftFingerPinchLeft.fromValue = center.x
-        leftFingerPinchLeft.toValue = center.x - panAmount
-        leftFingerPinchLeft.duration = panDuration
-        leftFingerPinchLeft.beginTime = rightFingerPanRightBack.beginTime + rightFingerPanRightBack.duration + panDelay
-        rightFingerPanLeft.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        leftFingerPinchLeft.fillMode = .forwards
-        leftFingerPinchLeft.isRemovedOnCompletion = false
-        let leftFingerPinchBottomBack = CABasicAnimation(keyPath: "position.y")
-        leftFingerPinchBottomBack.fromValue = center.y + panAmount
-        leftFingerPinchBottomBack.toValue = center.y
-        leftFingerPinchBottomBack.duration = panDuration
-        leftFingerPinchBottomBack.beginTime = leftFingerPinchBottom.beginTime + leftFingerPinchBottom.duration + panDelay + panDelay
-        leftFingerPinchBottomBack.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        leftFingerPinchBottomBack.fillMode = .forwards
-        leftFingerPinchBottomBack.isRemovedOnCompletion = false
-        let leftFingerPinchLeftBack = CABasicAnimation(keyPath: "position.x")
-        leftFingerPinchLeftBack.fromValue = center.x - panAmount
-        leftFingerPinchLeftBack.toValue = center.x
-        leftFingerPinchLeftBack.duration = panDuration
-        leftFingerPinchLeftBack.beginTime = leftFingerPinchLeft.beginTime + leftFingerPinchLeft.duration + panDelay + panDelay
-        leftFingerPinchLeftBack.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        leftFingerPinchLeftBack.fillMode = .forwards
-        leftFingerPinchLeftBack.isRemovedOnCompletion = false
-        let leftFingerFadeOut = CABasicAnimation(keyPath: "opacity")
-        leftFingerFadeOut.fromValue = 1
-        leftFingerFadeOut.toValue = 0
-        leftFingerFadeOut.duration = 0.3
-        leftFingerFadeOut.beginTime = leftFingerPinchBottomBack.beginTime + leftFingerPinchBottomBack.duration + panDelay
-        leftFingerFadeOut.fillMode = .forwards
-        leftFingerFadeOut.isRemovedOnCompletion = false
-        // Play Animation Finger
-        rightFingerView.layer.add(rightFingerFadeIn, forKey: nil)
-        rightFingerView.layer.add(rightFingerPanLeft, forKey: nil)
-        rightFingerView.layer.add(rightFingerPanLeftBack, forKey: nil)
-        rightFingerView.layer.add(rightFingerPanRight, forKey: nil)
-        rightFingerView.layer.add(rightFingerPanRightBack, forKey: nil)
-        rightFingerView.layer.add(rightFingerPinchTop, forKey: nil)
-        rightFingerView.layer.add(rightFingerPinchRight, forKey: nil)
-        rightFingerView.layer.add(rightFingerPinchTopBack, forKey: nil)
-        rightFingerView.layer.add(rightFingerPinchRightBack, forKey: nil)
-        rightFingerView.layer.add(rightFingerFadeOut, forKey: nil)
-        leftFingerView.layer.add(leftFingerFadeStay, forKey: nil)
-        leftFingerView.layer.add(leftFingerPinchLeft, forKey: nil)
-        leftFingerView.layer.add(leftFingerPinchBottom, forKey: nil)
-        leftFingerView.layer.add(leftFingerPinchLeftBack, forKey: nil)
-        leftFingerView.layer.add(leftFingerPinchBottomBack, forKey: nil)
-        leftFingerView.layer.add(leftFingerFadeOut, forKey: nil)
-        // Animation 3D Model
-        let panLeft = SCNAction.rotate(toAxisAngle: SCNVector4(0, 1, 0, 0.35), duration: rightFingerPanLeft.duration)
-        let panLeftBack = SCNAction.rotate(toAxisAngle: SCNVector4(0, 0, 0, 0), duration: rightFingerPanLeftBack.duration)
-        let panIdle = SCNAction.rotate(toAxisAngle: SCNVector4(0, 0, 0, 0), duration: panDelay)
-        let panRight = SCNAction.rotate(toAxisAngle: SCNVector4(x:0, y:-1 , z:0, w:0.35), duration: rightFingerPanRight.duration)
-        let panRightBack = SCNAction.rotate(toAxisAngle: SCNVector4(x:0, y:0 , z:0, w:0), duration: rightFingerPanRightBack.duration)
-        let zoomIn = SCNAction.move(by: SCNVector3(x:0, y:0, z: -5), duration: leftFingerPinchLeft.duration)
-        let zoomIdle = SCNAction.move(by: SCNVector3(0, 0, 0), duration: panDelay*4)
-        let zoomBack = SCNAction.move(by: SCNVector3(x:0, y:0, z: 5), duration: leftFingerPinchLeftBack.duration)
-        let completeAction = SCNAction.run { [weak self] _ in
-            DispatchQueue.main.async {
-                self?.fingerAnimationSequenceFinished()
-            }
-        }
-        let panSequence = SCNAction.sequence([panLeft, panLeftBack, panIdle, panRight, panRightBack, zoomIn, zoomIdle, zoomBack, completeAction])
-        cameraOrbitStart.runAction(panSequence, forKey: panSequenceKey )
+
+    @objc private func pointSizeChanged(_ slider: UISlider) {
+        guard let geometry = pointCloudNode?.geometry,
+              let element = geometry.elements.first else { return }
+        let size = CGFloat(slider.value)
+        element.pointSize = size
+        element.minimumPointScreenSpaceRadius = max(size * 0.3, 0.5)
+        element.maximumPointScreenSpaceRadius = size * 2.0
     }
 }

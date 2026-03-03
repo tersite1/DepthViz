@@ -59,6 +59,8 @@ private:
     Eigen::Matrix4d current_pose_ = Eigen::Matrix4d::Identity();
     bool first_frame_ = true;
     double last_imu_timestamp_ = -1.0;
+    Eigen::Vector3d last_arkit_pos_ = Eigen::Vector3d::Zero();
+    double last_arkit_timestamp_ = -1.0;
     mutable std::mutex mtx_;
 
     // Config

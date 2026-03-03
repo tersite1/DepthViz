@@ -31,6 +31,10 @@ public:
     // Initialize state
     void init(const SysState& state);
 
+    // Static initialization from IMU samples at rest.
+    // Returns true when enough samples collected and initialization complete.
+    bool initFromIMU(const IMUData& imu);
+
     // IMU prediction step (midpoint integration)
     void predict(const IMUData& imu, double dt);
 
@@ -64,6 +68,10 @@ private:
     M18d P_;         // 18x18 error-state covariance
     ESKFOptions opts_;
     bool initialized_ = false;
+
+    // Static init state
+    std::vector<IMUData> init_samples_;
+    static constexpr int kInitSampleCount = 30;
 };
 
 } // namespace DV

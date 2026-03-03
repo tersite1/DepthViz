@@ -67,6 +67,10 @@ private:
     Eigen::Matrix4d last_keyframe_pose_ = Eigen::Matrix4d::Identity();
     std::atomic<bool> first_frame_{true};
 
+    // Paper branch: IMU static initialization phase
+    enum class InitPhase { COLLECTING_IMU, READY };
+    InitPhase init_phase_ = InitPhase::COLLECTING_IMU;
+
     // Threading
     std::atomic<bool> is_running_{false};
     std::unique_ptr<std::thread> thread_;

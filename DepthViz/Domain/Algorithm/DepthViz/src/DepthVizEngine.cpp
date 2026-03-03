@@ -81,13 +81,9 @@ void DepthVizEngine::pushImage(double timestamp, const void* imageData, int widt
 }
 
 void DepthVizEngine::pushARKitPose(double timestamp, const Eigen::Matrix4d& pose) {
-    std::lock_guard<std::mutex> lock(mtx_state_);
-    arkit_pose_ = pose;
-    has_arkit_pose_.store(true);
-
-    if (vio_) {
-        vio_->pushARKitPose(timestamp, pose);
-    }
+    // Paper branch: ARKit VIO pose not used for ESKF.
+    // Keep function signature for compatibility but no-op.
+    (void)timestamp; (void)pose;
 }
 
 // ============================================================================
@@ -295,32 +291,60 @@ void DepthVizEngine::run() {
             pt.timestamp = timestamp;
         }
 
-        // Get pose prior (ARKit or last optimized)
+        // Drain IMU buffer and handle initialization
+        {
+            std::vector<DV::IMUData> imu_batch;
+            {
+                std::lock_guard<std::mutex> lock(mtx_data_);
+                while (!imu_buf_.empty() && imu_buf_.front().timestamp <= timestamp) {
+                    imu_batch.push_back(imu_buf_.front());
+                    imu_buf_.pop_front();
+                }
+            }
+
+            // Paper branch: IMU static init phase
+            if (init_phase_ == InitPhase::COLLECTING_IMU && lio_) {
+                for (const auto& imu : imu_batch) {
+                    if (lio_->initFromIMU(imu)) {
+                        init_phase_ = InitPhase::READY;
+                        printf("[Engine] IMU static init complete → READY\n");
+                        break;
+                    }
+                }
+                if (init_phase_ != InitPhase::READY) {
+                    continue;  // Still collecting IMU samples, skip LIO
+                }
+            }
+
+            // Run ESKF prediction with remaining IMU data
+            if (ablation_.enable_imu && !imu_batch.empty() && lio_) {
+                lio_->processIMU(imu_batch);
+            }
+        }
+
+        // Get pose prior (ESKF predicted state, no ARKit)
         Eigen::Matrix4d prior_pose;
         {
             std::lock_guard<std::mutex> lock(mtx_state_);
-            if (has_arkit_pose_.load()) {
-                prior_pose = arkit_pose_;
-            } else {
-                prior_pose = last_optimized_pose_;
-            }
+            prior_pose = last_optimized_pose_;
         }
 
         // First frame: initialize and continue
         if (first_frame_.load()) {
             if (lio_ && ablation_.enable_lio) {
-                lio_->process(prior_pose, bundled);
+                lio_->process(bundled);
             }
             {
                 std::lock_guard<std::mutex> lock(mtx_state_);
-                last_optimized_pose_ = prior_pose;
-                last_keyframe_pose_ = prior_pose;
+                Eigen::Matrix4d init_pose = (lio_) ? lio_->getCurrentPose() : Eigen::Matrix4d::Identity();
+                last_optimized_pose_ = init_pose;
+                last_keyframe_pose_ = init_pose;
                 display_cloud_ = bundled;
                 profiling_.total_frames++;
 
                 // Accumulate first frame into full_map_ with RGB
-                Eigen::Matrix3d R = prior_pose.block<3, 3>(0, 0);
-                Eigen::Vector3d t = prior_pose.block<3, 1>(0, 3);
+                Eigen::Matrix3d R = init_pose.block<3, 3>(0, 0);
+                Eigen::Vector3d t = init_pose.block<3, 1>(0, 3);
                 for (const auto& pt : bundled) {
                     if (full_map_.size() >= MAX_FULL_MAP_POINTS) break;
                     Eigen::Vector3d p_camera(pt.x, pt.y, pt.z);
@@ -342,25 +366,11 @@ void DepthVizEngine::run() {
             continue;
         }
 
-        // Drain IMU buffer and run ESKF prediction
-        if (ablation_.enable_imu) {
-            std::vector<DV::IMUData> imu_batch;
-            {
-                std::lock_guard<std::mutex> lock(mtx_data_);
-                while (!imu_buf_.empty() && imu_buf_.front().timestamp <= timestamp) {
-                    imu_batch.push_back(imu_buf_.front());
-                    imu_buf_.pop_front();
-                }
-            }
-            if (!imu_batch.empty() && lio_) {
-                lio_->processIMU(imu_batch);
-            }
-        }
-
-        // Keyframe check
-        if (!isKeyframe(prior_pose)) {
+        // Keyframe check (use ESKF predicted pose)
+        Eigen::Matrix4d eskf_pose = (lio_) ? lio_->getCurrentPose() : prior_pose;
+        if (!isKeyframe(eskf_pose)) {
             std::lock_guard<std::mutex> lock(mtx_state_);
-            last_optimized_pose_ = prior_pose;
+            last_optimized_pose_ = eskf_pose;
             display_cloud_ = bundled;
             profiling_.total_frames++;
 
@@ -380,11 +390,11 @@ void DepthVizEngine::run() {
                    dt_kf.norm(), angle_deg);
         }
 
-        // LIO optimization (or skip if ablation disabled → ARKit-only)
-        Eigen::Matrix4d refined_pose = prior_pose;
+        // LIO optimization (or skip if ablation disabled)
+        Eigen::Matrix4d refined_pose = eskf_pose;
         if (ablation_.enable_lio && lio_) {
             auto lio_start = std::chrono::high_resolution_clock::now();
-            refined_pose = lio_->process(prior_pose, bundled);
+            refined_pose = lio_->process(bundled);
             auto lio_end = std::chrono::high_resolution_clock::now();
             double lio_ms = std::chrono::duration<double, std::milli>(lio_end - lio_start).count();
 

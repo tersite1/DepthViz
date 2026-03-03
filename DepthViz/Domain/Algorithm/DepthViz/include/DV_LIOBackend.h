@@ -24,11 +24,14 @@ public:
     // Call this with all IMU data between the previous and current LiDAR frame.
     void processIMU(const std::vector<DV::IMUData>& imu_data);
 
-    // Process a frame: takes prior pose + bundled points, returns refined pose.
-    // First frame: inserts points into map, returns prior.
+    // Process a frame: takes bundled points, returns refined pose.
+    // First frame: inserts points into map at ESKF's current pose.
     // Subsequent frames: point-to-plane ICP with robust weighting.
-    Eigen::Matrix4d process(const Eigen::Matrix4d& prior_pose,
-                            const std::vector<DV::DVPoint3D>& points);
+    Eigen::Matrix4d process(const std::vector<DV::DVPoint3D>& points);
+
+    // IMU-based static initialization (delegates to ESKF)
+    bool initFromIMU(const DV::IMUData& imu);
+    bool isInitialized() const;
 
     // Get map points (voxel centroids) for export/visualization
     std::vector<DV::DVPoint3D> getMapPoints();
@@ -59,8 +62,6 @@ private:
     Eigen::Matrix4d current_pose_ = Eigen::Matrix4d::Identity();
     bool first_frame_ = true;
     double last_imu_timestamp_ = -1.0;
-    Eigen::Vector3d last_arkit_pos_ = Eigen::Vector3d::Zero();
-    double last_arkit_timestamp_ = -1.0;
     mutable std::mutex mtx_;
 
     // Config

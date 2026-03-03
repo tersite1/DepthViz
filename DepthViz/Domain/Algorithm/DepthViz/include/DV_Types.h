@@ -260,7 +260,7 @@ struct SysState {
     V3d v = V3d::Zero();      // Velocity
     V3d bg = V3d::Zero();     // Gyro bias
     V3d ba = V3d::Zero();     // Accel bias
-    V3d g = V3d(0, 0, -9.81); // Gravity in world frame
+    V3d g = V3d(0, -9.81, 0); // Gravity in world frame (ARKit Y-up convention)
 
     M4d poseMatrix() const {
         M4d T = M4d::Identity();

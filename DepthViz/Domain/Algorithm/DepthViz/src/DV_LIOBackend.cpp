@@ -10,9 +10,7 @@ DV_LIOBackend::~DV_LIOBackend() = default;
 void DV_LIOBackend::init() {
     map_ = std::make_unique<DV::DV_VoxelHashMap>(0.05f, 500000);
     eskf_ = std::make_unique<DV::DV_ESKF>(eskf_opts_);
-
-    DV::SysState initial_state;
-    eskf_->init(initial_state);
+    // Paper branch: ESKF initialized via initFromIMU(), not here
 
     current_pose_ = Eigen::Matrix4d::Identity();
     first_frame_ = true;
@@ -20,7 +18,9 @@ void DV_LIOBackend::init() {
 
 void DV_LIOBackend::processIMU(const std::vector<DV::IMUData>& imu_data) {
     std::lock_guard<std::mutex> lock(mtx_);
-    if (!eskf_ || first_frame_) return;
+    if (!eskf_) return;
+    // Paper branch: allow IMU processing before first_frame_ for initFromIMU collection.
+    // ESKF::predict() internally checks initialized_ and returns early if not ready.
 
     for (const auto& imu : imu_data) {
         double dt = 0.0;
@@ -29,85 +29,40 @@ void DV_LIOBackend::processIMU(const std::vector<DV::IMUData>& imu_data) {
         }
         last_imu_timestamp_ = imu.timestamp;
 
-        if (dt > 0.0 && dt < 0.5) { // Sanity: skip if dt > 500ms (stale data)
+        if (dt > 0.0 && dt < 0.5) {
             eskf_->predict(imu, dt);
         }
     }
 }
 
+bool DV_LIOBackend::initFromIMU(const DV::IMUData& imu) {
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (!eskf_) return false;
+    return eskf_->initFromIMU(imu);
+}
+
+bool DV_LIOBackend::isInitialized() const {
+    std::lock_guard<std::mutex> lock(mtx_);
+    return eskf_ && !first_frame_;
+}
+
 Eigen::Matrix4d DV_LIOBackend::process(
-    const Eigen::Matrix4d& prior_pose,
     const std::vector<DV::DVPoint3D>& points)
 {
     std::lock_guard<std::mutex> lock(mtx_);
 
-    if (points.empty()) return prior_pose;
+    if (points.empty() || !eskf_) return current_pose_;
 
-    // First frame: just insert points and return prior
+    // First frame: insert points at ESKF's current pose (from static init)
     if (first_frame_) {
-        insertPoints(prior_pose, points);
-        current_pose_ = prior_pose;
-
-        // Initialize ESKF state from prior
-        DV::SysState state;
-        state.R = prior_pose.block<3, 3>(0, 0);
-        state.p = prior_pose.block<3, 1>(0, 3);
-        eskf_->init(state);
-
+        current_pose_ = eskf_->getPoseMatrix();
+        insertPoints(current_pose_, points);
         first_frame_ = false;
-        return prior_pose;
+        printf("[LIO] First frame: %zu pts inserted at ESKF pose\n", points.size());
+        return current_pose_;
     }
 
-    // Use IMU-predicted state if available; fall back to ARKit prior if no IMU data
-    DV::SysState current_eskf_state = eskf_->getState();
-    Eigen::Vector3d eskf_pos = current_eskf_state.p;
-    Eigen::Vector3d prior_pos = prior_pose.block<3, 1>(0, 3);
-    Eigen::Matrix3d prior_R = prior_pose.block<3, 3>(0, 0);
-
-    // Check both position AND rotation divergence
-    double pos_diff = (eskf_pos - prior_pos).norm();
-    Eigen::Matrix3d dR = current_eskf_state.R.transpose() * prior_R;
-    double cos_angle = std::max(-1.0, std::min(1.0, (dR.trace() - 1.0) * 0.5));
-    double rot_diff_deg = std::acos(cos_angle) * 180.0 / M_PI;
-
-    // Always anchor ESKF to ARKit pose before ICP.
-    // This prevents drift accumulation: each frame's ICP starts fresh from ARKit,
-    // so corrections are always small and independent (not compounding).
-    // Velocity estimated from ARKit pose delta; biases preserved for calibration.
-    {
-        // Estimate velocity from ARKit pose difference
-        Eigen::Vector3d est_v = Eigen::Vector3d::Zero();
-        double dt_pose = current_eskf_state.timestamp > 0.0 ?
-            (prior_pose(3, 3) > 0.0 ? 0.0 : 0.0) : 0.0; // timestamp not in pose
-        if (last_arkit_timestamp_ > 0.0) {
-            double dt_ark = current_eskf_state.timestamp - last_arkit_timestamp_;
-            if (dt_ark > 0.001 && dt_ark < 1.0) {
-                est_v = (prior_pos - last_arkit_pos_) / dt_ark;
-                // Sanity: clamp to 5 m/s (walking speed)
-                double v_norm = est_v.norm();
-                if (v_norm > 5.0) {
-                    est_v = est_v * (5.0 / v_norm);
-                }
-            }
-        }
-        last_arkit_pos_ = prior_pos;
-        last_arkit_timestamp_ = current_eskf_state.timestamp;
-
-        DV::SysState anchored;
-        anchored.R = prior_R;
-        anchored.p = prior_pos;
-        anchored.v = est_v;                   // Velocity from ARKit, not IMU
-        anchored.bg = current_eskf_state.bg;  // Keep bias calibration
-        anchored.ba = current_eskf_state.ba;
-        anchored.g = current_eskf_state.g;
-        anchored.timestamp = current_eskf_state.timestamp;
-        eskf_->setState(anchored);
-
-        if (pos_diff > 0.1 || rot_diff_deg > 10.0) {
-            printf("[LIO] ANCHOR drift=%.3fm rot=%.1f° vel=%.2fm/s → reset to ARKit\n",
-                   pos_diff, rot_diff_deg, current_eskf_state.v.norm());
-        }
-    }
+    // Prior = ESKF IMU-predicted state (no ARKit anchoring)
 
     // Capture points and map pointer for the observation lambda
     const auto& pts = points;
@@ -190,25 +145,20 @@ Eigen::Matrix4d DV_LIOBackend::process(
     // Run iterated Kalman update
     bool success = eskf_->updateObserve(obs_func);
 
-    // Compute pose delta (SLAM refinement amount)
-    Eigen::Vector3d prior_t = prior_pose.block<3, 1>(0, 3);
-
     if (success) {
         current_pose_ = eskf_->getPoseMatrix();
-        Eigen::Vector3d refined_t = current_pose_.block<3, 1>(0, 3);
-        double refine_dist = (refined_t - prior_t).norm();
+        // Covariance-based divergence check (replaces ARKit comparison)
+        double pos_trace = eskf_->getCovariance().block<3,3>(3,3).trace();
         int map_size = map_ ? static_cast<int>(map_->size()) : 0;
-        printf("[LIO] OK pts=%zu refine=%.4fm map=%d\n",
-               points.size(), refine_dist, map_size);
-    } else {
-        current_pose_ = prior_pose;
-        printf("[LIO] FAIL pts=%zu → fallback to ARKit prior\n", points.size());
+        printf("[LIO] OK pts=%zu map=%d cov_trace=%.4f\n",
+               points.size(), map_size, pos_trace);
+        if (pos_trace > 1.0) {
+            printf("[LIO] WARNING: high uncertainty trace=%.3f\n", pos_trace);
+        }
     }
+    // ICP failure: keep current_pose_ (IMU predicted) — no ARKit fallback
 
-    // Insert with refined pose — safe because ESKF is anchored to ARKit each frame,
-    // so corrections are small and independent (no drift accumulation).
     insertPoints(current_pose_, points);
-
     return current_pose_;
 }
 

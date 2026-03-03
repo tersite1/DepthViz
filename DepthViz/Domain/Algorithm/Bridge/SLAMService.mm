@@ -365,9 +365,10 @@ public:
 
     double timestamp = frame.timestamp;
 
-    // Push ARKit pose as prior
-    simd_float4x4 arkit_transform = frame.camera.transform;
-    _currentSystem->pushARKitPose(timestamp, arkit_transform);
+    // Paper branch: ARKit VIO pose not pushed to engine
+    // (ESKF uses IMU-only prediction, no ARKit anchoring)
+    // simd_float4x4 arkit_transform = frame.camera.transform;
+    // _currentSystem->pushARKitPose(timestamp, arkit_transform);
 
     // Extract real depth data from ARFrame
     CVPixelBufferRef depthMap = frame.sceneDepth.depthMap;

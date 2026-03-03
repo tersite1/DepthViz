@@ -1148,6 +1148,11 @@ extension Renderer {
     }
 
     private func applySLAMPoseCorrection() {
+        // Paper branch: SLAM pose = final pose (no ARKit anchoring),
+        // so ARKit↔SLAM pose correction is not applicable.
+        print("📊 [Paper] SLAM 포즈 보정 생략 (ARKit 의존성 제거됨)")
+        return
+
         guard poseCorrectionLog.count >= 2 else {
             print("⚠️ SLAM 보정 쌍 부족 (\(poseCorrectionLog.count)) — 보정 생략")
             return

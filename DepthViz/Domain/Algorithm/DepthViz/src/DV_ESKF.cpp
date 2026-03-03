@@ -17,6 +17,64 @@ void DV_ESKF::init(const SysState& state) {
     initialized_ = true;
 }
 
+bool DV_ESKF::initFromIMU(const IMUData& imu) {
+    if (initialized_) return true;
+
+    init_samples_.push_back(imu);
+    if (init_samples_.size() < static_cast<size_t>(kInitSampleCount)) {
+        printf("[ESKF] collecting IMU samples: %zu/%d\n",
+               init_samples_.size(), kInitSampleCount);
+        return false;
+    }
+
+    // Compute mean acceleration (should be ~gravity if stationary)
+    V3d mean_acc = V3d::Zero();
+    for (const auto& s : init_samples_) {
+        mean_acc += s.acc;
+    }
+    mean_acc /= static_cast<double>(init_samples_.size());
+
+    double g_norm = mean_acc.norm();
+    if (g_norm < 8.0 || g_norm > 12.0) {
+        printf("[ESKF] WARNING: |g|=%.2f, expected ~9.81. Device not stationary?\n", g_norm);
+        init_samples_.clear();
+        return false;
+    }
+
+    // Find rotation aligning measured gravity to world gravity (0, -9.81, 0)
+    // acc measures reaction force, so gravity_dir = -mean_acc.normalized()
+    V3d g_measured = -mean_acc.normalized();
+    V3d g_world = V3d(0, -1, 0);  // Y-down = gravity direction
+
+    // Rotation from g_measured to g_world via axis-angle
+    V3d axis = g_measured.cross(g_world);
+    double sin_angle = axis.norm();
+    double cos_angle = g_measured.dot(g_world);
+
+    M3d R0;
+    if (sin_angle < 1e-6) {
+        R0 = (cos_angle > 0) ? M3d(M3d::Identity()) : M3d(-M3d::Identity());
+    } else {
+        axis.normalize();
+        double angle = std::atan2(sin_angle, cos_angle);
+        R0 = SO3::Exp(axis * angle).R;
+    }
+
+    SysState state;
+    state.R = R0;
+    state.p = V3d::Zero();
+    state.v = V3d::Zero();
+    state.g = V3d(0, -9.81, 0);
+    state.timestamp = imu.timestamp;
+    init(state);
+
+    printf("[ESKF] Static init complete: |g|=%.3f, R0 angle=%.1f deg\n",
+           g_norm, std::acos(std::max(-1.0, std::min(1.0, cos_angle))) * 180.0 / M_PI);
+
+    init_samples_.clear();
+    return true;
+}
+
 void DV_ESKF::predict(const IMUData& imu, double dt) {
     if (!initialized_ || dt <= 0.0) return;
 

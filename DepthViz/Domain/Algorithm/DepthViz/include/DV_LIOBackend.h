@@ -12,6 +12,7 @@
 #include "DV_Types.h"
 #include "DV_VoxelHashMap.h"
 #include "DV_ESKF.h"
+#include "DV_VIOManager.h"
 
 class DV_LIOBackend {
 public:
@@ -29,9 +30,16 @@ public:
     // Subsequent frames: point-to-plane ICP with robust weighting.
     Eigen::Matrix4d process(const std::vector<DV::DVPoint3D>& points);
 
+    // Visual observation ESKF update (reprojection residuals from tracked features)
+    bool processVisual(const std::vector<DV_VIOManager::VisualLandmark>& landmarks,
+                       const DV_VIOManager::CameraIntrinsics& K);
+
     // IMU-based static initialization (delegates to ESKF)
     bool initFromIMU(const DV::IMUData& imu);
     bool isInitialized() const;
+
+    // Reset voxel map but preserve ESKF state (for ICP failure recovery)
+    void resetMap();
 
     // Get map points (voxel centroids) for export/visualization
     std::vector<DV::DVPoint3D> getMapPoints();
@@ -62,6 +70,8 @@ private:
     Eigen::Matrix4d current_pose_ = Eigen::Matrix4d::Identity();
     bool first_frame_ = true;
     double last_imu_timestamp_ = -1.0;
+    int map_seed_count_ = 0;          // Frames inserted at IMU-only pose (no ICP)
+    static constexpr int kMapSeedFrames = 5; // Build map from 5 viewpoints before ICP
     mutable std::mutex mtx_;
 
     // Config

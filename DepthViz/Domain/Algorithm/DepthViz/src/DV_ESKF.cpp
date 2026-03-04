@@ -99,6 +99,15 @@ void DV_ESKF::predict(const IMUData& imu, double dt) {
     state_.p += state_.v * dt + 0.5 * acc_world * dt * dt;
     state_.v += acc_world * dt;
 
+    // FIX #5: Velocity magnitude clamp — indoor handheld scanning cannot exceed 0.5 m/s.
+    // 2.0 m/s was too permissive: IMU drift accumulates ~0.5 m/s² phantom accel
+    // from gravity misalignment, reaching 2 m/s in 4 seconds before any correction.
+    constexpr double kMaxVelocity = 0.5; // m/s
+    double v_norm = state_.v.norm();
+    if (v_norm > kMaxVelocity) {
+        state_.v *= kMaxVelocity / v_norm;
+    }
+
     // Error-state transition matrix F (18x18)
     M18d F = M18d::Identity();
 
@@ -135,8 +144,14 @@ bool DV_ESKF::updateObserve(const ObsFunc& obs_func) {
     SysState state_backup = state_;
     M18d P_backup = P_;
 
+    // FIX #3 (W-1): Keep P_pred for all iterations.
+    // Previously P_iter shrank every iteration, making later iterations
+    // trust observations less than they should (gain K → 0).
+    // Correct IEKF: always compute K from the prediction covariance P_pred.
+    M18d P_pred = P_;  // Frozen prediction covariance
+
     SysState state_iter = state_;
-    M18d P_iter = P_;
+    double last_dx_norm = 1e10;
 
     for (int iter = 0; iter < opts_.num_iterations; iter++) {
         Eigen::MatrixXd H;
@@ -158,9 +173,9 @@ bool DV_ESKF::updateObserve(const ObsFunc& obs_func) {
             return false;
         }
 
-        // K = P * H^T * (H * P * H^T + R)^{-1}
-        // Use LDLT decomposition for numerical stability instead of direct inverse
-        Eigen::MatrixXd PHt = P_iter * H.transpose();       // 18xN
+        // K = P_pred * H^T * (H * P_pred * H^T + R)^{-1}
+        // Use P_pred (not P_iter) — this is the key W-1 fix.
+        Eigen::MatrixXd PHt = P_pred * H.transpose();       // 18xN
         Eigen::MatrixXd S = H * PHt + R_obs;                // NxN
         Eigen::LDLT<Eigen::MatrixXd> S_ldlt(S);
         if (S_ldlt.info() != Eigen::Success) {
@@ -173,37 +188,67 @@ bool DV_ESKF::updateObserve(const ObsFunc& obs_func) {
 
         // Error-state update
         V18d dx = K * residual;
+        last_dx_norm = dx.norm();
 
         // Apply correction to nominal state
         applyCorrection(dx);
         state_iter = state_;
 
-        // Covariance update (Joseph form for numerical stability)
-        M18d I_KH = M18d::Identity() - K * H;
-        P_iter = I_KH * P_iter * I_KH.transpose() + K * R_obs * K.transpose();
-        P_iter = 0.5 * (P_iter + P_iter.transpose());
-
         // Check convergence
-        double dx_norm = dx.norm();
-        if (dx_norm < opts_.quit_eps) {
+        if (last_dx_norm < opts_.quit_eps) {
             printf("[ESKF] converged iter=%d/%d dx=%.6f obs=%d\n",
-                   iter + 1, opts_.num_iterations, dx_norm, n);
+                   iter + 1, opts_.num_iterations, last_dx_norm, n);
             break;
         }
         if (iter == opts_.num_iterations - 1) {
             printf("[ESKF] max_iter=%d dx=%.6f obs=%d (not converged)\n",
-                   opts_.num_iterations, dx_norm, n);
+                   opts_.num_iterations, last_dx_norm, n);
+        }
+    }
+
+    // FIX #3: Reject non-converged ICP — if dx is still large after max iterations,
+    // the observation is unreliable (rank-deficient geometry, outlier-dominated).
+    // Accepting a partial correction causes gravity misalignment → runaway drift.
+    constexpr double kMaxAcceptableDx = 0.01;
+    if (last_dx_norm > kMaxAcceptableDx) {
+        state_ = state_backup;
+        P_ = P_backup;
+        printf("[ESKF] REJECTED: dx=%.6f > %.4f after max_iter → state restored\n",
+               last_dx_norm, kMaxAcceptableDx);
+        return false;
+    }
+
+    // Covariance update (Joseph form, computed once after convergence using P_pred)
+    {
+        Eigen::MatrixXd H;
+        Eigen::VectorXd residual;
+        Eigen::MatrixXd R_obs;
+        // Re-evaluate at final state for covariance update
+        if (obs_func(state_iter, H, residual, R_obs)) {
+            int n = static_cast<int>(residual.rows());
+            if (n > 0) {
+                Eigen::MatrixXd PHt = P_pred * H.transpose();
+                Eigen::MatrixXd S = H * PHt + R_obs;
+                Eigen::LDLT<Eigen::MatrixXd> S_ldlt(S);
+                if (S_ldlt.info() == Eigen::Success) {
+                    Eigen::MatrixXd K = PHt * S_ldlt.solve(Eigen::MatrixXd::Identity(n, n));
+                    M18d I_KH = M18d::Identity() - K * H;
+                    P_ = I_KH * P_pred * I_KH.transpose() + K * R_obs * K.transpose();
+                    P_ = 0.5 * (P_ + P_.transpose());
+                } else {
+                    P_ = P_pred; // Fallback: keep prediction covariance
+                }
+            }
         }
     }
 
     // Log covariance health (position uncertainty)
-    double pos_trace = P_iter.block<3, 3>(3, 3).trace();
+    double pos_trace = P_.block<3, 3>(3, 3).trace();
     double vel_norm = state_.v.norm();
-    if (pos_trace > 0.1 || vel_norm > 3.0) {
+    if (pos_trace > 0.1 || vel_norm > 1.0) {
         printf("[ESKF] WARNING pos_cov_trace=%.4f vel=%.2fm/s\n", pos_trace, vel_norm);
     }
 
-    P_ = P_iter;
     return true;
 }
 
@@ -216,7 +261,30 @@ void DV_ESKF::applyCorrection(const V18d& delta_x) {
     V3d dba = delta_x.segment<3>(12);
     V3d dg = delta_x.segment<3>(15);
 
-    // Apply rotation correction on the left: R <- R * Exp(dtheta)
+    // FIX #4: Correction magnitude clamping.
+    // Prevents single bad ICP from causing catastrophic rotation/position jumps.
+    // Limits: rotation <5° (~0.087 rad), position <10cm, velocity change <0.3 m/s
+    constexpr double kMaxRotRad = 0.087;   // ~5 degrees
+    constexpr double kMaxPosMeter = 0.10;  // 10cm
+    constexpr double kMaxVelChange = 0.30; // 0.3 m/s
+
+    double rot_norm = dtheta.norm();
+    if (rot_norm > kMaxRotRad) {
+        dtheta *= kMaxRotRad / rot_norm;
+        printf("[ESKF] CLAMP rot: %.4f rad → %.4f rad\n", rot_norm, kMaxRotRad);
+    }
+    double pos_norm = dp.norm();
+    if (pos_norm > kMaxPosMeter) {
+        dp *= kMaxPosMeter / pos_norm;
+        printf("[ESKF] CLAMP pos: %.4f m → %.4f m\n", pos_norm, kMaxPosMeter);
+    }
+    double vel_norm = dv.norm();
+    if (vel_norm > kMaxVelChange) {
+        dv *= kMaxVelChange / vel_norm;
+        printf("[ESKF] CLAMP vel: %.4f m/s → %.4f m/s\n", vel_norm, kMaxVelChange);
+    }
+
+    // Apply rotation correction on the right: R <- R * Exp(dtheta)
     state_.R = state_.R * SO3::Exp(dtheta).R;
     state_.p += dp;
     state_.v += dv;

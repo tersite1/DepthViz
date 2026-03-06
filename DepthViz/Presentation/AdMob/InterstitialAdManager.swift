@@ -105,7 +105,8 @@ extension InterstitialAdManager: GADFullScreenContentDelegate {
         rewardedInterstitialAd = nil
 
         if rewardEarned {
-            // 시청 완료 → 프리뷰 이동
+            // 시청 완료 → 10분 쿨다운 시작 + 프리뷰 이동
+            ScanCountManager.shared.markRewardedShown()
             dismissCompletion?()
         } else {
             // 시청 미완료 → 다시 광고 로드 후 재시도 (프리뷰 차단)

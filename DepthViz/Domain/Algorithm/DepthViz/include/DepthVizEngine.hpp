@@ -36,6 +36,13 @@ public:
     void pushImage(double timestamp, const void* imageData, int width, int height);
     void pushARKitPose(double timestamp, const Eigen::Matrix4d& pose);
 
+    // Push downscaled grayscale + raw depth map + intrinsics for visual tracking
+    void pushImageAndDepth(double timestamp,
+                           const uint8_t* gray, int gray_w, int gray_h,
+                           const float* depth, int depth_w, int depth_h,
+                           float fx, float fy, float cx, float cy,
+                           int full_w, int full_h);
+
     // Output Interfaces
     Eigen::Matrix4d getPose();
     std::vector<DV::DVPoint3D> getDisplayCloud();
@@ -70,6 +77,10 @@ private:
     // Paper branch: IMU static initialization phase
     enum class InitPhase { COLLECTING_IMU, READY };
     InitPhase init_phase_ = InitPhase::COLLECTING_IMU;
+
+    // ICP failure tracking & recovery
+    int consecutive_icp_failures_ = 0;
+    static constexpr int kMaxICPFailures = 10;  // Reset map after this many consecutive obs=0
 
     // Threading
     std::atomic<bool> is_running_{false};
@@ -148,11 +159,23 @@ private:
     Eigen::Matrix4d arkit_pose_ = Eigen::Matrix4d::Identity();
     std::atomic<bool> has_arkit_pose_{false};
 
+    // Camera image buffer for visual tracking (latest frame, protected by mtx_data_)
+    struct ImageFrame {
+        double timestamp = 0.0;
+        std::vector<uint8_t> gray;   // Downscaled grayscale (480×360)
+        std::vector<float> depth;    // Raw depth map (256×192)
+        int gray_w = 0, gray_h = 0;
+        int depth_w = 0, depth_h = 0;
+        bool valid = false;
+    } latest_image_;
+
+    bool vio_intrinsics_set_ = false;
+
     // Visualization output
     std::vector<DV::DVPoint3D> display_cloud_;
 
     // Full map accumulator (preserves RGB colors for export)
-    static constexpr size_t MAX_FULL_MAP_POINTS = 2000000; // 2M points max
+    static constexpr size_t MAX_FULL_MAP_POINTS = 10000000; // 10M points max
     std::vector<DV::DVPoint3D> full_map_;
 
 public:

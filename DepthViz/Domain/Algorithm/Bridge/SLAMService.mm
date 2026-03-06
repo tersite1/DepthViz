@@ -34,6 +34,11 @@ public:
     virtual void pushIMU(double timestamp, const simd_float3& acc, const simd_float3& gyr) = 0;
     virtual void pushPointCloud(double timestamp, const std::vector<SLAMPoint3D>& points) = 0;
     virtual void pushPointCloudRaw(double timestamp, const float* xyz, const uint8_t* conf, const uint8_t* rgb, int count) {}
+    virtual void pushImageAndDepth(double timestamp,
+                                   const uint8_t* gray, int gray_w, int gray_h,
+                                   const float* depth, int depth_w, int depth_h,
+                                   float fx, float fy, float cx, float cy,
+                                   int full_w, int full_h) {}
     virtual void pushARKitPose(double timestamp, const simd_float4x4& pose) {}
     virtual simd_float4x4 getCurrentPose() = 0;
     virtual std::vector<SLAMPoint3D> getDisplayCloud() = 0;
@@ -90,6 +95,16 @@ public:
 
     void pushPointCloudRaw(double timestamp, const float* xyz, const uint8_t* conf, const uint8_t* rgb, int count) override {
         _wrapper->pushPointCloudRaw(timestamp, xyz, conf, rgb, count);
+    }
+
+    void pushImageAndDepth(double timestamp,
+                           const uint8_t* gray, int gray_w, int gray_h,
+                           const float* depth, int depth_w, int depth_h,
+                           float fx, float fy, float cx, float cy,
+                           int full_w, int full_h) override {
+        _wrapper->pushImageAndDepth(timestamp, gray, gray_w, gray_h,
+                                     depth, depth_w, depth_h,
+                                     fx, fy, cx, cy, full_w, full_h);
     }
 
     void pushARKitPose(double timestamp, const simd_float4x4& pose) override {
@@ -345,10 +360,13 @@ public:
 
     double timestamp = motion.timestamp;
 
+    // ESKF expects specific force (reaction force, points UP at rest)
+    // CoreMotion: gravity+userAcceleration = total physical acceleration (points DOWN at rest)
+    // Specific force = -(total physical acceleration) = -(gravity + userAcceleration) * 9.81
     simd_float3 acc = simd_make_float3(
-        (float)(motion.gravity.x + motion.userAcceleration.x) * 9.81f,
-        (float)(motion.gravity.y + motion.userAcceleration.y) * 9.81f,
-        (float)(motion.gravity.z + motion.userAcceleration.z) * 9.81f
+        -(float)(motion.gravity.x + motion.userAcceleration.x) * 9.81f,
+        -(float)(motion.gravity.y + motion.userAcceleration.y) * 9.81f,
+        -(float)(motion.gravity.z + motion.userAcceleration.z) * 9.81f
     );
 
     simd_float3 gyr = simd_make_float3(
@@ -474,6 +492,47 @@ public:
             }
         }
 
+        // Downscale Y plane to 480×360 for visual feature tracking (4× subsample)
+        static constexpr int kWorkW = 480;
+        static constexpr int kWorkH = 360;
+        static std::vector<uint8_t> grayBuf(kWorkW * kWorkH);
+        static std::vector<float> depthCopyBuf;
+
+        if (camWidth >= kWorkW * 4 && camHeight >= kWorkH * 4) {
+            // 4× subsample from Y plane
+            for (int r = 0; r < kWorkH; r++) {
+                for (int c = 0; c < kWorkW; c++) {
+                    grayBuf[r * kWorkW + c] = yPlane[(r * 4) * yBytesPerRow + (c * 4)];
+                }
+            }
+        } else {
+            // Fallback: subsample with proper scale
+            float sx = (float)camWidth / kWorkW;
+            float sy = (float)camHeight / kWorkH;
+            for (int r = 0; r < kWorkH; r++) {
+                for (int c = 0; c < kWorkW; c++) {
+                    int sr = (int)(r * sy);
+                    int sc = (int)(c * sx);
+                    sr = std::min(sr, camHeight - 1);
+                    sc = std::min(sc, camWidth - 1);
+                    grayBuf[r * kWorkW + c] = yPlane[sr * yBytesPerRow + sc];
+                }
+            }
+        }
+
+        // Copy depth map to contiguous buffer (handle stride padding)
+        depthCopyBuf.resize(depthWidth * depthHeight);
+        for (int r = 0; r < depthHeight; r++) {
+            float *srcRow = (float *)((uint8_t *)depthData + r * depthBytesPerRow);
+            memcpy(&depthCopyBuf[r * depthWidth], srcRow, depthWidth * sizeof(float));
+        }
+
+        // Get ORIGINAL camera intrinsics (full resolution, not scaled to depth)
+        float fx_orig = intrinsics.columns[0][0];
+        float fy_orig = intrinsics.columns[1][1];
+        float cx_orig = intrinsics.columns[2][0];
+        float cy_orig = intrinsics.columns[2][1];
+
         CVPixelBufferUnlockBaseAddress(capturedImage, kCVPixelBufferLock_ReadOnly);
         CVPixelBufferUnlockBaseAddress(confidenceMap, kCVPixelBufferLock_ReadOnly);
         CVPixelBufferUnlockBaseAddress(depthMap, kCVPixelBufferLock_ReadOnly);
@@ -482,6 +541,13 @@ public:
         if (pointIdx > 0) {
             _currentSystem->pushPointCloudRaw(timestamp, _xyzBuffer.data(), _confBuffer.data(), _rgbBuffer.data(), pointIdx);
         }
+
+        // Push image + depth for visual feature tracking
+        _currentSystem->pushImageAndDepth(timestamp,
+                                          grayBuf.data(), kWorkW, kWorkH,
+                                          depthCopyBuf.data(), depthWidth, depthHeight,
+                                          fx_orig, fy_orig, cx_orig, cy_orig,
+                                          camWidth, camHeight);
     } else {
         // No depth data available
         std::vector<SLAMPoint3D> dummy;

@@ -16,7 +16,7 @@ public enum SLAMAlgorithm: String, CaseIterable, Codable {
 
     public var description: String {
         switch self {
-        case .depthViz: return "LIO Optimization, Bundle & Discard"
+        case .depthViz: return "LIO Optimization, Nice for In-Room Scanning"
         case .arkit: return "ARKit pose as-is, confidence filtering only."
         }
     }

@@ -14,7 +14,6 @@
 		66689B4C2C8C70BD00DB20E9 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4B2C8C70A700DB20E9 /* LoginViewController.swift */; };
 		66689B4E2C8C70E900DB20E9 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66689B4D2C8C70E500DB20E9 /* AuthManager.swift */; };
 		666BA4A92EAD4CD6001372FE /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 666BA4A82EAD4CD6001372FE /* logo.png */; };
-		6697C8CA2F42A86B006E4917 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6697C8C92F42A86B006E4917 /* StoreKit.framework */; };
 		6697C8D22F42B000006E4917 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 6697C8D12F42B000006E4917 /* GoogleMobileAds */; };
 		669A6F0C2C7F35B100F8BDAC /* MatrixMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A6F0B2C7F35A700F8BDAC /* MatrixMath.swift */; };
 		669A6F0E2C7F47F100F8BDAC /* PointCloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669A6F0D2C7F47F100F8BDAC /* PointCloud.swift */; };
@@ -83,9 +82,9 @@
 		MARKERSTORAGE_BUILD /* MarkerStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = MARKERSTORAGE_REF /* MarkerStorage.swift */; };
 		PCLEXPORTER_BUILD /* PointCloudExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = PCLEXPORTER_REF /* PointCloudExporter.swift */; };
 		PCLSCENEVC_BUILD /* PointCloudSceneViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = PCLSCENEVC_REF /* PointCloudSceneViewController.swift */; };
+		FORCEUPDCHK_BUILD /* ForceUpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FORCEUPDCHK_REF /* ForceUpdateChecker.swift */; };
 		PREMIUMMGR_BUILD /* PremiumManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PREMIUMMGR_REF /* PremiumManager.swift */; };
-		PREMIUMPURCH_BUILD /* PremiumPurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PREMIUMPURCH_REF /* PremiumPurchaseManager.swift */; };
-		PREMIUMVIDEO_BUILD /* PremiumVideoPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = PREMIUMVIDEO_REF /* PremiumVideoPopup.swift */; };
+		PREMIUMPOPUP_BUILD /* PremiumPopup.swift in Sources */ = {isa = PBXBuildFile; fileRef = PREMIUMPOPUP_REF /* PremiumPopup.swift */; };
 		PROJECTMGR_BUILD /* ProjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJECTMGR_REF /* ProjectManager.swift */; };
 		PROJECT_ENTITY_BUILD /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJECT_ENTITY_REF /* Project.swift */; };
 		PROJSELVIEW_BUILD /* ProjectSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROJSELVIEW_REF /* ProjectSelectionView.swift */; };
@@ -112,9 +111,6 @@
 		66689B4D2C8C70E500DB20E9 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		666BA4A82EAD4CD6001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
 		666BA4AA2EAD4D32001372FE /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
-		6690E2932F4D9581008AAC08 /* DepthVizProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = DepthVizProducts.storekit; path = DepthViz/Configuration/DepthVizProducts.storekit; sourceTree = "<group>"; };
-		6690E2942F4D95F7008AAC08 /* DepthVizProducts.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = DepthVizProducts.storekit; sourceTree = "<group>"; };
-		6697C8C92F42A86B006E4917 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		669A6F0B2C7F35A700F8BDAC /* MatrixMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixMath.swift; sourceTree = "<group>"; };
 		669A6F0D2C7F47F100F8BDAC /* PointCloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointCloud.swift; sourceTree = "<group>"; };
 		66B1C0162C22B9E5003CDAD8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -190,9 +186,9 @@
 		MARKERSTORAGE_REF /* MarkerStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MarkerStorage.swift; path = DepthViz/Domain/Model/MarkerStorage.swift; sourceTree = SOURCE_ROOT; };
 		PCLEXPORTER_REF /* PointCloudExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PointCloudExporter.swift; path = DepthViz/Domain/PointCloudExporter.swift; sourceTree = SOURCE_ROOT; };
 		PCLSCENEVC_REF /* PointCloudSceneViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PointCloudSceneViewController.swift; path = DepthViz/Presentation/Shared/PointCloudSceneViewController.swift; sourceTree = SOURCE_ROOT; };
+		FORCEUPDCHK_REF /* ForceUpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ForceUpdateChecker.swift; path = DepthViz/Domain/ForceUpdateChecker.swift; sourceTree = SOURCE_ROOT; };
 		PREMIUMMGR_REF /* PremiumManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PremiumManager.swift; path = DepthViz/Domain/Premium/PremiumManager.swift; sourceTree = SOURCE_ROOT; };
-		PREMIUMPURCH_REF /* PremiumPurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PremiumPurchaseManager.swift; path = DepthViz/Domain/Premium/PremiumPurchaseManager.swift; sourceTree = SOURCE_ROOT; };
-		PREMIUMVIDEO_REF /* PremiumVideoPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PremiumVideoPopup.swift; path = DepthViz/Domain/Premium/PremiumVideoPopup.swift; sourceTree = SOURCE_ROOT; };
+		PREMIUMPOPUP_REF /* PremiumPopup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PremiumPopup.swift; path = DepthViz/Domain/Premium/PremiumPopup.swift; sourceTree = SOURCE_ROOT; };
 		PROJECTMGR_REF /* ProjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProjectManager.swift; path = DepthViz/Domain/Storage/ProjectManager.swift; sourceTree = SOURCE_ROOT; };
 		PROJECT_ENTITY_REF /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Project.swift; path = DepthViz/Domain/Entity/Project.swift; sourceTree = SOURCE_ROOT; };
 		PROJSELVIEW_REF /* ProjectSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ProjectSelectionView.swift; path = DepthViz/Presentation/Shared/ProjectSelectionView.swift; sourceTree = SOURCE_ROOT; };
@@ -215,7 +211,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6697C8CA2F42A86B006E4917 /* StoreKit.framework in Frameworks */,
 				6697C8D22F42B000006E4917 /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -235,7 +230,6 @@
 		6697C8C82F42A86B006E4917 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				6697C8C92F42A86B006E4917 /* StoreKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -327,7 +321,6 @@
 		87ABC85829D173AC00881FFB /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
-				6690E2942F4D95F7008AAC08 /* DepthVizProducts.storekit */,
 				E73DD14224636FF100D77039 /* DepthViz-Bridging-Header.h */,
 				E7E2ED6F1473F1FD1E9543FA /* LICENSE.txt */,
 				DB23EE222C08398500FC4167 /* env.xcconfig */,
@@ -400,7 +393,6 @@
 		E73DD12424636FEF00D77039 = {
 			isa = PBXGroup;
 			children = (
-				6690E2932F4D9581008AAC08 /* DepthVizProducts.storekit */,
 				666BA4AA2EAD4D32001372FE /* logo.png */,
 				E73DD12F24636FEF00D77039 /* DepthViz */,
 				6697C8C82F42A86B006E4917 /* Frameworks */,
@@ -448,9 +440,9 @@
 				PROJECT_ENTITY_REF /* Project.swift */,
 				MARKERSTORAGE_REF /* MarkerStorage.swift */,
 				PCLEXPORTER_REF /* PointCloudExporter.swift */,
+				FORCEUPDCHK_REF /* ForceUpdateChecker.swift */,
 				PREMIUMMGR_REF /* PremiumManager.swift */,
-				PREMIUMPURCH_REF /* PremiumPurchaseManager.swift */,
-				PREMIUMVIDEO_REF /* PremiumVideoPopup.swift */,
+				PREMIUMPOPUP_REF /* PremiumPopup.swift */,
 				PROJECTMGR_REF /* ProjectManager.swift */,
 				STUBCLASSES_REF /* StubClasses.swift */,
 				SCANSETTINGSVIEW_REF /* ScanSettingsView.swift */,
@@ -624,9 +616,9 @@
 				PROJECT_ENTITY_BUILD /* Project.swift in Sources */,
 				MARKERSTORAGE_BUILD /* MarkerStorage.swift in Sources */,
 				PCLEXPORTER_BUILD /* PointCloudExporter.swift in Sources */,
+				FORCEUPDCHK_BUILD /* ForceUpdateChecker.swift in Sources */,
 				PREMIUMMGR_BUILD /* PremiumManager.swift in Sources */,
-				PREMIUMPURCH_BUILD /* PremiumPurchaseManager.swift in Sources */,
-				PREMIUMVIDEO_BUILD /* PremiumVideoPopup.swift in Sources */,
+				PREMIUMPOPUP_BUILD /* PremiumPopup.swift in Sources */,
 				PROJECTMGR_BUILD /* ProjectManager.swift in Sources */,
 				STUBCLASSES_BUILD /* StubClasses.swift in Sources */,
 				SCANSETTINGSVIEW_BUILD /* ScanSettingsView.swift in Sources */,
@@ -821,7 +813,7 @@
 				CODE_SIGN_ENTITLEMENTS = DepthViz/DepthViz.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = D9WJV9698J;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -838,7 +830,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.3;
+				MARKETING_VERSION = 2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "DepthViz-Kaist";
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -860,7 +852,7 @@
 				CODE_SIGN_ENTITLEMENTS = DepthViz/DepthViz.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = D9WJV9698J;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -877,7 +869,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.3;
+				MARKETING_VERSION = 2.4;
 				PRODUCT_BUNDLE_IDENTIFIER = "DepthViz-Kaist";
 				PRODUCT_NAME = "Point Cloud";
 				PROVISIONING_PROFILE_SPECIFIER = "";

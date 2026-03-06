@@ -130,3 +130,15 @@ void DepthVizWrapper::pushPointCloudRaw(double timestamp, const float* xyz, cons
         _engine->pushPointCloud(timestamp, xyz, conf, rgb, count);
     }
 }
+
+void DepthVizWrapper::pushImageAndDepth(double timestamp,
+                                         const uint8_t* gray, int gray_w, int gray_h,
+                                         const float* depth, int depth_w, int depth_h,
+                                         float fx, float fy, float cx, float cy,
+                                         int full_w, int full_h) {
+    if (_engine) {
+        _engine->pushImageAndDepth(timestamp, gray, gray_w, gray_h,
+                                    depth, depth_w, depth_h,
+                                    fx, fy, cx, cy, full_w, full_h);
+    }
+}

@@ -139,10 +139,11 @@ public:
         int64_t qy = static_cast<int64_t>(std::floor(query.y() * inv_voxel_size_));
         int64_t qz = static_cast<int64_t>(std::floor(query.z() * inv_voxel_size_));
 
-        // Search 3x3x3 neighborhood
-        for (int64_t dx = -1; dx <= 1; dx++) {
-            for (int64_t dy = -1; dy <= 1; dy++) {
-                for (int64_t dz = -1; dz <= 1; dz++) {
+        // Search 5x5x5 neighborhood (±2 voxels) for robust ICP matching
+        // At 0.10m voxels: ±0.25m search radius — tolerates IMU drift between frames
+        for (int64_t dx = -2; dx <= 2; dx++) {
+            for (int64_t dy = -2; dy <= 2; dy++) {
+                for (int64_t dz = -2; dz <= 2; dz++) {
                     int64_t key = (qx + dx) + (qy + dy) * 10000LL + (qz + dz) * 100000000LL;
                     auto it = map_.find(key);
                     if (it == map_.end()) continue;

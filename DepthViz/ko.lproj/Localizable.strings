@@ -1,13 +1,17 @@
 /* Premium Popup */
 "premium_title" = "이 앱을 재밌어하시는 거 같군요..";
-"premium_subtitle" = "개발자에게 두쫀쿠를 사줘보는건 어떨까요?";
+"premium_subtitle" = "개발자를 후원하고 프리미엄을 활성화하세요!";
 "premium_feature_imu" = "실시간 IMU 데이터 (Roll / Pitch / Yaw, Accel)";
 "premium_feature_odometry" = "Odometry 경로 시각화";
 "premium_feature_icon" = "프리미엄 앱 아이콘";
 "premium_feature_no_ads" = "모든 광고 제거";
 "premium_feature_export" = "IMU, Trajectory, 동영상 내보내기";
-"premium_unlock" = "프리미엄 잠금 해제";
-"premium_restore" = "이미 구매하셨나요? 복원하기";
+"premium_buy_coffee" = "Buy Me a Coffee";
+"premium_enter_code" = "이미 후원하셨나요? 코드 입력";
+"premium_code_success" = "프리미엄이 활성화되었습니다!";
+"premium_code_fail" = "유효하지 않은 코드입니다.";
+"premium_code_hint" = "후원 완료 후 프리미엄 코드가 표시됩니다!";
+"premium_code_prompt" = "후원 후 발급받은 코드를 입력하세요.";
 
 /* Status Labels */
 "status_ready" = "녹화를 시작하려면 탭하세요\n↓";
@@ -46,16 +50,6 @@
 "developer_copy_hint" = "탭하면 계좌번호가 복사됩니다";
 "developer_usdt" = "USDT로 후원하기 (TRC-20)";
 "developer_website" = "개발자 웹사이트";
-
-/* In-App Purchase States */
-"iap_loading" = "상품 정보 불러오는 중...";
-"iap_retry" = "다시 시도";
-"iap_restore" = "구매 복원";
-"iap_load_failed" = "상품 정보를 불러올 수 없습니다. 네트워크를 확인 후 다시 시도해주세요.";
-"iap_product_unavailable" = "상품을 불러올 수 없습니다.";
-"iap_pending" = "구매 승인 대기 중입니다.";
-"iap_purchase_failed" = "구매 실패: %@";
-"iap_restore_empty" = "복원할 구매 내역이 없습니다.";
 
 /* Premium Export Path */
 "premium_export_path" = "CSV, 동영상 파일은 파일 앱 > 나의 iPhone > DepthViz 폴더에 저장됩니다";

@@ -41,10 +41,11 @@ class ScanPreviewVC: UIViewController {
     private var preExportedData: Data?
     private var preExportFormat: FileFormat?
 
-    /// 배너 광고 (20회 이상 미구매 시)
+    /// 배너 광고
     #if canImport(GoogleMobileAds)
     private var bannerView: GADBannerView?
     #endif
+    private var saveButtonBottomConstraint: NSLayoutConstraint?
 
     // MARK: - UI Elements
 
@@ -191,12 +192,10 @@ class ScanPreviewVC: UIViewController {
             startPreExport(renderer: renderer)
         }
 
-        // 10회 이상 미구매 → 하단 배너 광고 (DEBUG에서는 비활성화)
-        #if !DEBUG
+        // 10회 이상 비프리미엄 → 하단 배너 광고
         if ScanCountManager.shared.shouldShowBannerAd {
             setupBannerAd()
         }
-        #endif
     }
 
     // MARK: - Banner Ad
@@ -213,12 +212,18 @@ class ScanPreviewVC: UIViewController {
         banner.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(banner)
 
+        // 배너를 맨 하단에 배치
         NSLayoutConstraint.activate([
             banner.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            banner.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -8),
+            banner.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             banner.widthAnchor.constraint(equalToConstant: GADAdSizeBanner.size.width),
             banner.heightAnchor.constraint(equalToConstant: GADAdSizeBanner.size.height)
         ])
+
+        // saveButton + 슬라이더를 배너 위로 올림
+        saveButtonBottomConstraint?.isActive = false
+        saveButtonBottomConstraint = saveButton.bottomAnchor.constraint(equalTo: banner.topAnchor, constant: -8)
+        saveButtonBottomConstraint?.isActive = true
 
         banner.load(GADRequest())
         self.bannerView = banner
@@ -686,10 +691,14 @@ class ScanPreviewVC: UIViewController {
             infoLabel.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -12),
 
             saveButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
             saveButton.widthAnchor.constraint(equalToConstant: 140),
             saveButton.heightAnchor.constraint(equalToConstant: 50)
         ])
+
+        // saveButton 하단 제약 (배너 광고 있으면 위로 올림)
+        let bottomC = saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20)
+        bottomC.isActive = true
+        saveButtonBottomConstraint = bottomC
     }
 
     // MARK: - Height Clip Control
@@ -788,18 +797,14 @@ class ScanPreviewVC: UIViewController {
     @objc func saveButtonTapped() {
         guard let scanData = scanData, let renderer = renderer else { return }
 
-        // 20회 이상 미구매 → 보상형 전면 광고 시청 후 저장 (DEBUG에서는 스킵)
-        #if DEBUG
-        showProjectSelection(scanData: scanData, renderer: renderer)
-        #else
-        if ScanCountManager.shared.shouldShowInterstitialAd {
+        // 비프리미엄 + 저장 조건 충족 → 보상형 광고 시청 후 저장
+        if ScanCountManager.shared.shouldShowRewardedAd {
             InterstitialAdManager.shared.showAd(from: self) { [weak self] in
                 self?.showProjectSelection(scanData: scanData, renderer: renderer)
             }
         } else {
             showProjectSelection(scanData: scanData, renderer: renderer)
         }
-        #endif
     }
 
     // MARK: - Project Selection & Save Flow
@@ -890,9 +895,8 @@ class ScanPreviewVC: UIViewController {
                 loadingOverlay.removeFromSuperview()
 
                 if success {
+                    ScanCountManager.shared.incrementSaveCount()
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    // delegate에 저장 완료 알림
-                    print("📊 [SaveFlow] 저장 성공 — delegate 호출 (delegate=\(String(describing: self.delegate)))")
                     self.delegate?.scanPreviewDidSave(self, scanData: scanData)
                 } else {
                     print("📊 [SaveFlow] ⚠️ 저장 실패!")

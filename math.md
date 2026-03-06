@@ -1412,15 +1412,27 @@ DV-SLAM의 **핵심 ESKF 수학은 정확하게 구현**되어 있다. F matrix 
 
 **위험**: 거의 없음 — 실험만 제대로 수행하면 자체로 contribution 성립
 
-#### C3: Real-Time Multi-Sensor Mobile LIO — **LOW-MODERATE**
+#### C3: Lightweight LIO Architecture for Mobile SoC — **MODERATE**
 
 **강점**:
-- iPhone 내장 센서만으로 외부 하드웨어 없이 real-time 동작
-- 블랙박스(ARKit VIO) 제거 → 재현성, 이식성 (Android/ROS 포팅 가능)
+- 단순 "포팅"이 아닌 데이터 구조/파이프라인 재설계:
+
+| 데스크톱 LIO (FAST-LIO2) | DV-SLAM (모바일) | 설계 근거 |
+|---|---|---|
+| ikd-tree (동적 리밸런싱) | Voxel hash map (O(1) insert, LRU 500K cap) | 동적 메모리 할당 최소화, 캐시 친화 |
+| 전체 점 사용 (10K-100K) | Max 100 obs + stride sampling | LDLT O(N³): 125x 연산 절감 |
+| PCL + ROS + Boost + Sophus | Eigen-only self-contained | iOS에 PCL/ROS 불가, 의존성 zero |
+| 동적 vector/deque | 고정 배열 VoxelCell[20], KNN[5], ring buffer | Hot path heap 할당 제거 |
+| 별도 LIO/VIO update | 단일 ESKF update에 depth+visual 스택 | 행렬 연산 1회 통합 |
+| 전처리 없음 | Bundle & Discard (3000→500pts) | ICP 전 80% 연산 절감 |
+
+- 결과: A17 Pro SoC에서 30Hz real-time, 외장 하드웨어 불필요
+- 기존 모바일 매핑(Android+외장 Mid360)과 달리 내장 센서만 사용
 
 **약점**:
-- ESKF + point-to-plane ICP + KLT = 표준 기법 조합 (FAST-LIVO2, R3LIVE와 구조적 유사)
-- "System contribution" — 알고리즘적 novelty가 아닌 적용 novelty
+- 알고리즘 구조 자체는 FAST-LIO2 계승 (ESKF + point-to-plane ICP)
+- 개별 경량화 기법은 알려진 것 (voxel hashing, stride sampling 등)
+- 그러나 이 조합으로 sparse dToF mobile LIO를 실현한 시스템은 기존에 없음
 
 ---
 

@@ -76,12 +76,18 @@ struct LoopingVideoPlayer: UIViewRepresentable {
     }
 }
 
-// MARK: - Premium Video Popup
+// MARK: - Premium Popup (Buy Me a Coffee + 코드 입력)
 
-struct PremiumVideoPopup: View {
+struct PremiumPopup: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var purchaseManager = PremiumPurchaseManager.shared
     @ObservedObject private var premiumManager = PremiumManager.shared
+
+    @State private var showCodeAlert = false
+    @State private var codeInput = ""
+    @State private var codeResultMessage: String?
+    @State private var showCodeResult = false
+
+    private let bmcURL = "https://buymeacoffee.com/tersite"
 
     var body: some View {
         ZStack {
@@ -135,29 +141,48 @@ struct PremiumVideoPopup: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
 
-                // 구매 버튼 영역
-                purchaseButtonSection
+                // 안내 문구
+                Text(NSLocalizedString("premium_code_hint", comment: ""))
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.5))
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal, 20)
-                    .padding(.top, 18)
+                    .padding(.top, 10)
 
-                // 구매 복원 버튼
+                // Buy Me a Coffee 버튼
                 Button(action: {
-                    Task { await purchaseManager.restorePurchases() }
+                    if let url = URL(string: bmcURL) {
+                        UIApplication.shared.open(url)
+                    }
                 }) {
-                    Text(NSLocalizedString("iap_restore", comment: ""))
+                    HStack(spacing: 10) {
+                        Image(systemName: "cup.and.saucer.fill")
+                            .font(.system(size: 18))
+                        Text(NSLocalizedString("premium_buy_coffee", comment: ""))
+                            .font(.system(size: 16, weight: .semibold))
+                    }
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 48)
+                    .background(
+                        LinearGradient(
+                            colors: [Color.yellow, Color.orange],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 18)
+
+                // 코드 입력 버튼
+                Button(action: { showCodeAlert = true }) {
+                    Text(NSLocalizedString("premium_enter_code", comment: ""))
                         .font(.system(size: 13))
                         .foregroundColor(.white.opacity(0.5))
                 }
                 .padding(.top, 8)
-
-                // 에러 메시지
-                if let error = purchaseManager.errorMessage {
-                    Text(error)
-                        .font(.system(size: 12))
-                        .foregroundColor(.red.opacity(0.8))
-                        .padding(.top, 4)
-                        .padding(.horizontal, 20)
-                }
 
                 Spacer().frame(height: 20)
             }
@@ -169,91 +194,33 @@ struct PremiumVideoPopup: View {
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .padding(.horizontal, 20)
         }
+        .alert("프리미엄 코드 입력", isPresented: $showCodeAlert) {
+            TextField("Premium Code", text: $codeInput)
+                .autocapitalization(.allCharacters)
+                .disableAutocorrection(true)
+            Button("확인") {
+                let success = premiumManager.validateAndApplyCode(codeInput)
+                codeResultMessage = success
+                    ? NSLocalizedString("premium_code_success", comment: "")
+                    : NSLocalizedString("premium_code_fail", comment: "")
+                codeInput = ""
+                showCodeResult = true
+            }
+            Button("취소", role: .cancel) {
+                codeInput = ""
+            }
+        } message: {
+            Text(NSLocalizedString("premium_code_prompt", comment: ""))
+        }
+        .alert(codeResultMessage ?? "", isPresented: $showCodeResult) {
+            Button("확인", role: .cancel) {
+                if premiumManager.isPremium {
+                    dismiss()
+                }
+            }
+        }
         .onChange(of: premiumManager.isPremium) { isPremium in
             if isPremium { dismiss() }
-        }
-    }
-
-    // MARK: - Purchase Button States
-
-    @ViewBuilder
-    private var purchaseButtonSection: some View {
-        if purchaseManager.isLoadingProduct {
-            // 상태 1: 로딩 중
-            HStack {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .frame(width: 16, height: 16)
-                Text(NSLocalizedString("iap_loading", comment: ""))
-                    .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.6))
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 48)
-            .background(Color.gray.opacity(0.3))
-            .cornerRadius(12)
-        } else if purchaseManager.productLoadFailed {
-            // 상태 2: 로드 실패 — 재시도 버튼
-            Button(action: {
-                Task { await purchaseManager.loadProduct() }
-            }) {
-                HStack {
-                    Image(systemName: "arrow.clockwise")
-                    Text(NSLocalizedString("iap_retry", comment: ""))
-                }
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(Color.orange)
-                .cornerRadius(12)
-            }
-        } else if let product = purchaseManager.product {
-            // 상태 3: 상품 로드 완료 — 구매 버튼
-            Button(action: {
-                Task { await purchaseManager.purchase() }
-            }) {
-                HStack {
-                    if purchaseManager.isPurchasing {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    } else {
-                        Text(product.displayPrice)
-                            .fontWeight(.bold)
-                        Text(NSLocalizedString("premium_unlock", comment: ""))
-                    }
-                }
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 48)
-                .background(
-                    LinearGradient(
-                        colors: [Color.blue, Color.blue.opacity(0.7)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .cornerRadius(12)
-            }
-            .disabled(purchaseManager.isPurchasing)
-        } else {
-            // 상태 4: 초기 — 자동 로드 트리거
-            HStack {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                    .frame(width: 16, height: 16)
-                Text(NSLocalizedString("iap_loading", comment: ""))
-                    .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.6))
-            }
-            .frame(maxWidth: .infinity)
-            .frame(height: 48)
-            .background(Color.gray.opacity(0.3))
-            .cornerRadius(12)
-            .onAppear {
-                Task { await purchaseManager.loadProduct() }
-            }
         }
     }
 

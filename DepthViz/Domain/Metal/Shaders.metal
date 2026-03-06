@@ -89,20 +89,20 @@ vertex void unprojectVertex(uint vertexID [[vertex_id]],
     const auto position = worldPoint(gridPoint, depth, uniforms.cameraIntrinsicsInversed, uniforms.localToWorld);
 
     // Temporal voxel voting — count observations per voxel, accept only at threshold
-    // Ghost points jitter between voxels and never accumulate enough observations
-    // Real surface points are stable and reach the threshold quickly
+    // voxelSize <= 0 이면 복셀 중복 제거 비활성 (Apple ARKit 디폴트)
     const float vs = uniforms.voxelSize;
-    const int ix = int(floor(position.x / vs));
-    const int iy = int(floor(position.y / vs));
-    const int iz = int(floor(position.z / vs));
-    const uint hash = (uint(ix) * 73856093u ^ uint(iy) * 19349663u ^ uint(iz) * 83492791u) % uint(uniforms.voxelGridSize);
-    const uint prevCount = atomic_fetch_add_explicit(&voxelGrid[hash], 1u, memory_order_relaxed);
-    const uint newCount = prevCount + 1u;
-    const uint threshold = uint(max(uniforms.temporalThreshold, 1));
-    if (newCount != threshold) {
-        // Either not enough observations yet, or already accepted (duplicate) → skip
-        particleUniforms[currentPointIndex].confidence = -1.0;
-        return;
+    if (vs > 0) {
+        const int ix = int(floor(position.x / vs));
+        const int iy = int(floor(position.y / vs));
+        const int iz = int(floor(position.z / vs));
+        const uint hash = (uint(ix) * 73856093u ^ uint(iy) * 19349663u ^ uint(iz) * 83492791u) % uint(uniforms.voxelGridSize);
+        const uint prevCount = atomic_fetch_add_explicit(&voxelGrid[hash], 1u, memory_order_relaxed);
+        const uint newCount = prevCount + 1u;
+        const uint threshold = uint(max(uniforms.temporalThreshold, 1));
+        if (newCount != threshold) {
+            particleUniforms[currentPointIndex].confidence = -1.0;
+            return;
+        }
     }
 
     // Sample Y and CbCr textures to get the YCbCr color at the given texture coordinate

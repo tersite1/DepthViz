@@ -221,7 +221,7 @@ extension MainVM {
             self.renderer.startIMUForSLAM()
             print("🔬 DV-SLAM 엔진 + IMU(100Hz) 시작")
         } else {
-            // ARKit 모드: 프리미엄 IMU 표시/CSV 로깅을 위해 IMU는 시작
+            // ARKit 모드: 프리미엄 IMU 표시/CSV 로깅을 위해 IMU 시작
             if PremiumManager.shared.isPremium {
                 self.renderer.startIMUForSLAM()
                 print("📱 ARKit 모드 + 프리미엄 IMU(100Hz) 시작")

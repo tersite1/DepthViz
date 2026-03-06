@@ -275,9 +275,9 @@ struct SysState {
 // ============================================================================
 
 struct BundleDiscardConfig {
-    float voxel_size = 0.05f;       // 5cm voxels (was 10cm: too aggressive, only ~50pts/frame)
-    int min_density = 3;            // Min points per voxel (was 5: too strict for 5cm voxels)
-    float min_avg_confidence = 1.5f; // Min avg confidence: requires majority high-conf (≥2) points
+    float voxel_size = 0.03f;       // 3cm voxels (finer = more ICP points from sparse LiDAR)
+    int min_density = 1;            // Accept single-point voxels (LiDAR step=4 → ~3K pts)
+    float min_avg_confidence = 0.5f; // Accept medium confidence (ARKit: 0=low,1=med,2=high)
 };
 
 struct KeyframeConfig {
@@ -289,13 +289,13 @@ struct KeyframeConfig {
 };
 
 struct ESKFOptions {
-    int num_iterations = 5;           // 3→5: narrow spaces need more convergence
+    int num_iterations = 20;          // 5→20: must converge to avoid partial-correction velocity drift
     double quit_eps = 1e-6;
-    // IMU noise parameters
+    // IMU noise parameters (tuned for iPhone MEMS)
     double gyro_noise = 0.01;         // rad/s/sqrt(Hz)
-    double accel_noise = 0.1;         // m/s^2/sqrt(Hz)
+    double accel_noise = 0.02;        // m/s^2/sqrt(Hz) — 0.1 was too high, caused velocity σ explosion
     double gyro_bias_noise = 0.001;   // rad/s^2/sqrt(Hz)
-    double accel_bias_noise = 0.01;   // m/s^3/sqrt(Hz)
+    double accel_bias_noise = 0.005;  // m/s^3/sqrt(Hz) — tighter bias walk
     // Observation noise
     double lidar_noise = 0.01;        // meters
 };

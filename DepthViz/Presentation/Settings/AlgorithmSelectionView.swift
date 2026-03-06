@@ -13,7 +13,7 @@ import UIKit
 private extension SLAMAlgorithm {
     var displayName: String {
         switch self {
-        case .depthViz: return "Mobile-LIO (Recommended)"
+        case .depthViz: return "Mobile-LIO"
         case .arkit: return "ARKit (Apple Default)"
         }
     }
@@ -59,6 +59,10 @@ struct AlgorithmSelectionView: View {
         .interactiveDismissDisabled(false)
         .onAppear {
             loadSettings()
+        }
+        .fullScreenCover(isPresented: $showPremiumPopup) {
+            PremiumPopup()
+                .background(ClearBackgroundView())
         }
     }
 
@@ -195,88 +199,92 @@ struct AlgorithmSelectionView: View {
         sectionCard {
             sectionHeader("Premium", icon: "crown.fill")
 
+            // 프리미엄 활성화 버튼 / 상태
             if premiumManager.isPremium {
-                Toggle(isOn: $premiumManager.showOdometry) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Label("Odometry 시각화", systemImage: "point.topleft.down.curvedto.point.bottomright.up")
-                            .font(.system(size: 15))
-                        Text("프리뷰 경로 표시 + trajectory CSV 저장")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .tint(.blue)
-
-                Toggle(isOn: $premiumManager.showIMUData) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Label("IMU 데이터 표시", systemImage: "chart.bar.fill")
-                            .font(.system(size: 15))
-                        Text("스캔 중 Roll/Pitch/Yaw + IMU CSV 저장")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .tint(.blue)
-
-                Toggle(isOn: $premiumManager.saveVideo) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Label("동영상 페어 저장", systemImage: "video.fill")
-                            .font(.system(size: 15))
-                        Text("스캔 중 카메라 미리보기 + 동영상 저장")
-                            .font(.system(size: 11))
-                            .foregroundColor(.secondary)
-                    }
-                }
-                .tint(.blue)
-
-                Toggle(isOn: Binding(
-                    get: { premiumManager.usePremiumIcon },
-                    set: { premiumManager.setPremiumIcon($0) }
-                )) {
-                    Label("프리미엄 아이콘", systemImage: "app.badge.checkmark")
-                        .font(.system(size: 15))
-                }
-                .tint(.blue)
-
-                // 저장 경로 안내
                 HStack(spacing: 8) {
-                    Image(systemName: "folder.fill")
-                        .font(.system(size: 13))
-                        .foregroundColor(.blue)
-                    Text(NSLocalizedString("premium_export_path", comment: ""))
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    Image(systemName: "checkmark.seal.fill")
+                        .foregroundColor(.green)
+                        .font(.system(size: 16))
+                    Text("프리미엄 활성화됨")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.green)
                 }
-                .padding(.top, 4)
             } else {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("프리미엄 기능을 잠금 해제하세요")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-
-                    HStack(spacing: 6) {
-                        Image(systemName: "lock.fill").font(.caption).foregroundColor(.orange)
-                        Text("Odometry, IMU 데이터, 프리미엄 아이콘")
-                            .font(.system(size: 12)).foregroundColor(.secondary)
-                    }
-
-                    Button(action: { showPremiumPopup = true }) {
-                        Text("프리미엄 잠금 해제")
+                Button(action: { showPremiumPopup = true }) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 14))
+                        Text("프리미엄 활성화")
                             .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 44)
-                            .background(LinearGradient(colors: [.blue, .blue.opacity(0.7)], startPoint: .leading, endPoint: .trailing))
-                            .cornerRadius(10)
                     }
-                    .padding(.top, 4)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 44)
+                    .background(
+                        LinearGradient(colors: [.yellow, .orange], startPoint: .leading, endPoint: .trailing)
+                    )
+                    .cornerRadius(10)
                 }
             }
-        }
-        .fullScreenCover(isPresented: $showPremiumPopup) {
-            PremiumVideoPopup()
-                .background(ClearBackgroundView())
+
+            // 토글 (비프리미엄이면 disabled)
+            Toggle(isOn: $premiumManager.showOdometry) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Label("Odometry 시각화", systemImage: "point.topleft.down.curvedto.point.bottomright.up")
+                        .font(.system(size: 15))
+                    Text("프리뷰 경로 표시 + trajectory CSV 저장")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .tint(.blue)
+            .disabled(!premiumManager.isPremium)
+
+            Toggle(isOn: $premiumManager.showIMUData) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Label("IMU 데이터 표시", systemImage: "chart.bar.fill")
+                        .font(.system(size: 15))
+                    Text("스캔 중 Roll/Pitch/Yaw + IMU CSV 저장")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .tint(.blue)
+            .disabled(!premiumManager.isPremium)
+
+            Toggle(isOn: $premiumManager.saveVideo) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Label("동영상 페어 저장", systemImage: "video.fill")
+                        .font(.system(size: 15))
+                    Text("스캔 중 카메라 미리보기 + 동영상 저장")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+            }
+            .tint(.blue)
+            .disabled(!premiumManager.isPremium)
+
+            Toggle(isOn: Binding(
+                get: { premiumManager.usePremiumIcon },
+                set: { premiumManager.setPremiumIcon($0) }
+            )) {
+                Label("프리미엄 아이콘", systemImage: "app.badge.checkmark")
+                    .font(.system(size: 15))
+            }
+            .tint(.blue)
+            .disabled(!premiumManager.isPremium)
+
+            // 저장 경로 안내
+            HStack(spacing: 8) {
+                Image(systemName: "folder.fill")
+                    .font(.system(size: 13))
+                    .foregroundColor(.blue)
+                Text(NSLocalizedString("premium_export_path", comment: ""))
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.top, 4)
         }
     }
 
@@ -463,7 +471,7 @@ struct AlgorithmSelectionView: View {
         SLAMService.sharedInstance().reloadSettings()
 
         let cl = ScanSettings.shared.confidenceLevel
-        print("⚙️ 설정 저장: algo=\(selectedAlgorithm.badge), conf=\(cl.rawValue)(shader≥\(cl.shaderThreshold), edge=\(Int(cl.depthEdgeThreshold*100))cm, temporal=\(cl.temporalThreshold)x), dist=\(maxDistance > 10 ? "∞" : String(format: "%.1fm", maxDistance))")
+        print("Settings saved: algo=\(selectedAlgorithm.badge), conf=\(cl.rawValue)(shader>=\(cl.shaderThreshold), edge=\(Int(cl.depthEdgeThreshold*100))cm, temporal=\(cl.temporalThreshold)x), dist=\(maxDistance > 10 ? "inf" : String(format: "%.1fm", maxDistance))")
     }
 }
 

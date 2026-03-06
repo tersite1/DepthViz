@@ -59,8 +59,19 @@ void DepthVizEngine::pushIMU(double timestamp, const Eigen::Vector3d& acc, const
     std::lock_guard<std::mutex> lock(mtx_data_);
     DV::IMUData imu;
     imu.timestamp = timestamp;
-    imu.acc = acc;
-    imu.gyr = gyr;
+
+    // Camera-IMU extrinsic rotation for portrait orientation.
+    // SLAMService point cloud uses camera-flipped frame: flipYZ(intrinsics)
+    //   cam_x = landscape_right (= portrait up)
+    //   cam_y = landscape_up    (= portrait left)
+    //   cam_z = backward        (= toward user)
+    // IMU device frame (portrait):
+    //   dev_x = right, dev_y = up, dev_z = toward user
+    // Relationship: cam = Rz(-90°) * dev → cam_x=dev_y, cam_y=-dev_x, cam_z=dev_z
+    // Rotate IMU to match point cloud frame so ESKF is self-consistent.
+    imu.acc = Eigen::Vector3d(acc.y(), -acc.x(), acc.z());
+    imu.gyr = Eigen::Vector3d(gyr.y(), -gyr.x(), gyr.z());
+
     imu_buf_.push_back(imu);
 
     // Keep buffer bounded
@@ -76,8 +87,32 @@ void DepthVizEngine::pushPointCloud(double timestamp, const float* xyz, const ui
 }
 
 void DepthVizEngine::pushImage(double timestamp, const void* imageData, int width, int height) {
-    // Not used in DV-SLAM (ARKit handles visual odometry)
+    // Legacy interface — use pushImageAndDepth for visual tracking
     (void)timestamp; (void)imageData; (void)width; (void)height;
+}
+
+void DepthVizEngine::pushImageAndDepth(double timestamp,
+                                        const uint8_t* gray, int gray_w, int gray_h,
+                                        const float* depth, int depth_w, int depth_h,
+                                        float fx, float fy, float cx, float cy,
+                                        int full_w, int full_h) {
+    std::lock_guard<std::mutex> lock(mtx_data_);
+
+    // Set intrinsics once
+    if (!vio_intrinsics_set_ && vio_) {
+        vio_->setIntrinsics(fx, fy, cx, cy, full_w, full_h, depth_w, depth_h);
+        vio_intrinsics_set_ = true;
+    }
+
+    // Store latest image frame
+    latest_image_.timestamp = timestamp;
+    latest_image_.gray_w = gray_w;
+    latest_image_.gray_h = gray_h;
+    latest_image_.depth_w = depth_w;
+    latest_image_.depth_h = depth_h;
+    latest_image_.gray.assign(gray, gray + gray_w * gray_h);
+    latest_image_.depth.assign(depth, depth + depth_w * depth_h);
+    latest_image_.valid = true;
 }
 
 void DepthVizEngine::pushARKitPose(double timestamp, const Eigen::Matrix4d& pose) {
@@ -91,8 +126,27 @@ void DepthVizEngine::pushARKitPose(double timestamp, const Eigen::Matrix4d& pose
 // ============================================================================
 
 Eigen::Matrix4d DepthVizEngine::getPose() {
-    std::lock_guard<std::mutex> lock(mtx_state_);
-    return last_optimized_pose_;
+    // Use cached pose (updated by run() loop) — never block on LIO mutex.
+    // lio_->getCurrentPose() blocks on mtx_ which is held during ICP (500ms+).
+    // Renderer calls getPose() at 60Hz and must not be blocked.
+    Eigen::Matrix4d pose;
+    {
+        std::lock_guard<std::mutex> lock(mtx_state_);
+        pose = last_optimized_pose_;
+    }
+
+    // Camera-IMU extrinsic correction for renderer.
+    // ESKF body frame = camera-flipped frame (SLAMService applies flipYZ only).
+    // Renderer applies: localToWorld = slamPose * rotateToARCamera
+    //   where rotateToARCamera = flipYZ * Rz(90°) for portrait.
+    // slamPose = T_eskf * Rz(90°) so that the composition correctly maps
+    // camera intrinsics space → world space.
+    Eigen::Matrix3d Rz90;
+    Rz90 << 0, -1, 0,
+            1,  0, 0,
+            0,  0, 1;
+    pose.block<3,3>(0,0) = pose.block<3,3>(0,0) * Rz90;
+    return pose;
 }
 
 std::vector<DV::DVPoint3D> DepthVizEngine::getDisplayCloud() {
@@ -216,6 +270,16 @@ bool DepthVizEngine::isKeyframe(const Eigen::Matrix4d& current_pose) {
         return true;
     }
 
+    // Diagnostic (first 10 non-keyframes)
+    static int non_kf_log_count = 0;
+    if (non_kf_log_count < 10) {
+        printf("[ENG] not-KF: dt=%.4fm (th=%.2f) rot=%.2f° (th=%.1f°) pos=(%.3f,%.3f,%.3f)\n",
+               dt.norm(), keyframe_config_.translation_threshold,
+               angle * 180.0 / M_PI, keyframe_config_.rotation_threshold_deg,
+               current_pose(0,3), current_pose(1,3), current_pose(2,3));
+        non_kf_log_count++;
+    }
+
     return false;
 }
 
@@ -233,11 +297,18 @@ void DepthVizEngine::run() {
         double timestamp = 0.0;
         int n_points = 0;
 
-        // Pop from ring buffer — copies data into local buffers under the lock
+        // Pop from ring buffer — skip to latest frame to prevent queue buildup
+        // When ICP fails fast (2ms), the loop outruns sensor input (30Hz),
+        // starving VIO of images. Always process only the newest frame.
         bool has_data = false;
         {
             std::lock_guard<std::mutex> lock(mtx_data_);
-            has_data = cloud_ring_buf_.pop(timestamp, local_xyz.data(), local_conf.data(), local_rgb.data(), n_points);
+            // Drain to latest: pop all, keep last
+            bool got_any = false;
+            while (cloud_ring_buf_.pop(timestamp, local_xyz.data(), local_conf.data(), local_rgb.data(), n_points)) {
+                got_any = true;
+            }
+            has_data = got_any;
         }
 
         if (!has_data) {
@@ -282,8 +353,21 @@ void DepthVizEngine::run() {
         }
 
         if (bundled.empty()) {
-            printf("[ENG] frame: %d raw pts → 0 after B&D → SKIP\n", n_points);
+            printf("[ENG] frame: %d raw pts → 0 after B&D → SKIP (vs=%.0fmm, minD=%d, minC=%.1f)\n",
+                   n_points,
+                   bundle_config_.voxel_size * 1000.f,
+                   bundle_config_.min_density,
+                   bundle_config_.min_avg_confidence);
             continue;
+        }
+
+        // B&D 결과 로그 (처음 5프레임만)
+        {
+            std::lock_guard<std::mutex> lock(mtx_state_);
+            if (profiling_.total_frames < 5) {
+                printf("[ENG] frame: %d raw pts → %d after B&D (vs=%.0fmm)\n",
+                       n_points, (int)bundled.size(), bundle_config_.voxel_size * 1000.f);
+            }
         }
 
         // Stamp frame timestamp on all bundled points
@@ -304,9 +388,11 @@ void DepthVizEngine::run() {
 
             // Paper branch: IMU static init phase
             if (init_phase_ == InitPhase::COLLECTING_IMU && lio_) {
-                for (const auto& imu : imu_batch) {
-                    if (lio_->initFromIMU(imu)) {
+                size_t init_end_idx = 0;
+                for (size_t i = 0; i < imu_batch.size(); i++) {
+                    if (lio_->initFromIMU(imu_batch[i])) {
                         init_phase_ = InitPhase::READY;
+                        init_end_idx = i + 1;
                         printf("[Engine] IMU static init complete → READY\n");
                         break;
                     }
@@ -314,11 +400,40 @@ void DepthVizEngine::run() {
                 if (init_phase_ != InitPhase::READY) {
                     continue;  // Still collecting IMU samples, skip LIO
                 }
+                // Remove init samples — only keep post-init IMU for first predict
+                imu_batch.erase(imu_batch.begin(), imu_batch.begin() + init_end_idx);
             }
 
             // Run ESKF prediction with remaining IMU data
             if (ablation_.enable_imu && !imu_batch.empty() && lio_) {
                 lio_->processIMU(imu_batch);
+            }
+        }
+
+        // Visual tracking: ESKF update with reprojection residuals (every frame)
+        {
+            ImageFrame img_copy;
+            {
+                std::lock_guard<std::mutex> lock(mtx_data_);
+                if (latest_image_.valid && std::abs(latest_image_.timestamp - timestamp) < 0.05) {
+                    img_copy = latest_image_;
+                    latest_image_.valid = false; // Consume
+                }
+            }
+
+            if (img_copy.valid && vio_ && lio_) {
+                // Get ESKF predicted pose for landmark initialization
+                Eigen::Matrix4d eskf_pred = lio_->getCurrentPose();
+
+                int n_vis = vio_->processFrame(
+                    img_copy.gray.data(), img_copy.gray_w, img_copy.gray_h,
+                    img_copy.depth.data(), img_copy.depth_w, img_copy.depth_h,
+                    eskf_pred);
+
+                // Run ESKF visual update if we have enough tracked features
+                if (n_vis >= 5) {
+                    lio_->processVisual(vio_->getLandmarks(), vio_->getWorkingIntrinsics());
+                }
             }
         }
 
@@ -339,27 +454,25 @@ void DepthVizEngine::run() {
                 Eigen::Matrix4d init_pose = (lio_) ? lio_->getCurrentPose() : Eigen::Matrix4d::Identity();
                 last_optimized_pose_ = init_pose;
                 last_keyframe_pose_ = init_pose;
-                display_cloud_ = bundled;
                 profiling_.total_frames++;
 
-                // Accumulate first frame into full_map_ with RGB
+                // Transform to world frame for both display and full map
                 Eigen::Matrix3d R = init_pose.block<3, 3>(0, 0);
                 Eigen::Vector3d t = init_pose.block<3, 1>(0, 3);
+
+                display_cloud_.clear();
+                display_cloud_.reserve(bundled.size());
                 for (const auto& pt : bundled) {
-                    if (full_map_.size() >= MAX_FULL_MAP_POINTS) break;
                     Eigen::Vector3d p_camera(pt.x, pt.y, pt.z);
                     Eigen::Vector3d p_world = R * p_camera + t;
-                    DV::DVPoint3D world_pt;
+                    DV::DVPoint3D world_pt = pt;
                     world_pt.x = static_cast<float>(p_world.x());
                     world_pt.y = static_cast<float>(p_world.y());
                     world_pt.z = static_cast<float>(p_world.z());
-                    world_pt.intensity = pt.intensity;
-                    world_pt.confidence = pt.confidence;
-                    world_pt.r = pt.r;
-                    world_pt.g = pt.g;
-                    world_pt.b = pt.b;
-                    world_pt.timestamp = pt.timestamp;
-                    full_map_.push_back(world_pt);
+                    display_cloud_.push_back(world_pt);
+                    if (full_map_.size() < MAX_FULL_MAP_POINTS) {
+                        full_map_.push_back(world_pt);
+                    }
                 }
             }
             first_frame_.store(false);
@@ -369,10 +482,26 @@ void DepthVizEngine::run() {
         // Keyframe check (use ESKF predicted pose)
         Eigen::Matrix4d eskf_pose = (lio_) ? lio_->getCurrentPose() : prior_pose;
         if (!isKeyframe(eskf_pose)) {
-            std::lock_guard<std::mutex> lock(mtx_state_);
-            last_optimized_pose_ = eskf_pose;
-            display_cloud_ = bundled;
-            profiling_.total_frames++;
+            // Non-keyframe: update pose and display cloud (world-frame transform)
+            Eigen::Matrix3d R_disp = eskf_pose.block<3, 3>(0, 0);
+            Eigen::Vector3d t_disp = eskf_pose.block<3, 1>(0, 3);
+            std::vector<DV::DVPoint3D> world_display;
+            world_display.reserve(bundled.size());
+            for (const auto& pt : bundled) {
+                Eigen::Vector3d pw = R_disp * Eigen::Vector3d(pt.x, pt.y, pt.z) + t_disp;
+                DV::DVPoint3D wp = pt;
+                wp.x = static_cast<float>(pw.x());
+                wp.y = static_cast<float>(pw.y());
+                wp.z = static_cast<float>(pw.z());
+                world_display.push_back(wp);
+            }
+
+            {
+                std::lock_guard<std::mutex> lock(mtx_state_);
+                last_optimized_pose_ = eskf_pose;
+                display_cloud_ = std::move(world_display);
+                profiling_.total_frames++;
+            }
 
             auto frame_end = std::chrono::high_resolution_clock::now();
             profiling_.total_pipeline_ms += std::chrono::duration<double, std::milli>(frame_end - frame_start).count();
@@ -392,26 +521,64 @@ void DepthVizEngine::run() {
 
         // LIO optimization (or skip if ablation disabled)
         Eigen::Matrix4d refined_pose = eskf_pose;
+        bool lio_success = false;
         if (ablation_.enable_lio && lio_) {
             auto lio_start = std::chrono::high_resolution_clock::now();
             refined_pose = lio_->process(bundled);
             auto lio_end = std::chrono::high_resolution_clock::now();
             double lio_ms = std::chrono::duration<double, std::milli>(lio_end - lio_start).count();
 
-            std::lock_guard<std::mutex> lock(mtx_state_);
-            profiling_.total_lio_ms += lio_ms;
-            profiling_.keyframes++;
-            printf("[ENG] LIO %.1fms | total KF=%d avgLIO=%.1fms\n",
-                   lio_ms, profiling_.keyframes,
-                   profiling_.keyframes > 0 ? profiling_.total_lio_ms / profiling_.keyframes : 0.0);
+            // Check if LIO actually produced an observation update (obs > 0)
+            // process() returns eskf pose regardless, but we can detect failure
+            // by checking if the pose changed from pre-ICP state
+            lio_success = (lio_ms > 5.0); // obs=0 completes in <3ms, real ICP takes >5ms
+
+            if (lio_success) {
+                consecutive_icp_failures_ = 0;
+            } else {
+                consecutive_icp_failures_++;
+                if (consecutive_icp_failures_ == kMaxICPFailures) {
+                    printf("[ENG] *** ICP FAILED %d consecutive times — RESETTING MAP ***\n", kMaxICPFailures);
+                    // Clear voxel map but keep ESKF state (pose, velocity, biases)
+                    lio_->resetMap();
+                    // Insert current frame as new map seed
+                    refined_pose = lio_->process(bundled);
+                    consecutive_icp_failures_ = 0;
+                    printf("[ENG] Map reset complete. Resuming from ESKF pose.\n");
+                }
+            }
+
+            {
+                std::lock_guard<std::mutex> lock(mtx_state_);
+                profiling_.total_lio_ms += lio_ms;
+                profiling_.keyframes++;
+                printf("[ENG] LIO %.1fms %s | total KF=%d avgLIO=%.1fms\n",
+                       lio_ms, lio_success ? "OK" : "FAIL",
+                       profiling_.keyframes,
+                       profiling_.keyframes > 0 ? profiling_.total_lio_ms / profiling_.keyframes : 0.0);
+            }
         }
 
-        // Update state and accumulate full map with RGB
+        // Update state and accumulate full map with RGB (world-frame transform)
         {
             std::lock_guard<std::mutex> lock(mtx_state_);
             last_optimized_pose_ = refined_pose;
             last_keyframe_pose_ = refined_pose;
-            display_cloud_ = bundled;
+
+            // Transform display cloud to world frame
+            Eigen::Matrix3d R_w = refined_pose.block<3, 3>(0, 0);
+            Eigen::Vector3d t_w = refined_pose.block<3, 1>(0, 3);
+            display_cloud_.clear();
+            display_cloud_.reserve(bundled.size());
+            for (const auto& pt : bundled) {
+                Eigen::Vector3d pw = R_w * Eigen::Vector3d(pt.x, pt.y, pt.z) + t_w;
+                DV::DVPoint3D wp = pt;
+                wp.x = static_cast<float>(pw.x());
+                wp.y = static_cast<float>(pw.y());
+                wp.z = static_cast<float>(pw.z());
+                display_cloud_.push_back(wp);
+            }
+
             profiling_.total_frames++;
 
             // Accumulate bundled points into full_map_ (transformed to world frame)
@@ -458,9 +625,7 @@ void DepthVizEngine::run() {
             }
         }
 
-        // Feedback to VIO
-        if (vio_) {
-            vio_->updatePoseFromLIO(refined_pose);
-        }
+        // VIO landmarks use world-frame coordinates initialized at detection time.
+        // No feedback needed — ESKF state is shared between visual and LiDAR updates.
     }
 }

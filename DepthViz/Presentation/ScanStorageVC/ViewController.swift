@@ -12,11 +12,7 @@ class ViewController: UIViewController {
     var pointCloud: PointCloud?
     var pointCloudNode: SCNNode?
 
-    #if DEBUG
-    private let showAds = false
-    #else
-    private let showAds = ScanCountManager.shared.shouldShowInterstitialAd
-    #endif
+    private let showAds = ScanCountManager.shared.shouldShowBannerAd
     /// 배너 높이 (광고 있을 때 50pt, 없으면 0)
     private var bannerHeight: CGFloat { showAds ? 50 : 0 }
 

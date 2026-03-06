@@ -32,6 +32,13 @@ public:
     // Specialized method for iOS raw buffers (with RGB from camera)
     void pushPointCloudRaw(double timestamp, const float* xyz, const uint8_t* conf, const uint8_t* rgb, int count);
 
+    // Push downscaled grayscale + depth map for visual feature tracking
+    void pushImageAndDepth(double timestamp,
+                           const uint8_t* gray, int gray_w, int gray_h,
+                           const float* depth, int depth_w, int depth_h,
+                           float fx, float fy, float cx, float cy,
+                           int full_w, int full_h);
+
 private:
     std::shared_ptr<DepthVizEngine> _engine;
 };

@@ -63,12 +63,12 @@ final class Renderer: NSObject, SLAMDelegate {
     private var cameraRotationThreshold: Float {
         ScanSettings.shared.algorithm == .depthViz
             ? cos(2.0 * .degreesToRadian)   // DV-SLAM: 2도 회전
-            : cos(5.0 * .degreesToRadian)   // ARKit: 5도 회전
+            : cos(2.0 * .degreesToRadian)   // ARKit: Apple 디폴트 2도
     }
     private var cameraTranslationThreshold: Float {
         ScanSettings.shared.algorithm == .depthViz
             ? pow(0.015, 2)   // DV-SLAM: 1.5cm 이동
-            : pow(0.03, 2)    // ARKit: 3cm 이동
+            : pow(0.02, 2)    // ARKit: Apple 디폴트 2cm
     }
     // The max number of command buffers in flight
     private let maxInFlightBuffers = 3
@@ -144,7 +144,7 @@ final class Renderer: NSObject, SLAMDelegate {
         ScanSettings.shared.algorithm == .depthViz ? (1 << 24) : (1 << 21)  // 16M vs 2M
     }
     private var voxelSize: Float {
-        ScanSettings.shared.algorithm == .depthViz ? 0.005 : 0.020  // 5mm vs 20mm
+        ScanSettings.shared.algorithm == .depthViz ? 0.005 : 0  // 5mm vs 없음 (Apple 디폴트)
     }
     // 복셀 그리드 주기적 초기화 (격자 패턴 방지)
     private var voxelResetCounter = 0
@@ -300,19 +300,24 @@ final class Renderer: NSObject, SLAMDelegate {
     /// 사용자 설정 적용 (ARSession이 시작된 후, 녹화 시작 전에 호출)
     func applySettings() {
         let settings = ScanSettings.shared
+        let isARKit = settings.algorithm != .depthViz
+
         // Confidence → 셰이더 uniform (particleVertex에서 visibility 판정용)
-        confidenceThreshold = settings.confidenceLevel.shaderThreshold
+        confidenceThreshold = isARKit ? 0.0 : settings.confidenceLevel.shaderThreshold  // ARKit: 전체 수용
         // Distance limit → 셰이더에서 초과 거리 즉시 거부
-        // 설정 UI가 슬라이더(float)를 "ScanDistanceLimit"에 직접 저장하므로 UserDefaults에서 읽기
         let savedDist = Float(UserDefaults.standard.double(forKey: "ScanDistanceLimit"))
         pointCloudUniforms.maxDistance = savedDist > 0 ? savedDist : settings.distanceLimit.distanceValue
-        // Depth edge rejection + temporal voting (depth bleeding / ghost point 방지)
-        pointCloudUniforms.depthEdgeThreshold = settings.confidenceLevel.depthEdgeThreshold
-        pointCloudUniforms.temporalThreshold = Int32(settings.confidenceLevel.temporalThreshold)
+        // Depth edge rejection + temporal voting
+        // ARKit: Apple 디폴트 (edge rejection 없음, temporal 없음)
+        pointCloudUniforms.depthEdgeThreshold = isARKit ? 0.0 : settings.confidenceLevel.depthEdgeThreshold
+        pointCloudUniforms.temporalThreshold = isARKit ? 1 : Int32(settings.confidenceLevel.temporalThreshold)
+        // 복셀 크기/그리드 → 셰이더 uniform 업데이트 (알고리즘 전환 시 필수)
+        pointCloudUniforms.voxelSize = voxelSize
+        pointCloudUniforms.voxelGridSize = Int32(voxelGridSize)
         // 알고리즘에 맞게 그리드 포인트 버퍼 재생성 (DV-SLAM: 8192, ARKit: 2048)
         rebuildGridPointsBuffer()
         let distDisplay = pointCloudUniforms.maxDistance >= 999 ? "∞" : String(format: "%.1fm", pointCloudUniforms.maxDistance)
-        print("⚙️ 설정 적용: 알고리즘=\(settings.algorithm.badge), 신뢰도=\(settings.confidenceLevel.rawValue)(shader≥\(confidenceThreshold), edge=\(Int(pointCloudUniforms.depthEdgeThreshold*100))cm, temporal=\(pointCloudUniforms.temporalThreshold)회), 거리=\(distDisplay), 복셀=\(voxelSize*1000)mm")
+        print("⚙️ 설정 적용: 알고리즘=\(settings.algorithm.badge), 신뢰도=\(isARKit ? "All" : settings.confidenceLevel.rawValue)(shader≥\(confidenceThreshold), edge=\(Int(pointCloudUniforms.depthEdgeThreshold*100))cm, temporal=\(pointCloudUniforms.temporalThreshold)회), 거리=\(distDisplay), 복셀=\(voxelSize*1000)mm")
     }
     
     /// DV-SLAM용 IMU 데이터 공급 시작 (100Hz — LIO 필수)
@@ -428,16 +433,20 @@ final class Renderer: NSObject, SLAMDelegate {
         let viewMatrix = camera.viewMatrix(for: orientation)
         let viewMatrixInversed = viewMatrix.inverse
         let projectionMatrix = camera.projectionMatrix(for: orientation, viewportSize: viewportSize, zNear: 0.001, zFar: 0)
-        pointCloudUniforms.viewProjectionMatrix = projectionMatrix * viewMatrix
-        // 항상 ARKit 포즈 사용 (안정적)
-        // DV-SLAM 보정은 후처리에서만 적용 — 실시간 적용 시 0.5~0.8m 드리프트 발생
+        // Always use ARKit for real-time rendering (60Hz smooth).
+        // DV-SLAM runs in background — results used only for export (full_map_).
+        // SLAM pose is still recorded in didUpdatePose() for pose correction pairs.
         pointCloudUniforms.localToWorld = viewMatrixInversed * rotateToARCamera
+        pointCloudUniforms.viewProjectionMatrix = projectionMatrix * viewMatrix
         pointCloudUniforms.cameraIntrinsicsInversed = cameraIntrinsicsInversed
-        
+
         let cameraTranslation = cameraTransform.columns.3
 
         // 트라젝토리 기록 (녹화 중일 때)
         if isRecording {
+            let slamActive = ScanSettings.shared.algorithm == .depthViz && latestSLAMPose != nil
+            // Always use ARKit pose for trajectory — matches real-time rendering.
+            // SLAM poses are recorded separately in poseCorrectionLog for export.
             let pos = SIMD3<Float>(cameraTranslation.x, cameraTranslation.y, cameraTranslation.z)
             trajectoryPoses.append(pos)
             let elapsed = Date().timeIntervalSince(recordingStartTime ?? Date())
@@ -491,15 +500,8 @@ final class Renderer: NSObject, SLAMDelegate {
         // handle buffer rotating FIRST so we write & read from the same buffer
         currentBufferIndex = (currentBufferIndex + 1) % maxInFlightBuffers
 
-        // DV-SLAM: AR 프레임을 SLAM 엔진에 공급 (update 전에 호출하여 최신 포즈 확보)
-        if isRecording && ScanSettings.shared.algorithm == .depthViz {
-            slamFrameFeedCount += 1
-            SLAMService.sharedInstance().processARFrame(currentFrame)
-            // 첫 프레임 확인
-            if slamFrameFeedCount == 1 {
-                print("✅ [DV-SLAM] 첫 AR프레임 SLAM 엔진에 전달됨")
-            }
-        }
+        // DV-SLAM: MainVC의 ARSession delegate에서만 processARFrame 호출
+        // (여기서 중복 호출하면 같은 프레임이 엔진에 2번 들어가 타이밍 오류 발생)
 
         // update frame data
         update(frame: currentFrame)
@@ -964,22 +966,81 @@ extension Renderer {
                 return
             }
 
-            // ── Phase 0: Confidence 필터링 ──
-            // 셰이더는 confidence 0,1,2 모두 버퍼에 저장하지만 렌더링 시 threshold 이상만 표시.
-            // 후처리/프리뷰/내보내기에서도 동일 기준 적용: 저품질 포인트 제거.
-            let confThreshold = self.pointCloudUniforms.confidenceThreshold  // High=1.5
-            var confRejected = 0
-            for i in 0..<originalCount {
-                var p = self.particlesBuffer[i]
-                if p.confidence >= 0 && Float(p.confidence) < confThreshold {
-                    p.confidence = -1
-                    self.particlesBuffer[i] = p
-                    confRejected += 1
-                }
-            }
+            let afterDistCount: Int
 
-            // 버퍼 압축: confidence < 0 제거
-            if confRejected > 0 {
+            if useSLAM {
+                // ── Phase 0: Confidence 필터링 (Mobile-LIO만) ──
+                let confThreshold = self.pointCloudUniforms.confidenceThreshold
+                var confRejected = 0
+                for i in 0..<originalCount {
+                    var p = self.particlesBuffer[i]
+                    if p.confidence >= 0 && Float(p.confidence) < confThreshold {
+                        p.confidence = -1
+                        self.particlesBuffer[i] = p
+                        confRejected += 1
+                    }
+                }
+                if confRejected > 0 {
+                    var writeIdx = 0
+                    for i in 0..<originalCount {
+                        let p = self.particlesBuffer[i]
+                        if p.confidence >= 0 {
+                            if writeIdx != i { self.particlesBuffer[writeIdx] = p }
+                            writeIdx += 1
+                        }
+                    }
+                    for i in writeIdx..<originalCount {
+                        var p = self.particlesBuffer[i]
+                        p.confidence = -1
+                        self.particlesBuffer[i] = p
+                    }
+                    self.currentPointIndex = writeIdx
+                    self.currentPointCount = writeIdx
+                }
+                let afterConfCount = self.currentPointCount
+                print("📊 [Confidence 필터] \(originalCount)개 → \(afterConfCount)개 (제거: \(confRejected)개, threshold≥\(confThreshold))")
+
+                // ── Phase 0b: 원점 기준 거리 필터 (Mobile-LIO만) ──
+                let worldDistLimit = self.pointCloudUniforms.maxDistance
+                if worldDistLimit < 999, let startTransform = self.startCameraTransform {
+                    let origin = SIMD3<Float>(startTransform.columns.3.x,
+                                              startTransform.columns.3.y,
+                                              startTransform.columns.3.z)
+                    var distRejected = 0
+                    let count = self.currentPointCount
+                    for i in 0..<count {
+                        var p = self.particlesBuffer[i]
+                        guard p.confidence >= 0 else { continue }
+                        let d = distance(p.position, origin)
+                        if d > worldDistLimit {
+                            p.confidence = -1
+                            self.particlesBuffer[i] = p
+                            distRejected += 1
+                        }
+                    }
+                    if distRejected > 0 {
+                        var writeIdx = 0
+                        for i in 0..<count {
+                            let p = self.particlesBuffer[i]
+                            if p.confidence >= 0 {
+                                if writeIdx != i { self.particlesBuffer[writeIdx] = p }
+                                writeIdx += 1
+                            }
+                        }
+                        for i in writeIdx..<count {
+                            var p = self.particlesBuffer[i]
+                            p.confidence = -1
+                            self.particlesBuffer[i] = p
+                        }
+                        self.currentPointIndex = writeIdx
+                        self.currentPointCount = writeIdx
+                    }
+                    print("📊 [거리 필터] \(afterConfCount)개 → \(self.currentPointCount)개 (제거: \(distRejected)개, 원점기준 >\(String(format: "%.1f", worldDistLimit))m)")
+                }
+                afterDistCount = self.currentPointCount
+            } else {
+                // ARKit: Apple 디폴트 — confidence 필터 없음, 거리 필터만
+                // 빈 슬롯(confidence < 0) 압축
                 var writeIdx = 0
                 for i in 0..<originalCount {
                     let p = self.particlesBuffer[i]
@@ -988,48 +1049,8 @@ extension Renderer {
                         writeIdx += 1
                     }
                 }
-                for i in writeIdx..<originalCount {
-                    var p = self.particlesBuffer[i]
-                    p.confidence = -1
-                    self.particlesBuffer[i] = p
-                }
-                self.currentPointIndex = writeIdx
-                self.currentPointCount = writeIdx
-            }
-            let afterConfCount = self.currentPointCount
-            print("📊 [Confidence 필터] \(originalCount)개 → \(afterConfCount)개 (제거: \(confRejected)개, threshold≥\(confThreshold))")
-
-            // ── Phase 0b: 원점 기준 거리 필터 ──
-            // 셰이더의 maxDistance는 카메라↔점 depth만 체크 (카메라 이동 시 전체 범위 무제한)
-            // 여기서 스캔 시작 위치 기준으로 월드 공간 거리도 필터
-            let worldDistLimit = self.pointCloudUniforms.maxDistance
-            if worldDistLimit < 999, let startTransform = self.startCameraTransform {
-                let origin = SIMD3<Float>(startTransform.columns.3.x,
-                                          startTransform.columns.3.y,
-                                          startTransform.columns.3.z)
-                var distRejected = 0
-                let count = self.currentPointCount
-                for i in 0..<count {
-                    var p = self.particlesBuffer[i]
-                    guard p.confidence >= 0 else { continue }
-                    let d = distance(p.position, origin)
-                    if d > worldDistLimit {
-                        p.confidence = -1
-                        self.particlesBuffer[i] = p
-                        distRejected += 1
-                    }
-                }
-                // 버퍼 압축
-                if distRejected > 0 {
-                    var writeIdx = 0
-                    for i in 0..<count {
-                        let p = self.particlesBuffer[i]
-                        if p.confidence >= 0 {
-                            if writeIdx != i { self.particlesBuffer[writeIdx] = p }
-                            writeIdx += 1
-                        }
-                    }
-                    for i in writeIdx..<count {
+                if writeIdx < originalCount {
+                    for i in writeIdx..<originalCount {
                         var p = self.particlesBuffer[i]
                         p.confidence = -1
                         self.particlesBuffer[i] = p
@@ -1037,16 +1058,56 @@ extension Renderer {
                     self.currentPointIndex = writeIdx
                     self.currentPointCount = writeIdx
                 }
-                print("📊 [거리 필터] \(afterConfCount)개 → \(self.currentPointCount)개 (제거: \(distRejected)개, 원점기준 >\(String(format: "%.1f", worldDistLimit))m)")
+                let validCount = self.currentPointCount
+                print("📱 ARKit: 버퍼 \(originalCount) → 유효 \(validCount)개 (confidence 필터 없음)")
+
+                // 거리 필터
+                let worldDistLimit = self.pointCloudUniforms.maxDistance
+                if worldDistLimit < 999, let startTransform = self.startCameraTransform {
+                    let origin = SIMD3<Float>(startTransform.columns.3.x,
+                                              startTransform.columns.3.y,
+                                              startTransform.columns.3.z)
+                    var distRejected = 0
+                    let count = self.currentPointCount
+                    for i in 0..<count {
+                        var p = self.particlesBuffer[i]
+                        guard p.confidence >= 0 else { continue }
+                        let d = distance(p.position, origin)
+                        if d > worldDistLimit {
+                            p.confidence = -1
+                            self.particlesBuffer[i] = p
+                            distRejected += 1
+                        }
+                    }
+                    if distRejected > 0 {
+                        var writeIdx2 = 0
+                        for i in 0..<count {
+                            let p = self.particlesBuffer[i]
+                            if p.confidence >= 0 {
+                                if writeIdx2 != i { self.particlesBuffer[writeIdx2] = p }
+                                writeIdx2 += 1
+                            }
+                        }
+                        for i in writeIdx2..<count {
+                            var p = self.particlesBuffer[i]
+                            p.confidence = -1
+                            self.particlesBuffer[i] = p
+                        }
+                        self.currentPointIndex = writeIdx2
+                        self.currentPointCount = writeIdx2
+                    }
+                    print("📱 ARKit [거리] \(validCount)개 → \(self.currentPointCount)개 (제거: \(distRejected)개, >\(String(format: "%.1f", worldDistLimit))m)")
+                }
+                afterDistCount = self.currentPointCount
             }
-            let afterDistCount = self.currentPointCount
 
             // GPU 포인트 바운딩 박스 분석
+            let finalCount = self.currentPointCount
             var gpuMin = SIMD3<Float>(repeating: .greatestFiniteMagnitude)
             var gpuMax = SIMD3<Float>(repeating: -.greatestFiniteMagnitude)
             var validCount = 0
             self.particlesBuffer.withUnsafeBufferPointer { buffer in
-                let n = min(afterDistCount, buffer.count)
+                let n = min(finalCount, buffer.count)
                 for i in 0..<n {
                     let p = buffer[i]
                     guard p.confidence >= 0 else { continue }
@@ -1056,7 +1117,7 @@ extension Renderer {
                 }
             }
             let gpuSpan = gpuMax - gpuMin
-            print("📊 [GPU 포인트] \(afterConfCount)개 (유효 \(validCount)개) | 범위: X=\(String(format: "%.2f", gpuSpan.x))m Y=\(String(format: "%.2f", gpuSpan.y))m Z=\(String(format: "%.2f", gpuSpan.z))m")
+            print("📊 [GPU 포인트] \(finalCount)개 (유효 \(validCount)개) | 범위: X=\(String(format: "%.2f", gpuSpan.x))m Y=\(String(format: "%.2f", gpuSpan.y))m Z=\(String(format: "%.2f", gpuSpan.z))m")
 
             if useSLAM {
                 // ═══════════════════════════════════════════
@@ -1091,10 +1152,10 @@ extension Renderer {
 
                 let elapsed = CFAbsoluteTimeGetCurrent() - startTime
                 let totalReduction = Float(originalCount - p4) / Float(max(originalCount, 1)) * 100
+                let confTh = self.pointCloudUniforms.confidenceThreshold
                 print("═══════════════════════════════════════")
                 print("🔬 Mobile-LIO 파이프라인 완료")
-                print("   0a.신뢰도: \(originalCount) → \(afterConfCount) (conf≥\(confThreshold))")
-                print("   0b.거리:  \(afterConfCount) → \(afterDistCount) (원점기준)")
+                print("   0.필터: \(originalCount) → \(afterDistCount) (conf≥\(confTh), dist)")
                 print("   1.포즈보정: \(afterDistCount) → \(p1) [\(String(format: "%.2f", t1e))초]")
                 print("   2.씬닝:    \(p1) → \(p2) [\(String(format: "%.2f", t2e))초]")
                 print("   3.복셀8mm: \(p2) → \(p3) [\(String(format: "%.2f", t3e))초]")
@@ -1103,10 +1164,10 @@ extension Renderer {
                 print("═══════════════════════════════════════")
             } else {
                 // ═══════════════════════════════════════════
-                // ARKit: confidence + 거리 필터만 적용
+                // ARKit: Apple 디폴트 conf + 거리 필터만
                 // ═══════════════════════════════════════════
                 let elapsed = CFAbsoluteTimeGetCurrent() - startTime
-                print("📱 ARKit: \(originalCount) → \(afterDistCount) (conf≥\(confThreshold), dist) [\(String(format: "%.1f", elapsed))초]")
+                print("📱 ARKit: \(originalCount) → \(self.currentPointCount) (conf≥Medium, dist) [\(String(format: "%.1f", elapsed))초]")
             }
 
             // GPU 렌더 재개
@@ -1148,9 +1209,9 @@ extension Renderer {
     }
 
     private func applySLAMPoseCorrection() {
-        // Paper branch: SLAM pose = final pose (no ARKit anchoring),
-        // so ARKit↔SLAM pose correction is not applicable.
-        print("📊 [Paper] SLAM 포즈 보정 생략 (ARKit 의존성 제거됨)")
+        // Paper branch: SLAM 포즈를 실시간으로 localToWorld에 직접 사용하므로
+        // 후처리 ARKit↔SLAM 보정 불필요.
+        print("📊 [Paper] SLAM 포즈 직접 사용 — 후처리 보정 불필요")
         return
 
         guard poseCorrectionLog.count >= 2 else {

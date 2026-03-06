@@ -1,13 +1,17 @@
 /* Premium Popup */
 "premium_title" = "Enjoying the app?";
-"premium_subtitle" = "How about buying the developer a donut?";
+"premium_subtitle" = "Support the developer and unlock Premium!";
 "premium_feature_imu" = "Real-time IMU Data (Roll / Pitch / Yaw, Accel)";
 "premium_feature_odometry" = "Odometry Path Visualization";
 "premium_feature_icon" = "Premium App Icon";
 "premium_feature_no_ads" = "Remove All Ads";
 "premium_feature_export" = "IMU, Trajectory & Video Export";
-"premium_unlock" = "Unlock Premium";
-"premium_restore" = "Already purchased? Restore";
+"premium_buy_coffee" = "Buy Me a Coffee";
+"premium_enter_code" = "Already supported? Enter code";
+"premium_code_success" = "Premium activated!";
+"premium_code_fail" = "Invalid code.";
+"premium_code_hint" = "Premium code will be shown after your support!";
+"premium_code_prompt" = "Enter the code you received after supporting.";
 
 /* Status Labels */
 "status_ready" = "Tap to start scanning\n↓";
@@ -46,16 +50,6 @@
 "developer_copy_hint" = "Tap to copy account number";
 "developer_usdt" = "Donate via USDT (TRC-20)";
 "developer_website" = "Developer Website";
-
-/* In-App Purchase States */
-"iap_loading" = "Loading product info...";
-"iap_retry" = "Retry";
-"iap_restore" = "Restore Purchase";
-"iap_load_failed" = "Unable to load product info. Please check your network and try again.";
-"iap_product_unavailable" = "Product unavailable.";
-"iap_pending" = "Purchase is pending approval.";
-"iap_purchase_failed" = "Purchase failed: %@";
-"iap_restore_empty" = "No purchases to restore.";
 
 /* Premium Export Path */
 "premium_export_path" = "CSV and video files are saved to Files app > On My iPhone > DepthViz";

@@ -30,16 +30,16 @@ DepthViz is an iOS application that transforms your iPhone into a professional-g
 
 ---
 
-## 🚀 Latest Release: V2
+## 🚀 Latest Release: 2.0
 
-**Release Date:** October 2025  
+**Release Date:** March 2026
 
 **What's New:**
 - Completely revamped UI/UX design for smoother navigation
 - Major performance and stability improvements
 - Fixed scanning & file management bugs
 - Now available on the [App Store](https://apps.apple.com/app/depthviz/id6754522044) 🎉
-
+- 2.0 Released. Please Upadate at iOS Store.
 ---
 
 ## 🏅 Awards & Recognition

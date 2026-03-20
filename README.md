@@ -39,7 +39,7 @@ DepthViz is an iOS application that transforms your iPhone into a professional-g
 - Major performance and stability improvements
 - Fixed scanning & file management bugs
 - Now available on the [App Store](https://apps.apple.com/app/depthviz/id6754522044) 🎉
-- 2.0 Released. Please Upadate at iOS Store.
+- 2.2 Released. Please Upadate at iOS Store.
 ---
 
 ## 🏅 Awards & Recognition

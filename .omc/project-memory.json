@@ -1,0 +1,422 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1773661779372,
+  "projectRoot": "/Users/caz/Downloads/DepthViz_Final_real",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "DepthViz": {
+      "path": "DepthViz",
+      "purpose": null,
+      "fileCount": 11,
+      "lastAccessed": 1773661779361,
+      "keyFiles": [
+        "AppDelegate.swift",
+        "DepthViz.entitlements",
+        "Info.plist",
+        "LaunchScreen.storyboard",
+        "SceneDelegate.swift"
+      ]
+    },
+    "DepthViz.xcodeproj": {
+      "path": "DepthViz.xcodeproj",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1773661779361,
+      "keyFiles": [
+        "project.pbxproj",
+        "project.pbxproj.backup.1768473655"
+      ]
+    },
+    "DepthViz.xcworkspace": {
+      "path": "DepthViz.xcworkspace",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1773661779362,
+      "keyFiles": [
+        "contents.xcworkspacedata"
+      ]
+    },
+    "Pods": {
+      "path": "Pods",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1773661779362,
+      "keyFiles": [
+        "Manifest.lock"
+      ]
+    },
+    "Super-LIO-ros1": {
+      "path": "Super-LIO-ros1",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1773661779363,
+      "keyFiles": [
+        "LICENSE",
+        "README.md"
+      ]
+    },
+    "appremium": {
+      "path": "appremium",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1773661779364,
+      "keyFiles": [
+        "appstore.png",
+        "playstore.png"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1773661779364,
+      "keyFiles": [
+        "DV-SLAM_Mathematical_Foundation.md"
+      ]
+    },
+    "fast-livo2": {
+      "path": "fast-livo2",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1773661779364,
+      "keyFiles": [
+        "CMakeLists.txt",
+        "LICENSE",
+        "README.md",
+        "package.xml"
+      ]
+    },
+    "opencv.framework": {
+      "path": "opencv.framework",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1773661779365,
+      "keyFiles": []
+    },
+    "pcl-superbuild": {
+      "path": "pcl-superbuild",
+      "purpose": null,
+      "fileCount": 10,
+      "lastAccessed": 1773661779365,
+      "keyFiles": [
+        "CMakeLists.txt",
+        "PCL.podspec",
+        "README.md",
+        "build_ios.sh",
+        "external-project-macros.cmake"
+      ]
+    },
+    "simulator": {
+      "path": "simulator",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1773661779365,
+      "keyFiles": [
+        "CMakeLists.txt"
+      ]
+    },
+    "DepthViz/Data": {
+      "path": "DepthViz/Data",
+      "purpose": "Data files",
+      "fileCount": 1,
+      "lastAccessed": 1773661779366,
+      "keyFiles": [
+        "UserModel.swift"
+      ]
+    },
+    "Super-LIO-ros1/docs": {
+      "path": "Super-LIO-ros1/docs",
+      "purpose": "Documentation",
+      "fileCount": 3,
+      "lastAccessed": 1773661779368,
+      "keyFiles": [
+        "datasets_compressed.png",
+        "device.png",
+        "system_overview.png"
+      ]
+    },
+    "Super-LIO-ros1/src": {
+      "path": "Super-LIO-ros1/src",
+      "purpose": "Source code",
+      "fileCount": 1,
+      "lastAccessed": 1773661779369,
+      "keyFiles": []
+    },
+    "fast-livo2/config": {
+      "path": "fast-livo2/config",
+      "purpose": "Configuration files",
+      "fileCount": 8,
+      "lastAccessed": 1773661779369,
+      "keyFiles": [
+        "HILTI22.yaml",
+        "MARS_LVIG.yaml",
+        "NTU_VIRAL.yaml"
+      ]
+    },
+    "pcl-superbuild/build": {
+      "path": "pcl-superbuild/build",
+      "purpose": "Build output",
+      "fileCount": 4,
+      "lastAccessed": 1773661779370,
+      "keyFiles": [
+        "CMakeCache.txt",
+        "Makefile",
+        "cmake_install.cmake"
+      ]
+    },
+    "simulator/scripts": {
+      "path": "simulator/scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 1,
+      "lastAccessed": 1773661779370,
+      "keyFiles": [
+        "batch_eval.sh"
+      ]
+    },
+    "simulator/src": {
+      "path": "simulator/src",
+      "purpose": "Source code",
+      "fileCount": 5,
+      "lastAccessed": 1773661779370,
+      "keyFiles": [
+        "OfflineRunner.cpp",
+        "OfflineRunner.h",
+        "ScanNetLoader.cpp"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "paper/bare_jrnl_new_sample4.tex",
+      "accessCount": 22,
+      "lastAccessed": 1773663172819,
+      "type": "file"
+    },
+    {
+      "path": "paper/sections/03_method.tex",
+      "accessCount": 14,
+      "lastAccessed": 1773663326044,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 12,
+      "lastAccessed": 1773663138518,
+      "type": "directory"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz",
+      "accessCount": 11,
+      "lastAccessed": 1773663258997,
+      "type": "directory"
+    },
+    {
+      "path": "paper/sections/05_discussion.tex",
+      "accessCount": 11,
+      "lastAccessed": 1773663326272,
+      "type": "file"
+    },
+    {
+      "path": "paper",
+      "accessCount": 8,
+      "lastAccessed": 1773663100253,
+      "type": "directory"
+    },
+    {
+      "path": "paper/sections",
+      "accessCount": 8,
+      "lastAccessed": 1773663277459,
+      "type": "directory"
+    },
+    {
+      "path": "paper/sections/02_related_work.tex",
+      "accessCount": 8,
+      "lastAccessed": 1773663324978,
+      "type": "file"
+    },
+    {
+      "path": "paper/sections/04_experiments.tex",
+      "accessCount": 8,
+      "lastAccessed": 1773663325913,
+      "type": "file"
+    },
+    {
+      "path": "paper/sections/01_abstract_intro.tex",
+      "accessCount": 7,
+      "lastAccessed": 1773663324746,
+      "type": "file"
+    },
+    {
+      "path": "situation_brief.md",
+      "accessCount": 5,
+      "lastAccessed": 1773662931613,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/src/DV_ESKF.cpp",
+      "accessCount": 5,
+      "lastAccessed": 1773663248197,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/src/DV_LIOBackend.cpp",
+      "accessCount": 5,
+      "lastAccessed": 1773663248698,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/include/DV_Types.h",
+      "accessCount": 5,
+      "lastAccessed": 1773663249660,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/include/DV_ESKF.h",
+      "accessCount": 4,
+      "lastAccessed": 1773662915947,
+      "type": "file"
+    },
+    {
+      "path": "change.md",
+      "accessCount": 4,
+      "lastAccessed": 1773662931507,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/src/DV_VIOManager.cpp",
+      "accessCount": 4,
+      "lastAccessed": 1773663249160,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/src/DepthVizEngine.cpp",
+      "accessCount": 3,
+      "lastAccessed": 1773662896832,
+      "type": "file"
+    },
+    {
+      "path": "math.md",
+      "accessCount": 3,
+      "lastAccessed": 1773662906025,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/include/DV_VoxelHashMap.h",
+      "accessCount": 3,
+      "lastAccessed": 1773662915025,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/include/DV_RobustKernels.h",
+      "accessCount": 3,
+      "lastAccessed": 1773662915425,
+      "type": "file"
+    },
+    {
+      "path": "EXPERIMENTS.md",
+      "accessCount": 3,
+      "lastAccessed": 1773663087132,
+      "type": "file"
+    },
+    {
+      "path": "todo_work.md",
+      "accessCount": 2,
+      "lastAccessed": 1773661943340,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/include/DV_LIOBackend.h",
+      "accessCount": 2,
+      "lastAccessed": 1773662306474,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/include/DV_VIOManager.h",
+      "accessCount": 2,
+      "lastAccessed": 1773662311187,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/include/DepthVizEngine.hpp",
+      "accessCount": 2,
+      "lastAccessed": 1773662312614,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/src/DV_OfflineEvaluator.cpp",
+      "accessCount": 2,
+      "lastAccessed": 1773662312977,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/include/DV_OfflineEvaluator.h",
+      "accessCount": 2,
+      "lastAccessed": 1773662313448,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz",
+      "accessCount": 1,
+      "lastAccessed": 1773661974944,
+      "type": "directory"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/DepthViz/include",
+      "accessCount": 1,
+      "lastAccessed": 1773662328666,
+      "type": "directory"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm",
+      "accessCount": 1,
+      "lastAccessed": 1773662355289,
+      "type": "directory"
+    },
+    {
+      "path": "DepthViz/Domain",
+      "accessCount": 1,
+      "lastAccessed": 1773662356638,
+      "type": "directory"
+    },
+    {
+      "path": "DepthViz/Domain/Algorithm/Bridge/SLAMService.mm",
+      "accessCount": 1,
+      "lastAccessed": 1773662405176,
+      "type": "file"
+    },
+    {
+      "path": "DepthViz/Domain/Renderer.swift",
+      "accessCount": 1,
+      "lastAccessed": 1773662405780,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

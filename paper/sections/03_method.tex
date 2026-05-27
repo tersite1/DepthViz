@@ -1,0 +1,547 @@
+%% ============================================================
+%% NOTE: This section requires the following NEW bibliography entries
+%% (not in the original bare_jrnl_new_sample4.tex):
+%%   \bibitem{shi1994good}
+%%   J.~Shi and C.~Tomasi, ``Good features to track,'' in \textit{Proc. IEEE
+%%   Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 1994, pp.~593--600.
+%%
+%%   \bibitem{lucas1981iterative}
+%%   B.~D.~Lucas and T.~Kanade, ``An iterative image registration technique
+%%   with an application to stereo vision,'' in \textit{Proc. Int. Joint Conf.
+%%   Artif. Intell. (IJCAI)}, 1981, pp.~674--679.
+%%
+%%   \bibitem{bouguet2001pyramidal}
+%%   J.-Y.~Bouguet, ``Pyramidal implementation of the Lucas Kanade feature
+%%   tracker: Description of the algorithm,'' Intel Corp., Microprocessor
+%%   Research Labs, Tech. Rep., 2001.
+%% ============================================================
+\section{Method}
+\label{sec:method}
+%% ============================================================
+
+DV-SLAM takes three sensor inputs: (i)~a sparse dToF depth map with per-pixel confidence metadata, (ii)~6-axis IMU at ${\geq}100$\,Hz, and (iii)~monocular camera images at 30\,Hz.
+Fig.~\ref{fig:pipeline} shows the pipeline: IMU samples drive ESKF prediction at 100\,Hz; on each depth frame (30\,Hz), the point cloud is preprocessed by Bundle \& Discard and passed to point-to-plane ICP; visual features are tracked across camera frames and contribute reprojection residuals; both observation types update a single 18-dimensional ESKF.
+
+% ----------------------------------------------------------
+\subsection{Depth Back-Projection}
+\label{sec:backproj}
+% ----------------------------------------------------------
+
+We define three coordinate frames: the world frame $\mathcal{W}$ with gravity along $-y$, the body/IMU frame $\mathcal{B}$, and the camera frame $\mathcal{C}$ ($y$-down, $z$-forward).
+The camera--IMU extrinsic is approximated as identity ($\mathbf{T}_{\mathcal{C}\mathcal{B}} \approx \mathbf{I}$); on typical dToF-equipped smartphones the lever arm is 5--10\,mm, within the dToF noise floor at typical angular velocities.
+
+Each captured frame provides a depth map $\mathbf{D} \in \mathbb{R}^{H \times W}$ ($256 \times 192$ on our test device) and a per-pixel confidence map $\mathbf{C} \in \{0,1,2\}^{H \times W}$.
+Camera intrinsics $\mathbf{K}$ are rescaled from capture resolution to depth resolution:
+\begin{equation}
+    f'_x = f_x \cdot \frac{W_\text{depth}}{W_\text{cam}}, \quad
+    c'_x = c_x \cdot \frac{W_\text{depth}}{W_\text{cam}}
+    \label{eq:intrinsic_scale}
+\end{equation}
+and analogously for $y$.
+At stride $s{=}4$ pixels, each depth pixel $(u,v)$ with depth $d = \mathbf{D}[v,u] > 0$ is back-projected to a camera-frame point:
+\begin{equation}
+    \mathbf{p}_i^{\mathcal{C}} = \begin{bmatrix}
+        (u - c'_x)\,d\,/\,f'_x \\[2pt]
+        (v - c'_y)\,d\,/\,f'_y \\[2pt]
+        d
+    \end{bmatrix}
+    \label{eq:backproj}
+\end{equation}
+yielding ${\sim}3{,}000$ candidate points per frame.
+
+\textbf{Hard gate.}
+Points with confidence $c_i = 0$ are discarded immediately.
+This removes measurements from transparent surfaces, specular reflections, and out-of-range regions where the SPAD photon-count SNR is insufficient.
+Points with $\|\mathbf{p}_i\|^2 > 100$ ($>$10\,m) or containing NaN are also rejected.
+
+Unlike mechanical scanning LiDARs, the dToF sensor captures the full depth image simultaneously (flash operation)~\cite{luetzenburg2021evaluation}, eliminating the need for intra-frame motion compensation (de-skewing).
+
+Table~\ref{tab:confidence_levels} summarizes the three confidence levels and their pipeline treatment.
+
+\begin{table}[t]
+    \centering
+    \caption{dToF confidence levels and pipeline treatment.}
+    \label{tab:confidence_levels}
+    \setlength{\tabcolsep}{3pt}
+    \footnotesize
+    \begin{tabular}{lcccl}
+        \toprule
+        Level & Value & Depth noise & Proportion & Action \\
+        \midrule
+        High   & 2 & ${\sim}1$\,cm   & 40--50\% & Full weight ($w{=}1.0$) \\
+        Medium & 1 & ${\sim}2$--3\,cm & 30--40\% & Reduced ($w{=}0.5$) \\
+        Low    & 0 & $>$3\,cm         & 10--20\% & Hard reject \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% ----------------------------------------------------------
+\subsection{Bundle \& Discard}
+\label{sec:bundle_discard}
+% ----------------------------------------------------------
+
+The ${\sim}2{,}400$ post-gate points undergo adaptive reduction that jointly considers spatial density and measurement confidence.
+
+\textbf{Step~1: Spatial hashing.}
+Each point is assigned to a voxel of side length $l_v = 30$\,mm via a spatial hash:
+\begin{equation}
+    h(\mathbf{p}) = \left\lfloor p_x / l_v \right\rfloor
+                  + \left\lfloor p_y / l_v \right\rfloor \cdot 10^4
+                  + \left\lfloor p_z / l_v \right\rfloor \cdot 10^8
+    \label{eq:bd_hash}
+\end{equation}
+which maps to an \texttt{int64} key with negligible collision probability within the ${\sim}5$\,m dToF range.
+
+\textbf{Step~2: Density gate.}
+Voxels containing fewer than $\tau_d$ points are discarded.
+Isolated points in sparse voxels are disproportionately likely to be noise.
+
+\textbf{Step~3: Confidence gate.}
+Voxels whose mean confidence $\bar{c}_j = \frac{1}{n_j}\sum_{i \in V_j} c_i$ falls below a threshold $\tau_c$ are discarded.
+This removes spatially coherent but unreliable regions (e.g., distant reflective surfaces).
+
+\textbf{Step~4: Centroid emission.}
+Each surviving voxel emits a single representative point:
+\begin{equation}
+    \bar{\mathbf{p}}_j = \frac{1}{n_j}\sum_{i \in V_j} \mathbf{p}_i, \qquad
+    \bar{c}_j = \frac{1}{n_j}\sum_{i \in V_j} c_i
+    \label{eq:centroid}
+\end{equation}
+tagged with the mean confidence of the voxel.
+RGB is averaged analogously for optional colorization.
+
+The cascade reduces ${\sim}2{,}400$ post-gate points to ${\sim}200$--500 high-quality correspondences---an 80--90\% reduction---while preserving geometric diversity across the field of view.
+The key distinction from standard voxel downsampling is that density \emph{and} confidence jointly determine survival: a dense cluster of Medium-confidence points on glass is discarded, while sparse but High-confidence points on a diffuse wall are retained.
+The entire step runs in $O(N)$ time via hash-map accumulation with no nearest-neighbor search.
+
+% ----------------------------------------------------------
+\subsection{Error-State Kalman Filter}
+\label{sec:eskf}
+% ----------------------------------------------------------
+
+We adopt the iterated ESKF formulation of FAST-LIO2~\cite{xu2022fastlio2} on the 18-dimensional state
+\begin{equation}
+    \mathbf{x} = \bigl[\,\mathbf{R},\;\mathbf{p},\;\mathbf{v},\;\mathbf{b}_g,\;\mathbf{b}_a,\;\mathbf{g}\,\bigr]
+    \;\in\; SO(3) \times \mathbb{R}^{15}
+    \label{eq:state}
+\end{equation}
+where $\mathbf{R} \in SO(3)$ is the body-to-world rotation, $\mathbf{p},\mathbf{v} \in \mathbb{R}^3$ are position and velocity in $\mathcal{W}$, $\mathbf{b}_g,\mathbf{b}_a \in \mathbb{R}^3$ are gyroscope and accelerometer biases, and $\mathbf{g} \in \mathbb{R}^3$ is the gravity vector (initialized to $[0,-9.81,0]^\top$, refined online).
+
+The error state $\delta\mathbf{x} \in \mathbb{R}^{18}$ follows the ordering
+$[\delta\boldsymbol{\theta},\,\delta\mathbf{p},\,\delta\mathbf{v},\,\delta\mathbf{b}_g,\,\delta\mathbf{b}_a,\,\delta\mathbf{g}]$,
+where the rotation error is parameterized as a right perturbation: $\hat{\mathbf{R}} = \mathbf{R}\,\mathrm{Exp}(\delta\boldsymbol{\theta})$.
+
+\subsubsection{Static Initialization}
+\label{sec:static_init}
+
+Before the filter can propagate, the initial rotation $\mathbf{R}_0$ aligning the body frame to the world gravity must be determined.
+We collect $K_\text{init} = 30$ IMU samples while the device is approximately stationary.
+The mean accelerometer reading $\bar{\mathbf{a}}$ (reaction to gravity) gives the measured gravity direction $\hat{\mathbf{g}}_m = -\bar{\mathbf{a}} / \|\bar{\mathbf{a}}\|$.
+The initial rotation is found via the axis-angle between $\hat{\mathbf{g}}_m$ and the world gravity direction $\hat{\mathbf{g}}_w = [0,-1,0]^\top$:
+\begin{equation}
+    \mathbf{R}_0 = \mathrm{Exp}\!\left(\frac{\hat{\mathbf{g}}_m \times \hat{\mathbf{g}}_w}{\|\hat{\mathbf{g}}_m \times \hat{\mathbf{g}}_w\|}\;\arccos(\hat{\mathbf{g}}_m \cdot \hat{\mathbf{g}}_w)\right)
+    \label{eq:static_init}
+\end{equation}
+If $\|\bar{\mathbf{a}}\| \notin [8,12]$\,m/s$^2$, the device is likely in motion and initialization is deferred.
+The initial covariance is $\mathbf{P}_0 = 10^{-4}\,\mathbf{I}_{18}$, except $\mathbf{P}_{15{:}18,15{:}18} = \mathbf{I}_3$ (large initial gravity uncertainty).
+
+\subsubsection{IMU Prediction}
+\label{sec:imu_predict}
+
+At each IMU sample (${\sim}100$\,Hz), we propagate the nominal state via midpoint integration.
+Given bias-corrected measurements
+\begin{equation}
+    \boldsymbol{\omega} = \tilde{\boldsymbol{\omega}} - \mathbf{b}_g, \qquad
+    \mathbf{a} = \tilde{\mathbf{a}} - \mathbf{b}_a
+    \label{eq:bias_correct}
+\end{equation}
+the rotation is integrated as
+\begin{align}
+    \Delta\mathbf{R} &= \mathrm{Exp}(\boldsymbol{\omega}\,\Delta t) \label{eq:rot_int} \\
+    \mathbf{R}_{k+1} &= \mathbf{R}_k \cdot \Delta\mathbf{R} \label{eq:rot_update}
+\end{align}
+The world-frame acceleration uses a midpoint rotation for second-order accuracy:
+\begin{equation}
+    \mathbf{R}_\text{mid} = \mathbf{R}_k \cdot \mathrm{Exp}\!\left(\frac{\boldsymbol{\omega}\,\Delta t}{2}\right), \qquad
+    \mathbf{a}^{\mathcal{W}} = \mathbf{R}_\text{mid}\,\mathbf{a} + \mathbf{g}
+    \label{eq:midpoint}
+\end{equation}
+Position and velocity are updated as
+\begin{align}
+    \mathbf{p}_{k+1} &= \mathbf{p}_k + \mathbf{v}_k\,\Delta t + \tfrac{1}{2}\,\mathbf{a}^{\mathcal{W}}\,\Delta t^2 \label{eq:pos_update} \\
+    \mathbf{v}_{k+1} &= \mathbf{v}_k + \mathbf{a}^{\mathcal{W}}\,\Delta t \label{eq:vel_update}
+\end{align}
+A velocity magnitude clamp $\|\mathbf{v}\| \leq v_\text{max} = 0.5$\,m/s prevents runaway drift during extended IMU-only intervals in the indoor handheld scanning use case.
+
+\subsubsection{Error-State Transition}
+\label{sec:error_transition}
+
+The error-state transition matrix $\mathbf{F} \in \mathbb{R}^{18 \times 18}$ has the block structure
+\begin{equation}
+    \mathbf{F} = \begin{bmatrix}
+        \Delta\mathbf{R}^\top & \mathbf{0} & \mathbf{0} & -\mathbf{I}\Delta t & \mathbf{0} & \mathbf{0} \\
+        -\mathbf{R}\,[\mathbf{a}]_\times \frac{\Delta t^2}{2} & \mathbf{I} & \mathbf{I}\Delta t & \mathbf{0} & -\mathbf{R}\frac{\Delta t^2}{2} & \mathbf{I}\frac{\Delta t^2}{2} \\[3pt]
+        -\mathbf{R}\,[\mathbf{a}]_\times \Delta t & \mathbf{0} & \mathbf{I} & \mathbf{0} & -\mathbf{R}\,\Delta t & \mathbf{I}\,\Delta t \\
+        \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{I} & \mathbf{0} & \mathbf{0} \\
+        \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{I} & \mathbf{0} \\
+        \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{0} & \mathbf{I}
+    \end{bmatrix}
+    \label{eq:F_matrix}
+\end{equation}
+where $\mathbf{R} = \mathbf{R}_k$ and $[\mathbf{a}]_\times$ is the skew-symmetric matrix of the bias-corrected acceleration.
+The process noise covariance is
+\begin{equation}
+    \mathbf{Q} = \mathrm{diag}\!\left(
+        \sigma_g^2\Delta t,\;
+        \sigma_a^2\frac{\Delta t^3}{4},\;
+        \sigma_a^2\Delta t,\;
+        \sigma_{bg}^2\Delta t,\;
+        \sigma_{ba}^2\Delta t,\;
+        10^{-10}
+    \right) \otimes \mathbf{I}_3
+    \label{eq:Q_matrix}
+\end{equation}
+and the covariance propagation follows $\mathbf{P}_{k+1} = \mathbf{F}\,\mathbf{P}_k\,\mathbf{F}^\top + \mathbf{Q}$.
+IMU noise parameters ($\sigma_g, \sigma_a, \sigma_{bg}, \sigma_{ba}$) are listed in Table~\ref{tab:parameters}.
+
+% ----------------------------------------------------------
+\subsection{Point-to-Plane ICP}
+\label{sec:icp}
+% ----------------------------------------------------------
+
+At each keyframe, the bundled points are used to construct an observation function for the ESKF.
+A keyframe is declared when translation exceeds $\tau_p$ or rotation exceeds $\tau_r$ from the last keyframe (Table~\ref{tab:parameters}).
+
+\subsubsection{Map Structure}
+\label{sec:map}
+
+The global map is a voxel hash map with voxel size $l_m = 100$\,mm and a capacity of $M_\text{max} = 500{,}000$ voxels.
+Each voxel stores up to 20 points in a fixed-size array, avoiding heap allocation on the hot path.
+Insertion is $O(1)$ via the same spatial hash as~\eqref{eq:bd_hash} but computed at the map voxel scale.
+When the voxel count reaches $M_\text{max}$, the oldest 10\% of voxels (by access timestamp) are evicted via LRU.
+
+In contrast to FAST-LIO2's ikd-tree, which requires $O(\log n)$ re-balancing on insertion and deletion, the voxel hash map trades exact nearest-neighbor guarantees for $O(1)$ amortized insert and bounded memory---a favorable trade-off on mobile SoCs where cache locality and deterministic latency are critical.
+
+\subsubsection{Correspondence Search and Plane Fitting}
+\label{sec:correspondence}
+
+Each bundled point $\mathbf{p}_i^{\mathcal{C}}$ is transformed to the world frame using the current ESKF state:
+\begin{equation}
+    \mathbf{p}_i^{\mathcal{W}} = \mathbf{R}\,\mathbf{p}_i^{\mathcal{C}} + \mathbf{p}
+    \label{eq:body_to_world}
+\end{equation}
+The $K{=}5$ nearest neighbors are retrieved by searching a $5 \times 5 \times 5$ voxel neighborhood ($\pm 2$ voxels, i.e., $\pm 0.2$\,m at $l_m = 100$\,mm).
+A local plane $(\mathbf{n}_j, \bar{\mathbf{q}}_j)$ is fitted via PCA of the $K$ neighbors: the eigenvector of the covariance matrix
+\begin{equation}
+    \boldsymbol{\Sigma} = \frac{1}{K}\sum_{k=1}^{K}
+        (\mathbf{q}_k - \bar{\mathbf{q}})(\mathbf{q}_k - \bar{\mathbf{q}})^\top
+    \label{eq:pca_cov}
+\end{equation}
+corresponding to the smallest eigenvalue $\lambda_0$ gives the normal $\mathbf{n}_j$, and $\bar{\mathbf{q}}_j$ is the centroid.
+A planarity check rejects non-planar regions:
+\begin{equation}
+    \frac{\lambda_0}{\lambda_1} > \tau_\text{plan} \quad\Longrightarrow\quad \text{reject}
+    \label{eq:planarity}
+\end{equation}
+where $\lambda_1$ is the second-smallest eigenvalue.
+Correspondences with $\|\mathbf{p}_i^{\mathcal{W}} - \bar{\mathbf{q}}_j\| > 0.3$\,m are also rejected.
+
+\subsubsection{Observation Model}
+\label{sec:obs_model}
+
+The signed point-to-plane residual is
+\begin{equation}
+    r_i = \mathbf{n}_j^\top\!\left(\mathbf{R}\,\mathbf{p}_i^{\mathcal{C}} + \mathbf{p} - \bar{\mathbf{q}}_j\right)
+    \label{eq:residual}
+\end{equation}
+Linearizing~\eqref{eq:residual} with respect to the error state via the right perturbation $\mathbf{R} \to \mathbf{R}\,\mathrm{Exp}(\delta\boldsymbol{\theta})$ and the identity $[\delta\boldsymbol{\theta}]_\times\,\mathbf{p} = -[\mathbf{p}]_\times\,\delta\boldsymbol{\theta}$ yields the $1 \times 18$ Jacobian:
+\begin{equation}
+    \mathbf{H}_i = \bigl[\;
+        \underbrace{-\mathbf{n}_j^\top\mathbf{R}\,[\mathbf{p}_i^{\mathcal{C}}]_\times}_{1 \times 3},\;\;
+        \underbrace{\mathbf{n}_j^\top}_{1 \times 3},\;\;
+        \underbrace{\mathbf{0}_{1 \times 12}}_{\mathbf{v},\mathbf{b}_g,\mathbf{b}_a,\mathbf{g}}
+    \;\bigr]
+    \label{eq:jacobian}
+\end{equation}
+
+\subsubsection{Robust Weighting}
+\label{sec:robust}
+
+Each observation receives a combined weight $w_i = w_i^\text{conf} \cdot w_i^\text{TLS}$.
+The confidence weight maps the dToF hardware quality signal:
+\begin{equation}
+    w_i^\text{conf} = \begin{cases}
+        1.0 & c_i \geq 1.5 \;\text{(High)} \\
+        0.5 & c_i \geq 0.5 \;\text{(Medium)} \\
+        0.0 & \text{otherwise (discarded)}
+    \end{cases}
+    \label{eq:conf_weight}
+\end{equation}
+The truncated least squares (TLS) kernel hard-rejects outliers:
+\begin{equation}
+    w_i^\text{TLS} = \begin{cases}
+        1 & |r_i| \leq \tau_\text{TLS} \\
+        0 & \text{otherwise}
+    \end{cases}
+    \label{eq:tls}
+\end{equation}
+with $\tau_\text{TLS} = 100$\,mm (${\sim}3\times$ the high-confidence dToF noise).
+The combined weight enters the diagonal observation noise covariance:
+\begin{equation}
+    \mathbf{R}_\text{obs}(i,i) = \frac{\sigma_\text{base}^2}{\max(w_i,\,\epsilon)}, \qquad
+    \sigma_\text{base} = 10\,\text{mm},\;\; \epsilon = 0.01
+    \label{eq:Robs}
+\end{equation}
+High-confidence points ($w_i = 1$) receive the baseline noise $\sigma_\text{base}^2$; Medium-confidence points ($w_i = 0.5$) receive $2\sigma_\text{base}^2$, halving their influence on the Kalman gain.
+
+\subsubsection{Stride Sampling}
+\label{sec:stride}
+
+To bound the computational cost of the LDLT decomposition of $\mathbf{S} = \mathbf{H}\mathbf{P}\mathbf{H}^\top + \mathbf{R}_\text{obs} \in \mathbb{R}^{N \times N}$, which scales as $O(N^3)$, we cap the number of observations at $N_\text{max} = 100$.
+When more valid correspondences exist, they are stride-sampled to maintain spatial distribution:
+\begin{equation}
+    \text{stride} = \left\lceil N_\text{valid} / N_\text{max} \right\rceil
+    \label{eq:stride}
+\end{equation}
+This reduces the LDLT cost from $O(500^3) \approx 1.25 \times 10^8$ to $O(100^3) = 10^6$---a $125\times$ reduction.
+
+\subsubsection{Iterated Kalman Update}
+\label{sec:iekf}
+
+The ESKF update follows the iterated extended Kalman filter (IEKF) formulation~\cite{xu2022fastlio2,sola2017quaternion}.
+At each iteration $l = 1, \ldots, L_\text{max}$ (up to $L_\text{max} = 20$):
+
+\textbf{1) Re-linearize.}
+The observation function is re-evaluated at the current state estimate $\hat{\mathbf{x}}^{(l)}$, producing updated $\mathbf{H}^{(l)}$, $\mathbf{r}^{(l)}$, and $\mathbf{R}_\text{obs}^{(l)}$.
+
+\textbf{2) Compute Kalman gain.}
+Using the \emph{frozen} prediction covariance $\mathbf{P}_\text{pred}$ (not updated between iterations):
+\begin{align}
+    \mathbf{S} &= \mathbf{H}\,\mathbf{P}_\text{pred}\,\mathbf{H}^\top + \mathbf{R}_\text{obs} \label{eq:innovation_cov} \\
+    \mathbf{K} &= \mathbf{P}_\text{pred}\,\mathbf{H}^\top\,\mathbf{S}^{-1} \label{eq:kalman_gain}
+\end{align}
+$\mathbf{S}^{-1}$ is computed via LDLT decomposition for numerical stability.
+The key design choice is freezing $\mathbf{P}_\text{pred}$ across iterations: updating $\mathbf{P}$ within the IEKF loop would progressively shrink the covariance, causing later iterations to under-trust observations (gain $\mathbf{K} \to \mathbf{0}$).
+
+\textbf{3) Correct.}
+The error-state update and nominal-state injection are
+\begin{align}
+    \delta\mathbf{x} &= \mathbf{K}\,(-\mathbf{r}) \label{eq:dx} \\
+    \mathbf{R} &\leftarrow \mathbf{R} \cdot \mathrm{Exp}(\delta\boldsymbol{\theta}) \label{eq:rot_correct} \\
+    \mathbf{p} &\leftarrow \mathbf{p} + \delta\mathbf{p}, \quad
+    \mathbf{v} \leftarrow \mathbf{v} + \delta\mathbf{v}, \quad \text{etc.} \label{eq:state_correct}
+\end{align}
+where the negated residual $-\mathbf{r}$ follows the convention $\delta\mathbf{x} = \mathbf{K}(\mathbf{z} - h(\hat{\mathbf{x}}))$: a positive residual $r_i > 0$ means the point is above the plane, requiring a correction ``downward.''
+
+\textbf{4) Convergence check.}
+If $\|\delta\mathbf{x}\| < \epsilon_\text{quit} = 10^{-6}$, the iteration terminates early.
+
+\textbf{5) Non-convergence rejection.}
+If $\|\delta\mathbf{x}\| > 0.01$ after $L_\text{max}$ iterations, the entire observation is rejected and the state and covariance are restored to their pre-update values.
+Accepting a non-converged partial correction risks gravity misalignment and runaway drift.
+
+After convergence, the covariance is updated once using the Joseph form for numerical stability:
+\begin{equation}
+    \mathbf{P} = (\mathbf{I} - \mathbf{K}\mathbf{H})\,\mathbf{P}_\text{pred}\,(\mathbf{I} - \mathbf{K}\mathbf{H})^\top + \mathbf{K}\,\mathbf{R}_\text{obs}\,\mathbf{K}^\top
+    \label{eq:joseph}
+\end{equation}
+followed by symmetry enforcement $\mathbf{P} \leftarrow \tfrac{1}{2}(\mathbf{P} + \mathbf{P}^\top)$.
+
+% ----------------------------------------------------------
+\subsection{Visual Feature Tracking}
+\label{sec:visual}
+% ----------------------------------------------------------
+
+Visual features provide additional constraints between keyframes, improving robustness during fast rotation and in geometrically degenerate scenes where point-to-plane ICP is under-constrained.
+
+\subsubsection{Feature Detection and Tracking}
+
+We use Shi-Tomasi corner detection~\cite{shi1994good} with grid-based distribution: the image is divided into a grid, and the strongest corner (minimum eigenvalue of the structure tensor) is selected per unoccupied cell, up to $N_\text{feat} = 80$ features.
+This ensures spatial spread without expensive non-maximum suppression.
+
+Features are tracked across frames using pyramidal Lucas-Kanade (LK) optical flow~\cite{lucas1981iterative,bouguet2001pyramidal} with $L_\text{pyr} = 3$ pyramid levels and $11 \times 11$ search windows.
+Outliers are rejected via a forward-backward consistency check: tracking forward ($I_{k-1} \to I_k$) then backward ($I_k \to I_{k-1}$); features whose round-trip displacement exceeds $\tau_\text{FB} = 1.5$\,px are discarded.
+
+When the number of surviving features drops below $N_\text{min,feat} = 30$, new features are detected in unoccupied grid cells.
+
+\subsubsection{3D Initialization via dToF Depth}
+
+Each detected feature at pixel $(u,v)$ is mapped to the dToF depth map (after coordinate rescaling).
+If a valid depth $d \in [0.1, 5.0]$\,m is available, the feature is unprojected to a camera-frame 3D point using the working intrinsics:
+\begin{equation}
+    \mathbf{p}_\text{cam} = \begin{bmatrix}
+        (u - c_x)\,d\,/\,f_x \\[2pt]
+        -(v - c_y)\,d\,/\,f_y \\[2pt]
+        -d
+    \end{bmatrix}
+    \label{eq:vis_unproj}
+\end{equation}
+where the sign conventions ($y$ negated, $z$ negated) convert from the image-plane convention ($y$-down, $z$-forward) to the body frame ($y$-up, $z$-backward).
+This point is then transformed to a world-frame landmark $\mathbf{l}_j = \mathbf{R}\,\mathbf{p}_\text{cam} + \mathbf{p}$ using the current ESKF pose.
+The dToF depth provides stereo-free 3D initialization: no triangulation baseline is needed, and landmarks are initialized immediately at detection rather than after observing parallax.
+
+% ----------------------------------------------------------
+\subsection{Multi-Sensor ESKF Update}
+\label{sec:multi_update}
+% ----------------------------------------------------------
+
+Depth (ICP) and visual (reprojection) observations are processed as sequential ESKF updates within each frame, sharing a single filter state and covariance.
+
+\subsubsection{Visual Observation Model}
+
+For a landmark $\mathbf{l}_j$ with world-frame position $\mathbf{l}_j \in \mathbb{R}^3$, its camera-frame projection under state $(\mathbf{R}, \mathbf{p})$ is
+\begin{equation}
+    \mathbf{p}_c = \mathbf{R}^\top(\mathbf{l}_j - \mathbf{p})
+    \label{eq:world_to_cam}
+\end{equation}
+The projected pixel coordinates (with camera pointing along $-z$) are
+\begin{equation}
+    \hat{u} = -f_x \frac{X_c}{Z_c} + c_x, \qquad
+    \hat{v} = f_y \frac{Y_c}{Z_c} + c_y
+    \label{eq:projection}
+\end{equation}
+where $(X_c, Y_c, Z_c) = \mathbf{p}_c$. Points with $Z_c > -0.05$\,m (behind the camera) are rejected.
+
+The reprojection residual for the $j$-th feature observed at pixel $(u_j, v_j)$ is
+\begin{equation}
+    \mathbf{r}_j^\text{vis} = \begin{bmatrix} u_j - \hat{u}_j \\ v_j - \hat{v}_j \end{bmatrix}
+    \label{eq:vis_residual}
+\end{equation}
+with features whose reprojection error exceeds 50\,px rejected as outliers.
+
+The $2 \times 18$ Jacobian decomposes as $\mathbf{H}_j^\text{vis} = \mathbf{J}_\pi \cdot \mathbf{J}_\text{state}$, where
+\begin{equation}
+    \mathbf{J}_\pi = \begin{bmatrix}
+        -f_x/Z_c & 0 & f_x X_c/Z_c^2 \\
+        0 & f_y/Z_c & -f_y Y_c/Z_c^2
+    \end{bmatrix}
+    \label{eq:J_proj}
+\end{equation}
+is the projection Jacobian, and the state derivatives are
+\begin{equation}
+    \mathbf{H}_j^\text{vis} = \bigl[\;
+        \underbrace{\mathbf{J}_\pi\,[\mathbf{p}_c]_\times}_{2 \times 3},\;\;
+        \underbrace{-\mathbf{J}_\pi\,\mathbf{R}^\top}_{2 \times 3},\;\;
+        \underbrace{\mathbf{0}_{2 \times 12}}_{\mathbf{v},\mathbf{b}_g,\mathbf{b}_a,\mathbf{g}}
+    \;\bigr]
+    \label{eq:H_visual}
+\end{equation}
+The observation noise is $\sigma_\text{px}^2 = 4\;\text{px}^2$ (isotropic).
+
+\subsubsection{Update Ordering}
+
+In the processing loop (Fig.~\ref{fig:pipeline}), the per-frame update order is:
+\begin{enumerate}
+    \item IMU prediction (all samples since last frame).
+    \item Visual tracking (KLT) + ESKF visual update via~\eqref{eq:H_visual}.
+    \item Keyframe check; if triggered, ICP + ESKF depth update via~\eqref{eq:jacobian}.
+\end{enumerate}
+Both updates use the same ESKF \texttt{updateObserve()} interface: they construct the Jacobian $\mathbf{H}$, residual $\mathbf{r}$, and noise $\mathbf{R}_\text{obs}$, and the IEKF loop of Section~\ref{sec:iekf} runs identically.
+This modular design allows each sensor to be independently enabled or disabled for ablation.
+
+% ----------------------------------------------------------
+\subsection{Robustness Mechanisms}
+\label{sec:robustness}
+% ----------------------------------------------------------
+
+Several mechanisms prevent filter divergence in the sparse regime where individual ICP updates carry high uncertainty.
+
+\textbf{Map seeding.}
+The first $N_\text{seed} = 5$ keyframes insert points at the IMU-predicted pose without running ICP.
+A single-viewpoint map has rank-deficient geometry for point-to-plane ICP: normals from a single view span at most a hemisphere, leaving the along-view translation unobservable.
+Multi-viewpoint seeding builds geometric diversity before ICP begins.
+
+\textbf{Correction clamping.}
+Each ESKF correction $\delta\mathbf{x}$ is clamped per component:
+\begin{equation}
+    \|\delta\boldsymbol{\theta}\| \leq 5^\circ, \quad
+    \|\delta\mathbf{p}\| \leq 100\,\text{mm}, \quad
+    \|\delta\mathbf{v}\| \leq 0.3\,\text{m/s}
+    \label{eq:clamping}
+\end{equation}
+This prevents a single bad ICP match from causing a catastrophic pose jump.
+
+\textbf{ICP failure recovery.}
+When ICP fails (fewer than $N_\text{min} = 10$ valid correspondences or non-convergence), the state and covariance are fully restored to their pre-update values.
+Additionally, velocity is dampened by 50\% per failure to limit drift accumulation during IMU-only intervals.
+Points are \emph{not} inserted into the map on failure, preventing map corruption from misaligned observations.
+
+\textbf{Map reset.}
+After $N_\text{fail} = 10$ consecutive ICP failures, the voxel map is cleared and re-seeded from the current ESKF pose.
+The ESKF state (pose, velocity, biases) is preserved across the reset.
+
+% ----------------------------------------------------------
+\subsection{Map Management}
+\label{sec:map_mgmt}
+% ----------------------------------------------------------
+
+Refined keyframe points are inserted into the global voxel hash map after each successful ICP update.
+Each voxel cell stores up to 20 points in a fixed-size array ($20 \times 3 \times 4 = 240$\,bytes per cell), providing the local point density needed for PCA-based plane fitting (Section~\ref{sec:correspondence}).
+
+\textbf{LRU eviction.}
+When the map reaches $M_\text{max} = 500{,}000$ voxels, the oldest 10\% by access time are evicted via partial sort.
+This bounds memory to ${\sim}500\text{K} \times 240\,\text{B} \approx 120$\,MB and prevents unbounded growth during long scanning sessions.
+
+\textbf{Comparison with ikd-tree.}
+FAST-LIO2 uses an ikd-tree (incremental k-d tree) for nearest-neighbor queries with $O(\log n)$ search and $O(\log n)$ amortized insertion.
+The voxel hash map trades exact nearest-neighbor guarantees for $O(1)$ insert and $O(1)$ amortized lookup (via the $5^3$ neighborhood search).
+At the map voxel size of 100\,mm, each cell contains at most 20 points, so the in-cell linear scan is bounded.
+The practical advantage on a mobile SoC is deterministic latency: no tree re-balancing, no pointer chasing, and contiguous-memory voxel cells for cache efficiency.
+
+Table~\ref{tab:parameters} lists all DV-SLAM parameters; values were fixed across all experiments.
+
+\begin{table}[t]
+    \centering
+    \caption{DV-SLAM parameters (fixed across all experiments).}
+    \label{tab:parameters}
+    \setlength{\tabcolsep}{3pt}
+    \footnotesize
+    \begin{tabular}{llrl}
+        \toprule
+        Stage & Parameter & Value & Rationale \\
+        \midrule
+        \multicolumn{4}{l}{\textit{Bundle \& Discard (\S\ref{sec:bundle_discard})}} \\
+        & Voxel size $l_v$ & 30\,mm & Spatial binning \\
+        & Min.\ density $\tau_d$ & 1\,pt & Accept sparse dToF \\
+        & Mean conf.\ $\tau_c$ & 0.5 & Accept Medium \\
+        \midrule
+        \multicolumn{4}{l}{\textit{Keyframe (\S\ref{sec:icp})}} \\
+        & Transl.\ threshold $\tau_p$ & 50\,mm & Sufficient baseline \\
+        & Rot.\ threshold $\tau_r$ & $2^\circ$ & New geometry \\
+        \midrule
+        \multicolumn{4}{l}{\textit{ICP / IEKF (\S\ref{sec:icp})}} \\
+        & Nearest neighbors $K$ & 5 & Plane fitting \\
+        & Planarity $\tau_\text{plan}$ & 0.3 & $\lambda_0/\lambda_1$ \\
+        & Min.\ correspondences $N_\text{min}$ & 10 & Rank safety \\
+        & Max.\ observations $N_\text{max}$ & 100 & LDLT bound \\
+        & TLS threshold $\tau_\text{TLS}$ & 100\,mm & $3\times$ dToF noise \\
+        & Base noise $\sigma_\text{base}$ & 10\,mm & Eq.~\eqref{eq:Robs} \\
+        & IEKF iterations $L_\text{max}$ & 20 & Convergence \\
+        \midrule
+        \multicolumn{4}{l}{\textit{Visual tracking (\S\ref{sec:visual})}} \\
+        & Max.\ features $N_\text{feat}$ & 80 & Spatial coverage \\
+        & Min.\ features $N_\text{min,feat}$ & 30 & Re-detection trigger \\
+        & Pyramid levels $L_\text{pyr}$ & 3 & Coarse-to-fine \\
+        & FB threshold $\tau_\text{FB}$ & 1.5\,px & Outlier rejection \\
+        & Pixel noise $\sigma_\text{px}$ & 2\,px & Eq.~\eqref{eq:H_visual} \\
+        \midrule
+        \multicolumn{4}{l}{\textit{IMU noise (manufacturer spec.)}} \\
+        & Gyro noise $\sigma_g$ & 0.01\,rad/s/$\sqrt{\text{Hz}}$ & \\
+        & Accel noise $\sigma_a$ & 0.02\,m/s$^2$/$\sqrt{\text{Hz}}$ & \\
+        & Gyro bias $\sigma_{bg}$ & 0.001\,rad/s$^2$/$\sqrt{\text{Hz}}$ & \\
+        & Accel bias $\sigma_{ba}$ & 0.005\,m/s$^3$/$\sqrt{\text{Hz}}$ & \\
+        \midrule
+        \multicolumn{4}{l}{\textit{Map (\S\ref{sec:map_mgmt})}} \\
+        & Map voxel size $l_m$ & 100\,mm & KNN granularity \\
+        & Max.\ voxels $M_\text{max}$ & 500K & Memory bound \\
+        & Pts.\ per voxel & 20 & Plane fitting \\
+        & Map seed frames $N_\text{seed}$ & 5 & Multi-view init \\
+        \midrule
+        \multicolumn{4}{l}{\textit{Robustness (\S\ref{sec:robustness})}} \\
+        & Vel.\ clamp $v_\text{max}$ & 0.5\,m/s & Drift prevention \\
+        & Rot.\ clamp & $5^\circ$ & Eq.~\eqref{eq:clamping} \\
+        & Pos.\ clamp & 100\,mm & Eq.~\eqref{eq:clamping} \\
+        & ICP fail reset $N_\text{fail}$ & 10 & Map reset trigger \\
+        \bottomrule
+    \end{tabular}
+\end{table}

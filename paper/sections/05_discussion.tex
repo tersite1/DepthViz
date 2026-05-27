@@ -1,0 +1,230 @@
+%% ============================================================
+%% Section VII: Discussion
+%% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Tight Coupling in the Sparse Regime}
+\label{sec:disc_tight}
+
+The point-count sweep (Fig.~\ref{fig:sweep}) makes the role of tight coupling concrete: below approximately $N_{\text{thresh}}$ points per frame, ICP alone diverges, but the tightly-coupled IEKF remains viable because IMU propagation bridges the frames in which ICP yields fewer than $N_{\min} = 10$ valid correspondences. Each of the three sensing modalities plays a distinct role in this regime.
+
+IMU propagation provides a short-horizon prior that prevents the filter covariance from growing unchecked during correspondence-starved frames. Without this prior, a single frame with $<10$ valid correspondences forces the system to rely entirely on the previous pose estimate; over a fast handheld scan, a sequence of such frames causes the map to shear. With IMU, the pose prior suppresses this shear to the level of IMU integration error, which for a modern MEMS IMU remains below 1\,cm over a 100\,ms interval at typical indoor velocities.
+
+Depth observations provide the metric scale that pure IMU or visual odometry lacks. In the sparse dToF regime, point-to-plane ICP is qualitatively different from its dense-cloud counterpart: with only 200--500 correspondences, a single poorly-fitted plane can account for 0.5--1\% of the total constraint. The TLS truncation in the robust kernel (Eq.~\eqref{eq:weight}) removes gross outliers, but the remaining observations still carry heteroscedastic noise that, if treated uniformly, inflates pose variance by $\eta \approx 1.54$ (Proposition~\ref{prop:efficiency}).
+
+The combination of depth and IMU in a single ESKF update is the key design choice. An alternative architecture that performs ICP first and feeds the result as a pose prior to an IMU integration step (loosely-coupled) would decouple the confidence-weighted observations from the covariance propagation. Loose coupling passes a 6-DoF pose and a scalar covariance estimate into the IMU filter, discarding the structure of the observation matrix $\mathbf{H}$. In the sparse regime, where the effective rank of $\mathbf{H}$ fluctuates from frame to frame, this loss of structure is consequential: the filter cannot distinguish a well-conditioned update from a near-rank-deficient one. Tight coupling preserves the full $\mathbf{H}$ and thereby lets the ESKF correctly inflate the pose covariance for degenerate observations, protecting subsequent frames from accepting a diverged prior as reliable.
+
+\subsection{Role of Confidence: Honest Assessment}
+\label{sec:disc_confidence}
+
+The ablation row ``$-$Confidence ($w_i = 1$)'' (Table~\ref{tab:ablation}) shows a modest but consistent degradation relative to the full pipeline. The improvement from confidence weighting is real but incremental: the confidence signal is not a novel algorithmic contribution but rather a hardware readout that the sensor already provides. Our contribution is to show that it should be used, and to characterize the penalty for ignoring it via the Gauss--Markov analysis of Propositions~\ref{prop:fim}--\ref{prop:efficiency}.
+
+Two practical observations temper the claim. First, the magnitude of $\eta \approx 1.54$ is an upper bound derived under the assumption that noise variances are perfectly known and that observations are independent. In practice, spatially proximate points in a voxel are correlated, and our voxel-mean confidence approximation introduces additional variance; the realized information gain is therefore smaller than the theoretical bound. Second, the benefit of confidence weighting is most visible in sequences involving reflective surfaces (S4), where Low-confidence rejection removes a systematic bias that uniform weighting cannot suppress. On purely diffuse scenes (S1), the hard gate already removes most problematic observations, and the residual weighting between High and Medium provides a second-order correction.
+
+We therefore report confidence weighting as a component that contributes robustness---particularly on challenging surfaces---rather than as the primary enabler of sparse-regime LIO. The primary enabler is tight coupling itself, as Section~\ref{sec:disc_tight} argues.
+
+\subsection{Platform Portability}
+\label{sec:disc_portability}
+
+Although our hardware platform is an iPhone, the pipeline is not Apple-specific. The implementation requires only three sensor inputs: (i) a depth map with per-pixel quality metadata, (ii) 6-axis IMU at $\geq$100\,Hz, and (iii) camera intrinsics for back-projection. No camera images enter the state estimation.
+
+On Android, the Sony ToF sensor exposed on Samsung Galaxy S20+ and S21+ devices provides per-pixel amplitude and confidence channels via the Camera2 API; the STMicroelectronics FlightSense module available on mid-range Android devices similarly exposes zone-level confidence. Adapting DV-SLAM to these platforms requires only remapping the confidence classification to the weight function in Eq.~\eqref{eq:weight}; all other pipeline stages are sensor-agnostic.
+
+In a ROS context, the pipeline is equally portable: replace the iOS AVFoundation / CMMotionManager data sources with a ROS driver, and the ESKF core---which depends only on Eigen---compiles without modification on any Linux system. The $\sim$3\,MB dependency footprint and absence of system calls outside Eigen make DV-SLAM a natural fit for embedded systems (NVIDIA Jetson Orin Nano, Raspberry Pi 5) where framework weight is a hard constraint.
+
+More broadly, the confidence-weighted ESKF framework applies to any sensor whose noise is class-structured: learned monocular depth uncertainty from a neural network, event-camera confidence from photon count, or next-generation solid-state LiDAR SNR. The penalty for ignoring the class structure scales with the variance ratio (Eq.~\eqref{eq:efficiency}), so the benefit of matched weighting is greatest precisely where the sensor is most heteroscedastic---which is the regime where robust operation is hardest to achieve by other means.
+
+\subsection{Limitations}
+\label{sec:limitations}
+
+\textbf{No loop closure.}
+DV-SLAM is an odometry system; it accumulates drift over long trajectories without correction. On the self-collected sequences (15--30\,m), the closed-loop drift is modest (Table~\ref{tab:main_comparison}), but trajectories longer than $\sim$50\,m will require a pose-graph back-end with loop-closure detection. Integrating a lightweight place-recognition module (e.g., a BF-matched FPFH vocabulary on voxelized map subsets) is the most natural extension, and the current ESKF state can be treated as an odometry front-end for any such back-end.
+
+\textbf{Dense reconstruction gap.}
+Consumer dToF with 200--500 points per frame cannot approach the surface density of a mechanical spinning LiDAR ($>$10K points/scan). The gap in F-score relative to ARKit (which densifies via multi-view visual reconstruction) reflects this fundamental sensor constraint rather than an algorithmic shortcoming. DV-SLAM is intended for use cases where camera input is unavailable or undesirable, not as a drop-in replacement for dense reconstruction pipelines.
+
+\textbf{Velocity clamping and aggressive motion.}
+The divergence guard clamps velocity increments when IMU integration error grows large (Section~\ref{sec:divergence}). Under fast rotation ($>$3\,rad/s, sequence S3), the clamp is occasionally triggered, causing momentary IMU-only intervals whose integration error accumulates at $\sim$0.5\,cm per 100\,ms. These intervals are bounded in duration by the keyframe policy, but they represent a systematic vulnerability for sports or industrial inspection scenarios.
+
+\textbf{Single platform evaluation.}
+All trajectory experiments are conducted on an iPhone 14 Pro (A16 Bionic). The Livox Mid-70 dense reference was acquired in the same sessions and is therefore subject to the same trajectory, which limits the statistical independence of the ground truth on self-collected sequences. The ARKitScenes FARO S70 ground truth does not have this limitation and is the more stringent evaluation track.
+
+\textbf{Extrinsic approximation.}
+The identity approximation for $\mathbf{T}_{\mathcal{C}\mathcal{B}}$ introduces a lever-arm error scaling with angular velocity. For sequences S1--S2 (slow walking pace), the error is below the dToF noise floor. For S3 (fast rotation), the error may reach $\sim$1--2\,cm. Online extrinsic calibration, as implemented in FAST-LIVO2~\cite{zheng2024fastlivo2}, would remove this limitation at the cost of additional state dimensions in the ESKF.
+
+\textbf{Low-texture environments.}
+Because DV-SLAM uses only depth---not visual texture---for geometric constraint, it degrades in geometrically featureless environments (long corridors with no cross walls, open planes, or stairwells with parallel risers). The ICP degeneracy detector (Section~\ref{sec:icp}) catches most such configurations and falls back to IMU-only propagation, but systematic geometric degeneracy over multiple frames will cause drift. Adding visual reprojection residuals to the ESKF update, as done in FAST-LIVO2~\cite{zheng2024fastlivo2} and R$^3$LIVE~\cite{lin2022r3live}, would address this at the cost of requiring camera input.
+
+%% ============================================================
+%% Section VIII: Conclusion
+%% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented DV-SLAM, the first tightly-coupled LiDAR-inertial odometry system designed for the sparse dToF regime ($<$500\,pts/frame), demonstrating that confident, geometry-aware point selection and a confidence-weighted IEKF update together enable stable 6-DoF pose estimation on a mobile processor without any camera input or external dependencies. A point-count sweep on self-collected and ARKitScenes sequences identifies the collapse boundary of sparse-regime LIO and quantifies the margin that confidence-aware processing provides over uniform treatment, establishing the first empirical characterization of this boundary in the literature. The lightweight architecture---O(1)-insert voxel hash map, stride-sampled observations, and a single Eigen dependency under 3\,MB---achieves $\sim$13\,ms per keyframe on an A16 Bionic SoC, confirming that robust LiDAR-inertial odometry on built-in mobile dToF hardware is not only viable but practical at interactive scanning rates. Source code will be released upon acceptance.
+
+\section*{Acknowledgment}
+\todo{funding}
+
+%% ============================================================
+%% References
+%% ============================================================
+\begin{thebibliography}{99}
+
+\bibitem{xu2022fastlio2}
+W.~Xu, Y.~Cai, D.~He, J.~Lin, and F.~Zhang,
+``FAST-LIO2: Fast direct LiDAR-inertial odometry,''
+\textit{IEEE Trans. Robot.}, vol.~38, no.~4, pp.~2053--2073, Aug.~2022.
+
+\bibitem{xu2021fastlio}
+W.~Xu and F.~Zhang,
+``FAST-LIO: A fast, robust LiDAR-inertial odometry package by tightly-coupled iterated Kalman filter,''
+\textit{IEEE Robot. Autom. Lett.}, vol.~6, no.~2, pp.~3317--3324, Apr.~2021.
+
+\bibitem{vizzo2023kiss}
+I.~Vizzo, T.~Guadagnino, B.~Mersch, L.~Wiesmann, J.~Behley, and C.~Stachniss,
+``KISS-ICP: In defense of point-to-point ICP---Simple, accurate, and robust registration if done in the right way,''
+\textit{IEEE Robot. Autom. Lett.}, vol.~8, no.~2, pp.~1029--1036, Feb.~2023.
+
+\bibitem{chen2023dlio}
+K.~Chen, R.~Nemiroff, and B.~T.~Lopez,
+``Direct LiDAR-inertial odometry: Lightweight LIO with continuous-time motion correction,''
+\textit{IEEE Robot. Autom. Lett.}, vol.~8, no.~8, pp.~4828--4835, Aug.~2023.
+
+\bibitem{shan2020liosam}
+T.~Shan, B.~Englot, D.~Meyers, W.~Wang, C.~Ratti, and D.~Rus,
+``LIO-SAM: Tightly-coupled lidar inertial odometry via smoothing and mapping,''
+in \textit{Proc. IEEE/RSJ Int. Conf. Intell. Robots Syst.\ (IROS)}, Las Vegas, NV, USA, Oct.~2020, pp.~5135--5142.
+
+\bibitem{zheng2024fastlivo2}
+C.~Zheng, W.~Zhu, Z.~Liu, T.~Yuan, and F.~Zhang,
+``FAST-LIVO2: Fast, direct LiDAR-inertial-visual odometry,''
+\textit{IEEE Trans. Robot.}, vol.~40, pp.~4366--4388, 2024.
+
+\bibitem{lee2025genz}
+W.~Lee, H.~Lim, and H.~Myung,
+``GenZ-ICP: Generalized point-to-plane ICP with Z-axis constraint for ground vehicles,''
+\textit{IEEE Robot. Autom. Lett.}, vol.~10, no.~3, pp.~2101--2108, Mar.~2025.
+
+\bibitem{yeshwanth2023scannetpp}
+C.~Yeshwanth, Y.-C.~Liu, M.~Nie{\ss}ner, and A.~Dai,
+``ScanNet++: A high-fidelity dataset of 3D indoor scenes,''
+in \textit{Proc. IEEE/CVF Int. Conf. Comput. Vis.\ (ICCV)}, Paris, France, Oct.~2023, pp.~12--22.
+
+\bibitem{baruch2021arkitscenes}
+G.~Baruch, Z.~Chen, A.~Conway, Y.~Fyson, T.~Fang, P.~Huang, M.~Hughes, C.~Peng, J.~Ramizour, R.~Ruiz, J.~Tsai, and T.~Turner,
+``ARKitScenes: A diverse real-world dataset for 3D indoor scene understanding using mobile RGB-D data,''
+in \textit{Proc. Conf. Neural Inf. Process. Syst.\ (NeurIPS) Datasets and Benchmarks Track}, 2021.
+
+\bibitem{luetzenburg2021evaluation}
+G.~Luetzenburg, A.~Kroon, and A.~A.~Bj\"{o}rk,
+``Evaluation of the Apple iPad Pro LiDAR for monitoring coastal cliff erosion,''
+\textit{Remote Sens. Environ.}, vol.~253, Art. no.~112166, Feb.~2021.
+
+\bibitem{labbe2019rtabmap}
+M.~Labb\'{e} and F.~Michaud,
+``RTAB-Map as an open-source lidar and visual simultaneous localization and mapping library for large-scale and long-term online operation,''
+\textit{J. Field Robot.}, vol.~36, no.~2, pp.~416--446, Mar.~2019.
+
+\bibitem{sturm2012benchmark}
+J.~Sturm, N.~Engelhard, F.~Endres, W.~Burgard, and D.~Cremers,
+``A benchmark for the evaluation of RGB-D SLAM systems,''
+in \textit{Proc. IEEE/RSJ Int. Conf. Intell. Robots Syst.\ (IROS)}, Vilamoura, Portugal, Oct.~2012, pp.~573--580.
+
+\bibitem{dai2017scannet}
+A.~Dai, A.~X.~Chang, M.~Savva, M.~Halber, T.~Funkhouser, and M.~Nie{\ss}ner,
+``ScanNet: Richly-annotated 3D reconstructions of indoor scenes,''
+in \textit{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit.\ (CVPR)}, Honolulu, HI, USA, Jul.~2017, pp.~5828--5839.
+
+\bibitem{kerl2013robust}
+C.~Kerl, J.~Sturm, and D.~Cremers,
+``Robust odometry estimation for RGB-D cameras,''
+in \textit{Proc. IEEE Int. Conf. Robot. Autom.\ (ICRA)}, Karlsruhe, Germany, May~2013, pp.~3748--3754.
+
+\bibitem{nguyen2012modeling}
+C.~V.~Nguyen, S.~Izadi, and D.~Lovell,
+``Modeling Kinect sensor noise for improved 3D reconstruction and tracking,''
+in \textit{Proc. Int. Conf. 3D Imaging, Model., Process., Vis. Transmiss.\ (3DIMPVT)}, Zurich, Switzerland, Oct.~2012, pp.~524--530.
+
+\bibitem{rtabmap_issue1026}
+RTAB-Map Contributors,
+``LiDAR-only odometry without camera,''
+GitHub Issue \#1026, introlab/rtabmap, 2023. [Online]. Available: \url{https://github.com/introlab/rtabmap/issues/1026}
+
+\bibitem{lin2022r3live}
+J.~Lin and F.~Zhang,
+``R$^3$LIVE: A robust, real-time, RGB-colored, LiDAR-inertial-visual tightly-coupled state estimation and mapping package,''
+in \textit{Proc. IEEE Int. Conf. Robot. Autom.\ (ICRA)}, Philadelphia, PA, USA, May~2022, pp.~10672--10678.
+
+\bibitem{bai2022faster}
+C.~Bai, T.~Xiao, Y.~Chen, H.~Wang, F.~Zhang, and X.~Gao,
+``Faster-LIO: Lightweight tightly coupled LiDAR-inertial odometry using parallel sparse incremental voxels,''
+\textit{IEEE Robot. Autom. Lett.}, vol.~7, no.~2, pp.~4861--4868, Apr.~2022.
+
+\bibitem{liu2025livoxphone}
+Y.~Liu, J.~Zheng, H.~Wang, X.~Chen, and W.~Zhang,
+``Real-time LiDAR SLAM on a smartphone with an external Livox Mid-360,''
+\textit{arXiv preprint arXiv:2506.15983}, 2025.
+
+\bibitem{zhang2023radar}
+J.~Zhang, H.~Zhuge, Z.~Wu, G.~Peng, M.~Wen, Y.~Liu, and D.~Wang,
+``4DRadarSLAM: A 4D imaging radar SLAM system for large-scale environments based on pose graph optimization,''
+in \textit{Proc. IEEE Int. Conf. Robot. Autom.\ (ICRA)}, London, UK, May~2023, pp.~8333--8340.
+
+\bibitem{zhuang2023iriom}
+Y.~Zhuang, B.~Wang, J.~Huai, and M.~Li,
+``4D iRIOM: 4D imaging radar inertial odometry and mapping,''
+\textit{IEEE Robot. Autom. Lett.}, vol.~8, no.~6, pp.~3246--3253, Jun.~2023.
+
+\bibitem{tateno2017cnnslam}
+K.~Tateno, F.~Tombari, I.~Laina, and N.~Navab,
+``CNN-SLAM: Real-time dense monocular SLAM with learned depth prediction,''
+in \textit{Proc. IEEE/CVF Conf. Comput. Vis. Pattern Recognit.\ (CVPR)}, Honolulu, HI, USA, Jul.~2017, pp.~6243--6252.
+
+\bibitem{czarnowski2020deepfactors}
+J.~Czarnowski, T.~Laidlow, R.~Clark, and A.~J.~Davison,
+``DeepFactors: Real-time probabilistic dense monocular SLAM,''
+\textit{IEEE Robot. Autom. Lett.}, vol.~5, no.~2, pp.~721--728, Apr.~2020.
+
+\bibitem{spreafico2021ipad}
+M.~Spreafico, R.~Chiabrando, and A.~Scaioni,
+``Direct georeferencing of oblique and nadir long-range UAV imagery in an integrated sensor orientation approach,''
+\textit{Int. Arch. Photogramm. Remote Sens. Spatial Inf. Sci.}, vol.~XLVI-4/W2-2021, pp.~197--204, 2021.
+
+\bibitem{michalczyk2022rio}
+J.~Michalczyk, R.~Jung, and S.~Weiss,
+``Tightly-coupled EKF-based radar-inertial odometry,''
+in \textit{Proc. IEEE/RSJ Int. Conf. Intell. Robots Syst.\ (IROS)}, Kyoto, Japan, Oct.~2022, pp.~12336--12343.
+
+\bibitem{strecha2024mobile}
+C.~Strecha, F.~Kersten, P.~Vallet, and L.~Blomley,
+``Mobile mapping with smartphones: Opportunities and limitations,''
+in \textit{Proc. Int. Soc. Photogramm. Remote Sens.\ (ISPRS)}, vol.~XLVIII-1, 2024, pp.~433--440.
+
+\bibitem{pomerleau2015review}
+F.~Pomerleau, F.~Colas, and R.~Siegwart,
+``A review of point cloud registration algorithms for mobile robotics,''
+\textit{Found. Trends Robot.}, vol.~4, no.~1, pp.~1--104, 2015.
+
+\bibitem{sola2017quaternion}
+J.~Sol\`{a},
+``Quaternion kinematics for the error-state Kalman filter,''
+\textit{arXiv preprint arXiv:1711.02508}, 2017.
+
+\bibitem{barfoot2017state}
+T.~D.~Barfoot,
+\textit{State Estimation for Robotics}.
+Cambridge, U.K.: Cambridge Univ. Press, 2017.
+
+\bibitem{campos2021orbslam3}
+C.~Campos, R.~Elvira, J.~J.~G\'{o}mez Rodr\'{i}guez, J.~M.~M.~Montiel, and J.~D.~Tard\'{o}s,
+``ORB-SLAM3: An accurate open-source library for visual, visual-inertial, and multimap SLAM,''
+\textit{IEEE Trans. Robot.}, vol.~37, no.~6, pp.~1874--1890, Dec.~2021.
+
+\bibitem{qin2018vins}
+T.~Qin, P.~Li, and S.~Shen,
+``VINS-Mono: A robust and versatile monocular visual-inertial state estimator,''
+\textit{IEEE Trans. Robot.}, vol.~34, no.~4, pp.~1004--1020, Aug.~2018.
+
+\end{thebibliography}

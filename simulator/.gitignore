@@ -1,0 +1,5 @@
+build/
+test_data/
+test_output/
+baselines/
+*.bag

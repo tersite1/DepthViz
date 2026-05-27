@@ -1,0 +1,11 @@
+{
+  "active": true,
+  "iteration": 2,
+  "max_iterations": 100,
+  "started_at": "2026-03-16T12:02:16.415Z",
+  "prompt": "/ralph 논문의 abstract/introduction/related works/method/experiment 의 구성을 정리할 것. experiment 는 아직 완료되기 전이며, ra-l 제출 형식에 맞게 모든것이 작성되어야하며, 검증이 끝나야만 완료가 가능함. experiment 섹션테이블의 결과는 비워도 상관없으며, latex형식의 파일은 paper 폴더에 있음. ra-l submission 인것을 인지하고 행동할 것. 팀별로 각 섹션을 담당해서 작성을 시작할 것. 팀원은 총 5명으로, 리뷰어까지 5명. 총 10개 에이저트 필요.",
+  "session_id": "49e64bd4-094f-456b-a082-a6c2777f0f32",
+  "project_path": "/Users/caz/Downloads/DepthViz_Final_real",
+  "linked_ultrawork": true,
+  "last_checked_at": "2026-03-16T12:08:32.647Z"
+}

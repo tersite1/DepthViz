@@ -1,0 +1,105 @@
+{
+  "title": "DV-SLAM RA-L Paper Rewrite",
+  "description": "Rewrite IEEE RA-L paper to align with confirmed direction: sparse dToF LIO (not confidence-aware), multi-sensor tight coupling (not camera-free), confidence demoted to ablation. 6+2 page format.",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Abstract + Introduction rewrite",
+      "priority": 1,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Title changed: remove 'Confidence-Aware' and 'camera-free', focus on 'Sparse Mobile dToF' and 'On-Device LIO'",
+        "Abstract: leads with sparse dToF regime problem (<500 pts), NOT confidence",
+        "Abstract: mentions camera+LiDAR+IMU tight coupling, NOT camera-free",
+        "Abstract: confidence mentioned only as 'ablation shows modest improvement'",
+        "Abstract: mentions ScanNet++ evaluation and collapse boundary",
+        "Introduction P1-P3: dense LIO gap -> dToF regime qualitatively different (keep F1-F3)",
+        "Introduction P4-P5: thesis = 'lightweight on-device LIO architecture enables sparse regime' NOT 'confidence is key enabler'",
+        "Contributions rewritten: C1=First on-device LIO for sparse dToF, C2=Sparse-regime characterization (collapse boundary), C3=Lightweight mobile LIO architecture (ikd-tree->voxel hash, stride sampling, Eigen-only)",
+        "No 'camera-free' claim anywhere in abstract or intro",
+        "Confidence NOT listed as a contribution, only mentioned as system component",
+        "Propositions 1-2 (54% variance inflation) references REMOVED from contributions",
+        "Keywords updated to match new framing",
+        "LaTeX compiles without errors"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Related Work rewrite",
+      "priority": 2,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Section 2.1 LiDAR-Inertial Odometry: FAST-LIO2, DLIO, LIO-SAM, KISS-ICP, FAST-LIVO2 cited with correct venues/years",
+        "Section 2.1: clearly states all assume >10K pts/frame, none validated on <500 pts",
+        "Section 2.1: GenZ-ICP (RA-L 2025) and D2-LIO cited as recent degeneracy-aware LIO",
+        "Section 2.2 Mobile Depth Sensing: ARKitScenes, ScanNet++, Luetzenburg cited",
+        "Section 2.2: RTAB-Map iOS = ARKit VIO dependent, community LiDAR-only attempts failed",
+        "Section 2.2: Android+Livox Mid-360 paper cited as external LiDAR (not built-in dToF)",
+        "Section 2.3 retitled: 'Quality-Aware and Sparse-Regime SLAM' (not just confidence)",
+        "Section 2.3: radar odometry (~100-500 detections) cited as related sparse regime",
+        "Gap statement: 'No peer-reviewed open-source LIO validated on built-in mobile dToF <500 pts/frame'",
+        "Table II (pipeline comparison) updated: add visual column, remove 'camera-free' row",
+        "No mention of 'camera-free' as our advantage",
+        "LaTeX compiles without errors"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Method section rewrite",
+      "priority": 3,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Section 3 overview: 3-sensor pipeline (dToF + Camera + IMU -> ESKF), NOT camera-free",
+        "Section 3.1 Depth Back-Projection: keep as-is (correct), remove camera-free claim",
+        "Section 3.2 Bundle & Discard (renamed from CGD): voxel spatial hashing, density+confidence gates, centroid emission. Remove Lemma about information loss",
+        "Section 3.3 IEKF State Estimation: 18D state, midpoint IMU integration, static init from gravity. Keep equations",
+        "Section 3.4 Point-to-Plane ICP: point-to-plane residual, TLS robust kernel, confidence weighting as R_obs scaling (1 paragraph, not prominent). Remove Propositions 1-2 entirely",
+        "NEW Section 3.5 Visual Feature Tracking: Shi-Tomasi + Pyramidal KLT, feature 3D init from dToF depth (no stereo needed), reprojection residual in ESKF. Brief (standard method)",
+        "NEW Section 3.6 Multi-Sensor ESKF Update: depth ICP residuals + visual reprojection residuals, sequential update structure. Honest about sequential vs joint optimization",
+        "Section 3.7 Robustness: map seeding (5 frames), correction clamping, non-convergence rejection, velocity clamp, ICP failure recovery",
+        "Section 3.8 Map Management: voxel hash map (O(1) insert, 5x5x5 KNN), LRU eviction (500K cap). Contrast with ikd-tree",
+        "Remove ALL Propositions (Prop 1, Prop 2) and Lemma (CGD information bound)",
+        "Remove ALL 'camera-free' claims",
+        "All equations numbered and referenced correctly",
+        "LaTeX compiles without errors"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "Experiments section structure",
+      "priority": 4,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Section 5.1 Datasets: ScanNet++ (primary, ICCV 2023, 460 scenes, FARO GT) + self-collected S1-S5 (supplementary). Hardware spec table: iPhone 15 Pro Max, A17 Pro, dToF 256x192 30Hz, Camera 1920x1440 30Hz, IMU 100Hz",
+        "Section 5.2 Baselines: Naive ICP (no IMU), IMU-only, -Camera (depth+IMU), KISS-ICP (sparse input). ARKit VIO from lowres_wide.traj as reference",
+        "Section 5.3 Metrics: ATE RMSE (SE(3) aligned via evo), map accuracy/completeness/F-score, per-frame latency",
+        "Table III: Main comparison (DV-SLAM vs ARKit vs Naive ICP) — column headers present, results cells contain '--' placeholder",
+        "Table IV: Ablation (Full, -Camera, -Confidence, -B&D, -TLS, ~100pts, ~3000pts) — headers present, results '--'",
+        "Figure placeholder: Point-count sweep (X=#points log, Y=ATE log) with caption describing collapse boundary",
+        "Section 5.4 Runtime: per-stage latency table (IMU/B&D/Visual/ICP/Total) with '--' placeholders",
+        "All table/figure labels referenced in text",
+        "Experiment design matches contribution claims (each experiment supports at least 1 contribution)",
+        "LaTeX compiles without errors"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Discussion + Conclusion + References",
+      "priority": 5,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Discussion 7.1: sparse regime tight coupling importance (references ablation results)",
+        "Discussion 7.2: confidence is modest improvement (references ablation, honest assessment)",
+        "Discussion 7.3: platform portability — ARKit = sensor HAL, algorithm portable to Android/ROS",
+        "Limitations: no loop closure, dense LiDAR accuracy gap, velocity clamp 0.5m/s, single platform evaluation",
+        "Future work: loop closure, learned depth completion, multi-device evaluation",
+        "Conclusion: 3 sentences summarizing 3 contributions, no overclaiming",
+        "References: minimum 25 entries including FAST-LIO2, KISS-ICP, GenZ-ICP, FAST-LIVO2, DLIO, LIO-SAM, ScanNet++, ARKitScenes, Luetzenburg, RTAB-Map, Sturm TUM benchmark",
+        "All \\cite{} keys resolve to bibliography entries",
+        "No 'camera-free' claim in discussion or conclusion",
+        "IEEE RA-L format: 6 pages content + 2 pages references max",
+        "LaTeX compiles without errors"
+      ]
+    }
+  ]
+}

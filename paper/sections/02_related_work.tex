@@ -1,0 +1,132 @@
+%% ============================================================
+\section{Related Work}
+\label{sec:related}
+%% ============================================================
+
+\subsection{LiDAR-Inertial Odometry}
+
+LiDAR-inertial odometry (LIO) has matured rapidly on mechanical spinning
+sensors.  FAST-LIO2~\cite{xu2022fastlio2} established the iterated
+error-state Kalman filter (IEKF) with an incremental $k$d-tree (ikd-Tree)
+as the dominant paradigm, enabling real-time operation at 10--100K
+points/scan.  DLIO~\cite{chen2023dlio} simplified the pipeline via
+continuous-time motion correction, while LIO-SAM~\cite{shan2020liosam}
+added factor-graph back-end optimization with loop closure for long-range
+consistency.  KISS-ICP~\cite{vizzo2023kiss} demonstrated that
+carefully tuned point-to-point ICP rivals more elaborate systems, raising
+the bar for minimal viable odometry.  Tightly-coupled visual extensions
+such as FAST-LIVO2~\cite{zheng2024fastlivo2} fuse camera images alongside
+LiDAR and IMU inside the same IEKF framework.  More recently,
+GenZ-ICP~\cite{lee2025genz} introduced PCA-based adaptive weighting and
+degeneracy-aware correspondence rejection to handle geometrically
+degenerate environments.
+
+All of the above systems assume \emph{dense} point clouds ($>$10K
+points/scan) produced by mechanical or solid-state spinning sensors with
+$360^{\circ}$ or wide field-of-view coverage.  Applied to built-in mobile
+dToF data with $<$500 usable points per frame, ICP correspondence sets
+become critically underconstrained and the IEKF update degrades or
+diverges, as we quantify in Section~\ref{sec:experiments}.
+
+\textbf{Sparse-observation odometry.}  Sparse point regimes arise in
+automotive 4D radar, which produces ${\sim}$100--500 detections per scan
+with continuous-valued SNR~\cite{zhang2023radar}, and in feature-based LIO
+pipelines that operate on ${\sim}$100--500 keypoints extracted \emph{from}
+dense clouds.  Neither case is directly analogous to built-in mobile dToF:
+radar has 10--50$\times$ coarser range resolution; feature-based methods
+presuppose a dense input stage that is simply unavailable here.  Consumer
+dToF is distinct in that sparsity is \emph{inherent} to the hardware, not a
+design choice, and the noise floor is at least an order of magnitude lower
+than radar.  To our knowledge, no prior LIO work addresses this specific
+sparse-dToF regime.
+
+\subsection{Mobile Depth Sensing and 3D Scanning}
+
+Consumer smartphones equipped with dToF sensors (Apple iPad Pro from 2020,
+iPhone 12 Pro onward) have motivated several evaluation and dataset
+studies.  ARKitScenes~\cite{baruch2021arkitscenes} provided the first
+large-scale RGB-D dataset from iPad Pro dToF, paired with FARO Focus
+ground-truth meshes.  ScanNet++~\cite{yeshwanth2023scannetpp} extended this
+with iPhone 13 Pro captures at higher fidelity alongside DSLR imagery, and
+remains the most complete public dataset with synchronized dToF depth, IMU,
+and RGB.  Luetzenburg et al.~\cite{luetzenburg2021evaluation} evaluated
+iPhone and iPad LiDAR for geoscientific applications, characterizing the
+${\pm}$1\,cm to ${\pm}$10\,cm depth accuracy envelope at varying distances
+and incidence angles.  These works focus on sensor characterization and scene
+understanding; none attempt to build or benchmark a native odometry pipeline
+from the raw dToF stream.
+
+Commercial 3D scanning applications on dToF-equipped iPhones and iPads are
+uniformly closed-source and rely on the platform's visual-inertial odometry
+(ARKit VIO) for pose estimation, without disclosing their internal odometry
+method or providing per-point quality control.  RTAB-Map~\cite{labbe2019rtabmap}
+is the principal open-source alternative on iOS, but it uses ARKit VIO
+explicitly as the SLAM front-end; community attempts to operate in
+LiDAR-only mode have failed due to this architectural
+dependency~\cite{rtabmap_issue1026}, confirming that ARKit VIO is a
+hard requirement rather than an optional component.  A recent
+preprint~\cite{liu2025livoxphone} runs Faster-LIO on an Android smartphone,
+but attaches an external Livox Mid-360 (${\sim}$200K points/scan, $360^{\circ}$
+FoV) to the phone, using the phone only as a compute platform; this work
+addresses mobile computation constraints, not built-in sensor sparsity.
+
+To our knowledge, no peer-reviewed, open-source LIO system has been
+validated on built-in mobile dToF data producing $<$500 points per frame.
+This is the gap DV-SLAM addresses.
+
+\subsection{Confidence and Quality-Aware SLAM}
+
+Incorporating measurement uncertainty into SLAM and odometry has a
+well-established literature.  Kerl et al.~\cite{kerl2013robust} introduced
+robust weighting for RGB-D odometry via a $t$-distribution residual model
+that suppresses outliers without hard rejection.  Nguyen et
+al.~\cite{nguyen2012modeling} characterized structured-light Kinect depth
+noise as a polynomial function of distance and incidence angle, enabling
+heteroscedastic ICP weighting.  In monocular SLAM, CNN-predicted per-pixel
+depth confidence has been used to gate unreliable measurements~\cite{tateno2017cnnslam}.
+In the LiDAR domain, KISS-ICP~\cite{vizzo2023kiss} uses adaptive distance
+thresholding but carries no explicit per-point quality indicator.
+
+The dToF confidence signal used in DV-SLAM is qualitatively different from
+the above: it is a discrete three-level classification (0/1/2) derived
+from photon-count signal-to-noise ratio by the sensor's on-chip readout
+circuitry, not estimated in software.  DV-SLAM reads this hardware signal
+and uses it to modulate the IEKF observation noise covariance
+($\mathbf{R}_\text{obs} = \sigma^2 / w(c_i)$, with $w \in \{-, 0.5, 1.0\}$
+for levels 0--2).  This is an engineering choice to exploit available
+metadata rather than a novel estimation contribution; we report its effect
+as one ablation entry in Table~\ref{tab:ablation}.  The primary contributions
+of this paper---operating LIO in the sparse-dToF regime and characterizing
+its collapse boundary---are independent of whether confidence weighting is
+applied.
+
+Table~\ref{tab:pipeline_comparison} summarizes the structural differences
+between DV-SLAM and representative LIO systems.
+
+\begin{table}[t]
+    \centering
+    \caption{Pipeline comparison with representative LIO systems.
+             DV-SLAM operates on $10$--$500\times$ fewer points per frame
+             and runs entirely on built-in smartphone sensors without
+             external hardware.}
+    \label{tab:pipeline_comparison}
+    \setlength{\tabcolsep}{2.5pt}
+    \footnotesize
+    \begin{tabular}{lccccc}
+        \toprule
+        Feature & FAST-LIO2 & DLIO & LIO-SAM & KISS-ICP & \textbf{Ours} \\
+        \midrule
+        Target sensor      & Mech.       & Mech.       & Mech.       & Mech.       & dToF \\
+        Est. framework     & IEKF        & GICP        & Factor gr.  & ICP         & IEKF \\
+        Visual input       & \ding{55}   & \ding{55}   & \ding{55}   & \ding{55}   & Opt.$^\dagger$ \\
+        Pts.\ / frame      & 10--100K+   & 10--100K+   & 10--100K+   & 10--100K+   & 200--500 \\
+        Quality weight     & \ding{55}   & \ding{55}   & \ding{55}   & \ding{55}   & HW conf. \\
+        Loop closure       & \ding{55}   & \ding{55}   & \ding{51}   & \ding{55}   & \ding{55} \\
+        Built-in mobile    & \ding{55}   & \ding{55}   & \ding{55}   & \ding{55}   & \ding{51} \\
+        Deps.\ (approx.)   & ${\sim}$50\,MB & ${\sim}$30\,MB & ${\sim}$80\,MB & ${\sim}$10\,MB & ${\sim}$3\,MB \\
+        \bottomrule
+        \multicolumn{6}{l}{\scriptsize $^\dagger$RGB used only for optional
+          point-cloud colorization; state estimation uses}\\
+        \multicolumn{6}{l}{\scriptsize \phantom{$^\dagger$}dToF depth and IMU only.}
+    \end{tabular}
+\end{table}
